@@ -1,0 +1,11 @@
+    /*home4*/
+	.home4{
+		font-size:0;
+	}
+	.home4_1,.home4_2{
+		width:50%;
+		display:inline-block;
+		vertical-align:middle;
+		text-align:center;
+	}
+	/*---------end--------*/

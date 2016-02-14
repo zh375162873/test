@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>我的订单-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <script src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/home/js/common.js" type="text/javascript"></script>
+</head>
+<body>
+<header class="order_list_nav">
+    <ul>
+        <li <if condition='$rule eq 0'>class="active"</if>><a href="{:U('order/orderlist')}">全部<span <if condition="$info['total_num'] neq 0">style="visibility:visible;width:auto;"</if>>{$info.total_num}</span></a></li>
+        <li <if condition='$rule eq 1'>class="active"</if>><a href="{:U('order/orderlist',array('rule'=>1))}">未消费<span <if condition="$info['wxf_num'] neq 0">style="visibility:visible;width:auto;"</if>>{$info.wxf_num}</span></a></li>
+        <li <if condition='$rule eq 2'>class="active"</if>><a href="{:U('order/orderlist',array('rule'=>2))}">已消费<span <if condition="$info['yxf_num'] neq 0">style="visibility:visible;width:auto;"</if>>{$info.yxf_num}</span></a></li>
+        <li <if condition='$rule eq 3'>class="active"</if>><a href="{:U('order/orderlist',array('rule'=>3))}">退款中<span <if condition="$info['ytk_num'] neq 0">style="visibility:visible;width:auto;"</if>>{$info.ytk_num}</span></a></li>
+    </ul>
+</header>
+<div class="home_list content_marginBottom" id="orderlist">
+   <if condition="$rule eq 0">
+    <foreach name="arr_status0" item="vo">
+	    <section>
+         <div class="goods_content">
+            <a href="{:U('order/createpay',array('id'=>$vo['order_id']))}">
+                <div class="goodImg">
+                    <img src="{$vo.goods.0.goods_image}">
+                </div>
+            </a>
+            <div class="goodInfo">
+                <a href="{:U('order/createpay',array('id'=>$vo['order_id']))}">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35 iconRight">{$vo.goods_name}</h3>
+                        </div>
+                    </div>
+                    <div class="item_desc">
+                        <div>总价：<span>¥{$vo.order_amount}</span></div>	
+                    </div>
+                </a>
+                <div class="item_desc">
+							  <div class="colorC4">未付款</div>
+                </div>
+            </div>
+          </div>
+       </section>
+	</foreach>
+	</if>
+    <volist name="arr" id="vo" empty="$empty">
+       <section>
+         <div class="goods_content">
+            <a href="{:U('order/orderinfo',array('id'=>$vo['order_id']))}">
+                <div class="goodImg">
+                    <img src="{$vo.goods.goods_image}">
+                </div>
+            </a>
+            <div class="goodInfo">
+                <a href="{:U('order/orderinfo',array('id'=>$vo['order_id']))}">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35 iconRight">{$vo.goods.goods_name}</h3>
+                        </div>
+                    </div>
+                    <div class="item_desc">
+                        <div>数量：<span>{$vo.goods_num}</span></div>
+                        <div>总价：<span>¥{$vo.order_amount}</span></div>	
+                    </div>
+                </a>
+                <div class="item_desc">
+					<if condition="$vo['is_entity'] eq 0" >
+						<if condition="$vo['order_status'] eq 2" >
+							<div class="colorFf">已消费
+							<if condition="$vo['evaluation_state'] eq 0">
+								<a href="{:U('order/pinglun',array('id'=>$vo['order_id']))}" class="pingJia">评价</a></div>
+							<else />
+								<a href="#" class="pingJia">已评价</a></div>
+							</if>
+						<elseif condition="($vo['order_status'] eq 1)&&($vo['refund_state'] eq 3)" />
+							<div class="colorFf">退款已完成</div>
+						<else />
+						<?php
+							$string = "";
+							 for($i=0;$i<count($vo['dhm']);$i++){
+								 if($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==0){
+									 $string .= "<div class='colorC4'>未消费";
+								   }
+								 elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==1){
+									 $string .= "<div class='colorFf'>正在退款中";
+								  }
+
+									 $string .= "<span class='dhm format_code'>".$vo['dhm'][$i]['dhm_code']."</span></div>";
+							 }
+							echo $string;
+						?>
+					   </if>
+				   <else/>
+				      <if condition="$vo['delivery_status'] eq 0">
+					    <if condition="$vo['send_type'] eq 1">
+							<div class="colorC4">未发货</div>
+						</if>
+					  <elseif condition="$vo['delivery_status'] eq 1"/>
+						  <div class="colorFf">已发货</div>
+					  <elseif condition="$vo['delivery_status'] eq 2"/>
+					    <if condition="$vo['send_type'] eq 1">
+							<div class="colorFf">已收货
+							<if condition="$vo['evaluation_state'] eq 0">
+								<a href="{:U('order/pinglun',array('id'=>$vo['order_id']))}" class="pingJia">评价</a></div>
+							 <else />
+							 <a href="#" class="pingJia">已评价</a></div>
+						   </if>
+						</if>
+					  </if>
+					  <if condition="$vo['send_type']==2">
+						  <if condition="$vo['order_status']==0">
+							  <div class="colorC4">未付款</div>
+						  <elseif condition="$vo['order_status']==1"/>
+							  <div class="colorC4">未提货
+								  <?php
+							$string = "";
+							 for($i=0;$i<count($vo['dhm']);$i++){
+									  $string .= "<span class='dhm format_code'>".$vo['dhm'][$i]['dhm_code']."</span>";
+								  }
+								  echo $string;
+								  ?>
+							  </div>
+						  <elseif condition="$vo['order_status']==2"/>
+							  <div class="colorFf">已提货
+							  <if condition="$vo['evaluation_state'] eq 0">
+								  <a href="{:U('order/pinglun',array('id'=>$vo['order_id']))}" class="pingJia">评价</a></div>
+								<else />
+								<a href="#" class="pingJia">已评价</a></div>
+								</if>
+						  </if>
+					  </if>
+					  
+					  <if condition="$vo['send_type']==0">
+						  <if condition="$vo['order_status']==0">
+							  <div class="colorC4">未付款</div>
+						  </if>
+					  </if>
+					  
+				   </if>
+				   
+                </div>
+            </div>
+          </div>
+       </section>
+    </volist>
+</div>
+<script type="text/javascript">
+	$(function(){
+	    var isLoading = true;//是否正处于请求数据状态
+	    var isMaxCount = true;//数据是否已达最大
+	    var totalHeight = 1000;//页面总高度
+	    var pageNum = 10;//每次请求数量
+	    var curPage = 2;//当前位置
+	    var $content = $(document.getElementById("content"));//需要将数据追加到的节点
+	    var $win = $(window);
+	    
+	    $win.scroll(function(){
+	        var scrollY = $win.scrollTop();
+	        totalHeight = parseFloat($win.height()) + parseFloat(scrollY);
+	        if($(document).height()-1<= totalHeight && isMaxCount &&isLoading) {
+	            isLoading = true;//锁住瀑布流
+	            $.post("{:U('order/ajax_orderlist')}",{curPage:curPage,pageNum:pageNum,rule:{$rule}},function(order_list){
+	                var _string = '';
+	                
+	            	if(order_list.type==1){
+	            		for(var i=0;i<order_list['list'].length;i++){
+	            		   _string = _string+" <section><div class='goods_content'><a href='/index.php/Home/Order/orderinfo/id/"+order_list['list'][i]['order_id']+"'>";
+	            		   _string = _string+" <div class='goodImg'><img src="+order_list['list'][i]['goods']['goods_image']+"></div></a><div class='goodInfo'>";
+	            		   _string = _string+" <div class='title_line'><a href='/index.php/Home/Order/orderinfo/id/"+order_list['list'][i]['order_id']+"'>";
+	            		   _string = _string+" <div class='title'><h3 class='item_name color35 iconRight'>"+order_list['list'][i]['goods']['goods_name']+"</h3></div></a>";
+	            		   _string = _string+" </div><div class='item_desc'><div>数量：<span>"+order_list['list'][i]['goods_num']+"</span></div><div>总价：<span>¥"+order_list['list'][i]['order_amount']+"</span></div>";
+	            		   _string = _string+""+order_list['list'][i]['string']+"</div></div></div></section>";
+	            		}
+	            		curPage = curPage+1;
+	            	}
+	            	else if(order_list.type==2){
+	            		for(var i=0;i<order_list['list'].length;i++){
+		            		   _string = _string+" <section><div class='goods_content'><a href='/index.php/Home/Order/orderinfo/id/"+order_list['list'][i]['order_id']+"'>";
+		            		   _string = _string+" <div class='goodImg'><img src="+order_list['list'][i]['goods']['goods_image']+"></div></a><div class='goodInfo'>";
+		            		   _string = _string+" <div class='title_line'><a href='/index.php/Home/Order/orderinfo/id/"+order_list['list'][i]['order_id']+"'>";
+		            		   _string = _string+" <div class='title'><h3 class='item_name color35 iconRight'>"+order_list['list'][i]['goods']['goods_name']+"</h3></div></a>";
+		            		   _string = _string+" </div><div class='item_desc'><div>数量：<span>"+order_list['list'][i]['goods_num']+"</span></div><div>总价：<span>¥"+order_list['list'][i]['order_amount']+"</span></div>";
+		            		   _string = _string+""+order_list['list'][i]['string']+"</div></div></div></section>";
+		            		}
+	            		isLoading = false;//关闭瀑布流
+	            	}else{
+	            		isLoading = false;//关闭瀑布流
+	            	}
+	            	$("#orderlist").append(_string);
+	            	
+	            }, "json");
+	        }
+	    });
+	});
+</script>
+<include file="Index/footer"/>
+</body>
+</html>

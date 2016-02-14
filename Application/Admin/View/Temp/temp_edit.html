@@ -1,0 +1,55 @@
+<include file="Index/header"/>
+
+<style>
+
+    .breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited {
+        color: #000000
+    }
+
+    .row-fluid a, .row-fluid a:link, .row-fluid a:visited {
+        color: #000000
+    }
+
+</style>
+<div class="container">
+    <!--面包屑导航-->
+    <ul class="breadcrumb">
+        <li>
+            <a href="<?php echo U('class/templist') ;?>">模板管理</a>
+        </li>
+        <li class="active">修改</li>
+    </ul>
+    <div class="row" style="padding-top:10px;">
+        <form id="form1" action="" method="post" class="form-horizontal">
+          
+            <div class="form-group">
+                <label for="name" class="col-xs-2 control-label">名称<span class="span_required">*</span></label>
+
+                <div class="col-xs-5">
+                    <input class="form-control required" name="temp_title" id="temp_title" type="text" value="{$info['temp_title']}"
+                           data-msg="请输入名称"/>
+                </div>
+            </div>
+         
+            <div class="form-group">
+                <label for="sort" class="col-xs-2 control-label">说明<span class="span_required">*</span></label>
+
+                <div class="col-xs-5">
+                   <textarea name="content">{$info['content']}</textarea>
+                </div>
+            </div>
+            <input type="hidden" name="temp_id" value="<?php echo $temp_id;?>">
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-7">
+                    <button type="submit" name="sub" class="btn btn-primary">提交</button>
+                    <button id="reset" type="reset" class="btn btn-default">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<include file="Index/footer"/>
+<script>
+    ddt_validate($('#form1'));
+</script>

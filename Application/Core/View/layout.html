@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{$title} - 闪购平台</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
+        <link href="{$uri}__PUBLIC__/admin/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+		<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/font.css">
+		<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/style.css">
+		<style>
+			body{ background:#fafcff; color:#666;}
+			a{ color:#FFF; text-decoration:none;}
+			a:visited,a:hover,a:active{ text-decoration:none;color:#FFF}
+			ul{ list-style-type:none; margin:0px; padding:0px;}
+			/**导航条*/
+			.nva{ height:100px; background:#f2f2f2;}
+			.nvamain{ height:60px;  background:#fd6759;}
+			.navdaohang{ width:940px; margin:0px auto;}
+			.navdaohang {background:none;  border-bottom:none; box-shadow:none; height:60px;}
+			.logo{ width:215px; height:55px; float:left; margin-right:15px;}
+			.nva_cd{ display:block; float:left; margin:0px;}
+			.nva_cd li{ display:block; float:left; width:auto; height:60px; line-height:60px;}
+			.nva_cd li a{display:block; width:auto; height:60px; line-height:60px; padding:0px 10px;  font-size:16px;}
+			.nva_cd li a:hover,.nva_cd li .active{ background:#f2f2f2; color:#000;}
+			
+			.admin_user{ float:right; width:auto; height:60px; position:relative; top:0px; left:0px;}
+			.admin_user ul li{ display:none; height:30px; border-bottom:1px solid #fd6759; }
+			.admin_user ul li:first-child{ display:block;}
+			.admin_user ul li a{ display:block; height:30px; line-height:30px; padding:0px 10px; background:#fd6759; text-align:center; overflow:hidden;}
+			.admin_user ul li a:hover,.admin_user ul li a:active{ background:#f45749; color:#FFF; text-decoration:none;}
+			.admin_user ul .account,.admin_user ul .account a{widht:98px; height:59px; line-height:59px; background:#fd6759;}
+			.admin_user ul .account a span{ font-size:25px; margin-top:-5px;}
+			.admin_user:hover ul li{display:block;}
+			
+			.secondaryMenu{ height:40px;}
+			.secondaryMenu ul{ display:block; width:740px; height:auto; margin:0px auto;}
+			.secondaryMenu ul li{ display:block; float:left; width:auto; height:40px; line-height:40px; overflow:hidden; margin:0px 5px;}
+			.secondaryMenu ul li a{ padding:5px; color:#666;}
+			.secondaryMenu ul li a:hover,.secondaryMenu ul li .active{ background:#dadada; border-radius:5px;}
+
+			.childMenu{ height:40px;}
+			.childMenu ul{ display:block; width:740px; height:auto; margin:0px auto;}
+			.childMenu ul li{ display:block; float:left; width:auto; height:40px; line-height:40px; overflow:hidden; margin:0px 5px;}
+			.childMenu ul li a{ padding:5px; color:#666;}
+			.childMenu ul li a:hover,.childMenu ul li .active{ background:#dadada; border-radius:5px;}
+			/**end-------------导航条*/
+		</style>
+		
+		<script src="{$uri}__PUBLIC__/admin/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="{$uri}__PUBLIC__/admin/js/bootstrap.min.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/general.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/common.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/jquery.validate.min.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/jquery.qrcode.min.js" type="text/javascript"></script>
+			    <!--日期选择-->
+	    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+	    <script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+	    <script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+		<script src="http://apps.bdimg.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+		<script src="http://apps.bdimg.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+    <body>
+	<nav class="navbar navbar-default navbar-fixed-top nva" id="topmenu">
+		<div class="nvamain">
+			<div class="navdaohang">
+				<div class="logo"><a href="/admin/default/index"><img src="{$uri}__PUBLIC__/admin/img/logo_admin.png" width="215" height="55"></a></div>
+				<ul class="nva_cd">
+					<li onmouseover="showMenu('default')"><a data-menuname="default" href="{:C('WIFI_URL')}/admin/default/index">首页</a></li>
+					<li onmouseover="showMenu('operate')"><a data-menuname="operate" href="{:C('WIFI_URL')}/admin/proxy/index">运营管理</a></li>
+					<li onmouseover="showMenu('proxyadvert')"><a data-menuname="proxyadvert" href="{:C('WIFI_URL')}/admin/proxyadvert/auditad">广告管理</a></li>
+					<li onmouseover="showMenu('finance')"><a data-menuname="finance" href="{:C('WIFI_URL')}/admin/traderecord/index">财务管理</a></li>
+					<li onmouseover="showMenu('system')"><a data-menuname="system" href="{:C('WIFI_URL')}/admin/system/index">系统管理</a></li>
+					<li onmouseover="showMenu('account')"><a data-menuname="account" href="{:C('WIFI_URL')}/admin/admin/repassword">账户管理</a></li>
+					<li onmouseover="showMenu('userscenter')"><a data-menuname="userscenter" href="__APP__/Core/userscenter/index">会员中心</a></li>
+				</ul>
+				<div class="admin_user">
+					<ul>
+						<li class="account"><a href="javascript:;" title="admin" style="background: rgb(244, 87, 73);">&nbsp;&nbsp;admin&nbsp;&nbsp;<span class="icon-iconfont-xiala"></span></a></li>
+						<li><a href="{:C('WIFI_URL')}/admin/admin/clearcache"><span class="icon-iconfont-touxiang"></span>&nbsp;&nbsp;清除缓存</a></li>
+						<li><a href="{:C('WIFI_URL')}/admin/admin/repassword"><span class="icon-iconfont-mimazhuanhuan"></span>&nbsp;&nbsp;修改密码</a></li>
+						<li><a href="{:C('WIFI_URL')}/admin/default/logout"><span class="icon-iconfont-tuichudenglu"></span>&nbsp;&nbsp;安全退出</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</nav>
+    <script>
+		function showMenu(menu,bl) {
+			if(bl){
+				$("a[data-menuName='"+ menu +"']").addClass("active");
+				var childMenu = "<div class='secondaryMenu'><ul>";
+			}else{
+				$(".secondaryMenu").hide();
+				$(".childMenu").remove();
+				var childMenu = "<div class='childMenu'><ul>";
+			}
+			switch (menu) {
+				case "default":
+					childMenu += "";
+					break;
+				case "operate":
+					childMenu += '<li><a href="{:C('WIFI_URL')}/admin/proxy/index">代理商管理</a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/aduser/index" > 广告商管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/biz/index" > 商家管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/device/index" > 设备管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/notice/index" > 公告管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/sms/index" > 短信审核 </a></li> ';
+					break;
+				case "proxyadvert":
+					childMenu += '<li><a href = "{:C('WIFI_URL')}/admin/ad/auditad" > 审核平台广告 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/proxyadvert/auditproxy" > 审核代理广告 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/adspace/index" > 广告位管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/cpscoupon/index" > CPS广告管理 </a></li ><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/recommendGame/index" > 平台广告 </a></li > ';
+					break;
+				case "finance":
+					childMenu += '<li><a href="{:C('WIFI_URL')}/admin/traderecord/index">交易记录</a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/traderecord/statistics" > 交易统计 </a></li> ';
+					break;
+				case "system":
+					childMenu += '<li><a href="{:C('WIFI_URL')}/admin/system/index">系统配置</a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/system/index" > 接口配置 </a></li ><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/admin/index" > 权限设置 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/province/index" > 地区管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/microtemplatetype/index" > 模版管理 </a></li><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/log/index" > 系统日志 </a></li ><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/device/type" > 固件升级 </a></li ><li> |</li><li><a href = "{:C('WIFI_URL')}/admin/erya/index" > 尔雅设备 </a></li > ';
+					break;
+				case "userscenter":
+					childMenu += '<li><a href = "__APP__/Core/userscenter/statistics" >会员统计</a></li><li> | </li><li><a href="__APP__/Core/userscenter/index">会员列表</a></li>';
+					break;
+				default:
+			}
+			childMenu += "</ul></div>";
+			$("#topmenu").append(childMenu);
+			if(bl){
+				var pathName = location.pathname;
+				$('[href="'+pathName+'"]').addClass("active");
+			}
+		}
+		function hideMenu() {
+			$(".secondaryMenu").show();
+			$(".childMenu").remove();
+		}
+		$(document).ready(function(){
+			$("#topmenu").mouseleave(function(){
+				hideMenu();
+			});
+			
+			showMenu("userscenter",true);//导航点击后初始化时导航条对应css变化选择
+		});
+    </script>
+        {__CONTENT__}
+    </body>
+</html>

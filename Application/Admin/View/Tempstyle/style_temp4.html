@@ -1,0 +1,64 @@
+<php>
+//调取数据
+$item=D('tempitem')->findbyid($item_id);
+$data=json_decode($item['item_data'],true);	
+$info=$data['info_data'];	
+$used="禁用";
+</php>
+<if condition="$item.item_is_used eq 1">
+  <div class="home_nav_huodong home_block">
+<else/>
+  <php> $used="启用";</php>
+  <div class="home_nav_huodong home_block unusable">
+</if>
+    <ul>
+        <li class="borderBm borderRt">
+			<if condition="is_array($info) and array_key_exists('1',$info)">     
+				<a href="{$info[1]['url']}"><div class="huodong_title"><span class="colorDb">{$info[1]['info_title']}</span><small>{$info[1]['info_content']}</small></div>
+				<img class="huodong_img" src="{$info[1]['info_img']}"></a>
+			<else/>
+			   <a href="#"><div class="huodong_title"><span class="colorDb">暂无信息</span><small>无信息</small></div>
+						<img class="huodong_img" src="{$uri}__PUBLIC__/temp/images/100_100.png"></a>
+			</if>     
+        </li>
+        <li class="borderBm">
+			<if condition="is_array($info) and array_key_exists('2',$info)">     
+				<a href="{$info[2]['url']}"><div class="huodong_title"><span class="colorE7">{$info[2]['info_title']}</span><small>{$info[2]['info_content']}</small></div>
+				<img class="huodong_img" src="{$info[2]['info_img']}"></a>
+			<else/>
+			   <a href="#"><div class="huodong_title"><span class="colorE7">暂无信息</span><small>无信息</small></div>
+						<img class="huodong_img" src="{$uri}__PUBLIC__/temp/images/100_100.png"></a>
+			</if>
+        </li>
+        <li class="borderRt">
+		  <if condition="is_array($info) and array_key_exists('3',$info)">   
+				<a href="{$info[3]['url']}"><div class="huodong_title"><span class="colorBb">{$info[3]['info_title']}</span><small><?=$info[3]['info_content']?></small></div>
+				<img class="huodong_img" src="{$info[3]['info_img']}"></a>
+		  <else/>
+			   <a href="#"><div class="huodong_title"><span class="colorBb">暂无信息</span><small>无信息</small></div>
+						<img class="huodong_img" src="{$uri}__PUBLIC__/temp/images/100_100.png"></a>
+		  </if>
+        </li>
+        <li>
+			<if condition="is_array($info) and array_key_exists('4',$info)">         
+				<a href="{$info[4]['url']}"><div class="huodong_title"><span class="colorC6">{$info[4]['info_title']}</span><small><?=$info[4]['info_content']?></small></div>
+				<img class="huodong_img" src="{$info[4]['info_img']}"></a>
+			<else/> 
+			   <a href="#"><div class="huodong_title"><span class="colorC6">暂无信息</span><small>无信息</small></div>
+						<img class="huodong_img" src="{$uri}__PUBLIC__/temp/images/100_100.png"></a>
+			</if>
+        </li>
+    </ul>
+<if condition="$show neq 1">
+    <div class="headerEdit">
+        模板
+    </div>
+    <div class="footerEdit">
+        <a target="_parent" data-type='btn_move_up' href='{:U('admin/tempitem/itemlistup/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-up'></i>上移</a>
+        <a target="_parent"  data-type='btn_move_down' href='{:U('admin/tempitem/itemlistdown/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-down'></i>下移</a>
+        <a target="_parent"  data-type='btn_usable' href='{:U('admin/tempitem/itemisused/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-off'></i>{$used}</a>
+        <a target="_parent"  data-type='btn_edit_item' href='{:U('admin/tempitem/itemedit/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-edit'></i>编辑</a>
+        <a target="_parent"  onclick="javascript:return window.confirm('是否删除！');"  href='{:U('admin/tempitem/itemdel/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-trash'></i>删除</a>
+    </div>
+</if>
+</div>

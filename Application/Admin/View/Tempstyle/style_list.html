@@ -1,0 +1,39 @@
+<include file="Index/header"/>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('temp/templist')}" onclick="jumpTo(this);" class="active">样式列表</li>
+    </ul>
+</div>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th>ID</th>
+                <th>样式类型</th>
+                <th>样式名称</th>
+                <th>数据数量</th>
+				<th>是否可用</th>
+                <th>操作</th>
+            </tr>
+     <?php
+	 foreach($data as $val){
+	 ?>
+            <tr class="trbor">
+                <td>{$val['style_id']}</td>
+                <td>{$val['style_type']}</td>
+                <td>{$val['style_title']}</td>
+                <td>{$val['style_num']}</td>
+				<td>{$val['style_is_used']}</td>
+				<td><a href="{:U('admin/tempstyle/styleedit/style_id/'.$val['style_id'])}">修改</a> | <a href="#">删除</a></td>
+            </tr>
+            <?php
+	 }
+	 ?>
+        </table>
+    </div>
+
+</div>
+
+<include file="Index/footer"/>

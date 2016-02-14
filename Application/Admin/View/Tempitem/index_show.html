@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/temp/indexTrue.js" type="text/javascript"></script>
+<link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/style1/common.css">
+<link rel="stylesheet" href="/Uploads/temp/temp{$temp_id}/css/style.css">
+<title>预览页面</title>
+</head>
+<body>
+<div class="home_lbs">
+   <a  class="colorC3" href="{:U('index/location')}"><img src="{$uri}__PUBLIC__/home/images/index/nav_place.png"><b> 西安市 </b></a>
+</div>
+<foreach name="item_data" item="val">
+   <php>
+     $item_id=$val['item_id'];
+	 $style_id=$val['style_id'];
+   </php>
+   <switch name="style_id">
+      <case value="1" >	 
+		  <!--加载模板内容1-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp1.html" />
+	  </case>
+	  <case value="2" >
+		  <!--加载模板内容2-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp2.html" />
+	  </case>
+	  <case value="3" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp3.html" />
+	  </case>
+	  <case value="4" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp4.html" />
+	  </case>
+	  <case value="5" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp5.html" />
+	  </case>
+	  <case value="6" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp6.html" />
+	  </case>
+	  <case value="7" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp7.html" />
+	  </case>
+	  <case value="8" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp8.html" />
+	  </case>
+	  <case value="62" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp62.html" />
+	  </case>
+	  <case value="63" >
+		  <!--加载模板内容-->
+		  <include file="./Application/Admin/View/Tempstyle/style_temp63.html" />
+ 	  </case>	  
+	</switch>
+</foreach>
+<div class="home_list_end">
+</div>
+<footer class="home_footer">
+    <ul>
+        <li><a href="#"><b class="colorD5">首页</b><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_sy.png"></a></li>
+        <li><a href="#"><img class="home_footer_hd" src="{$uri}__PUBLIC__/home/images/index/nav_fixed_yiy.png"></a></li>
+        <li><a href="mine.html"><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">我的</b></a></li>
+    </ul>
+</footer>
+</body>
+</html>

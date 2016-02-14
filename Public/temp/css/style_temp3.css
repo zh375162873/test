@@ -1,0 +1,11 @@
+	/*home2*/
+	.home2{
+		font-size:0;
+	}
+	.home2_1,.home2_2{
+		width:50%;
+		display:inline-block;
+		vertical-align:middle;
+		text-align:center;
+	}
+	/*---------end--------*/

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>我的二维码-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/tuiguang.css">
+    <script src="{$uri}__PUBLIC__/admin/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/admin/js/jquery.qrcode.min.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="tg_content ewm_content">
+    <div id="qrimage">
+    
+    </div>
+    <p>扫一扫上面的二维码，加入点点购闪购商城</p>
+</div>
+<script type="text/javascript">
+window.onload = function(){
+	var options = {  
+	        render: 'canvas',//设置渲染方式canvas/table  
+	        ecLevel: 'L',  
+	        background: '#FFF',  
+	        text: "{$url}",//设置二维码内容
+	        size: parseInt($("#qrimage").width(),10)*0.7,  
+	        mSize: 0.1,  
+	        mPosX: 0.5,  
+	        mPosY: 0.5,  
+	        label: 'no label',  
+	        fontname: 'sans',  
+	        fontcolor: '#FFF'  
+	    };  
+	  
+    $("#qrimage").empty().qrcode(options);  
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+@charset "utf-8";
+body { background:url(images/yaoyiyao_background.png) no-repeat; background-size:100%; margin:auto; padding:0px;}
+li,ul { list-style-type:none;}
+a, a:link, a:hover, a:active, a:visited {
+  text-decoration: none;
+  outline: 0;
+  color:#FFF;
+}
+.yiy_zc { background:url(images/yiy_zhuce.png) no-repeat; background-size:100%; height:630px;  margin-top: -9.5em; }
+.yiy_hongbao { background:url(images/yiy_hongbao.png) no-repeat; background-size:100%; height:630px;  margin-top: -9.5em; }
+.hand-animate {-webkit-animation: hand_move infinite 2s;}
+header img {width:100%; margin-top:1.5em;}
+.yiy_input{
+  width: 60%;
+  height: 32px;
+  line-height: normal;
+  padding: 0;
+  border: 1px solid #d7d7d7;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 16px;
+  color: #252525;
+  -webkit-appearance: none;
+  padding-left: 8px;
+    margin-top: 97%;
+	margin-left: -10%;}
+.yiy_password {
+	 width: 60%;
+  height: 32px;
+  line-height: normal;
+  padding: 0;
+  border: 1px solid #d7d7d7;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 16px;
+  color: #252525;
+  margin-left: -10%;
+  margin-top:15px;
+    padding-left: 8px;
+}
+.yiy_zc ul {text-align:center;}
+.yiy_dl {font-size:16px; font-family:"Arial Black", Gadget, sans-serif; color:#FFF;   padding-top: 97%;
+  margin-left: -10%;}
+.yiy_button {   width: 63%;
+  height: 32px;
+  line-height: normal;
+  padding: 0;
+  border: 1px solid #eead53;
+  border-radius: 5px;
+  background: #eead53;
+  font-size: 16px;
+  color: #FFF;
+  -webkit-appearance: none;
+  margin-top: 15px;
+  margin-left: -10%;}
+
+.yiy_icon {width:100%;position: absolute;
+  z-index: 999;
+  margin-top: 120%;}
+.yiy_icon li {font-size:20px; font-family:微软雅黑; color:#FFF;   margin-left: 0.75em; text-align: center; float:left; width:20%;line-height: 70px; height:83px;}
+.yiy_icon_01 {background:url(images/yiy_icon_01.png) no-repeat; background-size:100%;}
+.yiy_icon_02 { background:url(images/yiy_icon_02.png) no-repeat; background-size:100%;}
+.yiy_icon_03 { background:url(images/yiy_icon_03.png) no-repeat; background-size:100%;}
+.yiy_icon_04 { background:url(images/yiy_icon_04.png) no-repeat; background-size:100%;}
+.yiy_zhongjiang {   color: #FFF;
+  width: 40%;
+  position: absolute;
+  z-index: 999999;
+  margin-top: 75%;
+  margin-left: 30%;
+  text-align: center;
+}

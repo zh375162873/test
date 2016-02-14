@@ -1,0 +1,81 @@
+<php>
+//数据调取
+$item=D('tempitem')->findbyid($item_id);
+$data=json_decode($item['item_data'],true);
+$info=$data['info_data'];
+$img1=$info[1]['info_img'];
+if($img1==""){
+ $img1=$uri."__PUBLIC__/temp/images/120_100.png";
+}
+$img2=$info[2]['info_img'];
+if($img2==""){
+ $img2=$uri."__PUBLIC__/temp/images/120_100.png";
+}
+$img3=$info[3]['info_img'];
+if($img3==""){
+ $img3=$uri."__PUBLIC__/temp/images/120_100.png";
+}
+</php>
+<style>
+.breadcrumb a:link, .breadcrumb a:visited{
+color:#000000;
+}
+.box a:link, .box a:visited{
+color:#000000;
+}
+</style>
+
+<!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="{:U('admin/tempitem/index/temp_id/'.$temp_id)}">样式管理</a> 
+  </li>
+  <li class="active">编辑内容</li>
+</ul>
+<form id="form1" method="post" action="{:U('admin/tempitem/editupdate')}" enctype="multipart/form-data" class="form-horizontal" role="form" >
+<div class="form-group" style="clear:both">
+                <label for="info_title" class="col-md-2 control-label">标题<span>*</span></label>
+                <div class="col-xs-7">
+				<input class="form-control required"  style="width:280px;" name="info_title"  type="text"  value="<?php echo isset($data['info_title'])?$data['info_title']:"";?>"  id="title" />
+                </div>
+      </div>
+	  <div class="form-group" style="clear:both; padding-top:10px;">
+                <label for="goods_serial" class="col-md-2 control-label">内容编辑<span>*</span></label>
+				<div class="col-xs-8">	
+					<div class="col-xs-4">
+					   <div  class="box" style=" clear:both;padding-top:10px;" >
+						 <div><img src="{$img1}" width="200" height="200"  class="img-thumbnail"></div>
+						 <div>
+						 <a href="{:U("admin/tempitem/subedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id/id/1")}">编辑</a>
+						 </div>
+					   </div>
+					</div>	
+				  <div class="col-xs-4">	
+					<div >
+					   <div  class="box" style=" clear:both;padding-top:10px;" >
+						 <div><img src="{$img2}"   class="img-thumbnail"></div>
+						 <div>
+						 <a href="{:U("admin/tempitem/subedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id/id/2")}">编辑</a> 
+						 </div>
+					   </div>
+					</div>
+					<div >
+					   <div  class="box" style=" clear:both;padding-top:10px;" >
+						 <div><img src="{$img3}"  class="img-thumbnail"></div>
+						 <div>
+						 <a href="{:U("admin/tempitem/subedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id/id/3")}">编辑</a>
+						 </div>
+					   </div>
+					</div>	
+				  </div>	
+			   </div>	   			
+      </div>
+<input type="hidden" name="style_id" value="{$style_id}">
+	  <input type="hidden" name="temp_id" value="{$temp_id}">
+	  <input type="hidden" name="item_id" value="{$item_id}">
+      <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button type="submit" value="1" name="sub" class="btn btn-primary">保存样式信息</button>
+            </div>
+      </div>
+</form>	 

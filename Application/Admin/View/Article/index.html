@@ -1,0 +1,80 @@
+<include file="Index/header"/>
+<div class="row headerNav" id="headerNav">
+	<ul>
+		<li data-url="{:U('article/article_list')}" onclick="jumpTo(this);">文章列表</li>
+		<li data-url="{:U('article/index')}" onclick="jumpTo(this);" class="active">添加文章</li>
+	</ul>
+</div>
+<div class="row">
+
+   	<form action="__URL__/{$btn_ok_act}" id="form1" method="post" class="form-horizontal">
+		<div class="form-group">
+			<label for="txtTitle" class="col-xs-2 control-label">文章标题<span class="span_required">*</span></label>
+
+			<div class="col-xs-5">
+				<input class="form-control required" name="subject" id="txtTitle" maxlength="100" value="{$article_item.subject}" data-msg="请输入文章标题"/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="message" class="col-xs-2 control-label">文章内容<span class="span_required">*</span></label>
+
+			<div class="col-xs-5">
+				<textarea id="message" class="required" name="message" style="width:100%;height:280px;visibility:hidden;" data-msg="请输入文章内容">{$article_item.message}</textarea>
+				<script src="{$uri}__PUBLIC__/static/kindeditor/kindeditor-min.js" charset="utf-8"></script>
+				<script src="{$uri}__PUBLIC__/static/kindeditor/lang/zh_CN.js" charset="utf-8"></script>
+				<script>
+					var KE;
+					KindEditor.ready(function(K) {
+						KE = K.create("textarea[name='message']", {
+									items : ['source', '|', 'fullscreen', 'undo', 'redo', 'print', 'cut', 'copy', 'paste',
+										'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright',
+										'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript',
+										'superscript', '|', 'selectall', 'clearhtml','quickformat','|',
+										'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
+										'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'table', 'hr', 'emoticons', 'link', 'unlink', '|', 'about'],
+									cssPath : "{$uri}__PUBLIC__/static/kindeditor/themes/default/default.css",
+									allowImageUpload : true,
+									allowFlashUpload : false,
+									allowMediaUpload : false,
+									allowFileManager : false,
+								syncType:"form",
+								afterCreate : function() {
+							var self = this;
+							self.sync();
+						},
+						afterChange : function() {
+							var self = this;
+							self.sync();
+						},
+						afterBlur : function() {
+							var self = this;
+							self.sync();
+						}
+					});
+					KE.appendHtml = function(id,val) {
+						this.html(this.html() + val);
+						if (this.isCreated) {
+							var cmd = this.cmd;
+							cmd.range.selectNodeContents(cmd.doc.body).collapse(false);
+							cmd.select();
+						}
+						return this;
+					}
+					});
+				</script>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-2 col-sm-7">
+				<button type="submit" name="sub" class="btn btn-primary btn_important">提交</button>
+				<button id="reset" type="reset" class="btn btn-default">重置</button>
+				<input type="hidden" value="{$article_item.id}" name="id"/>
+			</div>
+		</div>
+	</form>
+</div>
+<include file="Index/footer"/>
+<script>
+	ddt_validate($('#form1'));
+</script>

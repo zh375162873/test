@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <title>我的-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+	<script src="__PUBLIC__/home/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <style>
+        .newVersion_tips{
+            position:fixed;
+            width:100%;
+            height:100%;
+            top:0;
+            left:0;
+            z-index:1000;
+            visibility:hidden;
+            background:rgba(0,0,0,0.5);
+        }
+        .newVersion_tips .nv_tips{
+            position:absolute;
+            width:78%;
+            min-height:100px;
+            top:154px;
+            font-size:15px;
+            line-height:20px;
+            background:rgba(0,0,0,0.7);
+            color:#fff;
+            padding:15px 8px 30px 8px;
+            border-radius:6px;
+            left:11%;
+            letter-spacing:2px;
+        }
+        .newVersion_tips .nv_tips .label{
+            position:absolute;
+            right:8px;
+            bottom:8px;
+            font-size:12px;
+            letter-spacing:normal;
+        }
+        .newVersion_tips .nv_tips b{
+            color:yellow;
+        }
+        .newVersion_tips .nv_tips div input{
+            vertical-align:middle;
+        }
+        .newVersion_tips .nv_tips:before{
+            position:absolute;
+            content:attr(data-beforeValue);
+            display:block;
+            width:30px;
+            height:20px;
+            top:-10px;
+            left:10px;
+            background:rgba(255,0,0,0.9);
+            color:#fff;
+            font-size:12px;
+            line-height:20px;
+            text-align:center;
+            letter-spacing:normal;
+        }
+        .newVersion_tips .nv_tips:after{
+            position:absolute;
+            content:"";
+            display:block;
+            width:0;
+            height:0;
+            top:-10px;
+            left:40px;
+            border-left:6px solid rgba(215, 2, 2, 0.9);
+            border-top:10px solid transparent;
+        }
+        .tipsShow{
+            -webkit-animation:tipsDrop 0.5s;
+            animation:tipsDrop 0.5s;
+        }
+        @-webkit-keyframes tipsDrop {
+            from{transform:translate3d(0,-70%,0);opacity:0.1;}
+            to{transform:translate3d(0,0,0);opacity:1;}
+        }
+        @keyframes tipsDrop {
+            from{transform:translate3d(0,-70%,0);opacity:0.1;}
+            to{transform:translate3d(0,0,0);opacity:1;}
+        }
+    </style>
+</head>
+<body>
+	<div id="viewport" class="viewport">
+		<div class="mine">
+			<ul class="mine_name">
+				<h3>{$userdata['nick_name']?$userdata['nick_name']:'昵称未设置'}</h3><a href="__APP__/user/changeNickname"><p>修改<img src="__PUBLIC__/home/images/btn_more.png"></p></a>
+				<h4>{$userdata['user_name']}</h4>
+			</ul>
+			<ul class="mine_account">
+                <li><a href="__APP__/user/checkNumber" style="display:block;"><span id="dhmTipNum">{$userdata['checknum']}</span><small>兑换码</small></a></li>
+				<li class="mine_ye"><span>{$userdata['user_money']}元</span><small>我的余额</small></li>
+				<li class="mine_jf"><span>{$userdata['pay_points']}</span><small>我的积分</small></li>
+			</ul>
+		</div>
+
+		<div class="home_nav_huodong">
+			<ul class="mine_nav">
+				<li class="mine_nav_line">
+					<a href="__APP__/order/orderlist">
+						<img src="__PUBLIC__/home/images/nav_order.png">
+						<p>我的订单<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<!--2015-11-12 暂未实现
+				<li class="mine_nav_line">
+					<a href="#">
+						<img src="__PUBLIC__/home/images/nav_exchange.png">
+						<p>我的兑换(不可用)<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<li class="mine_nav_line">
+					<a href="#">
+						<img src="__PUBLIC__/home/images/nav_lottery.png">
+						<p>我的抽奖(不可用)<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>-->
+			 	<li class="mine_nav_line">
+					<a href="__APP__/favorite/index">
+						<img src="__PUBLIC__/home/images/nav_collect.png">
+						<p>我的收藏<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<li class="mine_nav_line">
+					<a href="__APP__/address/addressList">
+						<img src="__PUBLIC__/home/images/nav_shopping-add.png">
+						<p>收货地址<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<if condition="$userdata['extend'] eq 1">
+		<div class="home_nav_huodong">
+			<ul class="mine_nav">
+				<if condition="$userdata['channel'] eq 1">
+				<li class="mine_nav_line"><a href="__APP__/extend/myChannel"><img src="__PUBLIC__/home/images/nav_generalize.png"><p>推广管理<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p></a>
+				</li>
+				</if>
+				<li class=""><a href="__APP__/Commissionorder/tgrindex"><img src="__PUBLIC__/home/images/nav_mygeneralize.png"><p>我的推广<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p></a>
+				</li>
+			</ul>
+		</div>
+		</if>
+		<div class="home_nav_huodong">
+			<ul class="mine_nav">
+				<li class="mine_nav_line">
+					<a href="__APP__/user/changePassword">
+						<img src="__PUBLIC__/home/images/nav_password.png">
+						<p>修改密码<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<li class="">
+					<a href="__APP__/user/about">
+						<img src="__PUBLIC__/home/images/nav_about.png">
+						<p>关于我们<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="mine_nav_buttom">
+            <a class="item-btns" href="__APP__/index/userLoginOut">退出登录</a>
+        </div>
+	</div>
+    <div class="newVersion_tips">
+        <div class="nv_tips" data-beforeValue="提示">
+            商城已经升级了，之前购买的物品可以从提示上方的<b>兑换码</b>处进入正常消费，感谢您的支持
+            <div class="label"><label><input name="isShowTips" type="checkbox" checked="checked">知道了，不要再晃了</label></div>
+        </div>
+    </div>
+	<include file="Index/footer"/>
+    <script>
+        var showNewShopTips = true;
+        var num = document.getElementById("dhmTipNum").innerText;
+        if(window.localStorage&&window.localStorage.newShopTips){
+            showNewShopTips = false;
+        }
+        if((num&&num=="0")||!num){
+            showNewShopTips = false;
+        }
+        if(showNewShopTips){
+            var bg = document.getElementsByClassName("newVersion_tips")[0];
+            bg.style.visibility = "visible";
+            document.getElementsByClassName("nv_tips")[0].className = "nv_tips tipsShow";
+            bg.addEventListener("click",function(e){
+                var tag = e.target;
+                if(tag.className=="newVersion_tips"){
+                    if(window.localStorage&&document.getElementsByName("isShowTips")[0].checked){
+                        window.localStorage.newShopTips = "false";
+                    }
+                    tag.style.visibility = "hidden";
+                }
+            },true);
+        }
+    </script>
+</body>
+</html>

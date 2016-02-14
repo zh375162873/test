@@ -1,0 +1,117 @@
+<?php
+/*
+ * 用户评论管理模型
+ * 记录用户评论，统计用户相关评论
+ */
+namespace Admin\model;
+use Think\Model;
+use BizService\UserService;
+use Org\Util\Date;
+use BizService\GoodshomeService;
+class PinglunManageModel extends Model {
+    protected $fields=array("id","goods_id","order_id","goods_type","shop_id","store_id","buyer_id","pl_content","pl_parentid","pl_addtime","pl_updatetime","pl_points","pl_status","_pk"=>"id");
+    protected $_auto=array(
+    	array("pl_addtime","time",1,"function"),
+    	array("pl_updatetime","time",2,"function"),	
+    );
+    
+    public $orderdb,$users,$goods,$GoodshomeService;
+    public function __construct(){
+        parent::__construct();
+        $this->orderdb=D("Orders");
+        $this->goods = D("Goods");
+        $this->GoodshomeService=new GoodshomeService();
+        $this->users=new UserService();
+    }
+
+	
+	//评论搜索和统计(每个商品的用户评论，每个商户的用户平路数，每个商城的用户评论)
+	public function search_list($shop_id,$data,$order_by,$class){
+	    $data['shop_id'] = $shop_id;
+	    if(empty($order_by)){
+	        $order_by = "pl_addtime DESC";
+	    }
+	    
+	    
+		//获取商城商品相关评论
+		$list = $this->where($data)->order($order_by)->limit($page->firstRow.",".$page->listRows)->select();
+		$numcount=0;
+	    foreach ($list as $key => $value) {
+	    	
+	    
+	        $order_sn = $this->orderdb->where(array("order_id"=>$list[$key]['order_id']))->field("order_sn")->find();
+	        $goods_name=$this->goods->where(array("goods_id"=>$list[$key]['goods_id']))->field("goods_name,goods_commonid")->find();
+	        $userinfo = $this->users->userInfo($list[$key]['buyer_id']);
+	        if(!$class||D('Goodsclassrelation')->isbelongclass($goods_name['goods_commonid'],$class)){
+	        	$newlist[$numcount] = $list[$key];
+		        $newlist[$numcount]['order_sn'] = $order_sn['order_sn'];
+		        $newlist[$numcount]['goods_name']=$goods_name['goods_name'];
+		        $newlist[$numcount]['user_name']=$userinfo['user_name'];
+		        $newlist[$numcount]['nick_name']=$userinfo['nick_name'];
+		        $newlist[$numcount]['pl_addtime']=Date("Y-m-d H:i:s",$list[$key]['pl_addtime']);
+		        $numcount++;
+	        }
+	        
+	    }
+	    $count = sizeof($list);
+	    $page = new \Think\Page($count,PAGE_SIZE);
+	    $show = $page->show();		
+		$data = array();  
+		$data['list'] = $newlist;
+		$data['page'] = $show;
+		return $data;
+	}
+	
+	public function list_excel($shop_id,$data){
+	    $data['shop_id'] = $shop_id;
+	    
+		//获取商城商品相关评论
+		$list = $this->where($data)->order("pl_addtime DESC")->select();
+	    for($i=0;$i<count($list);$i++){
+			$order_sn = $this->orderdb->getOrderById($list[$i]['order_id'],'order_sn');
+	        $goods_name=$this->goods->where(array("goods_id"=>$list[$i]['goods_id']))->field("goods_name")->find();
+	        $userinfo = $this->users->userInfo($list[$i]['buyer_id']);
+			$list[$i]['order_sn']=$order_sn['order_sn']." ";
+	        $list[$i]['goods_name']=$goods_name['goods_name'];
+	        $list[$i]['user_name']=$userinfo['user_name'];
+	        $list[$i]['nick_name']=$userinfo['nick_name'];
+	        $list[$i]['pl_points']=$list[$i]['pl_points']."星";
+	        $list[$i]['pl_addtime']=Date("Y-m-d H:i:s",$list[$i]['pl_addtime']);
+	        if($list[$i]['pl_status']==1){
+	            $list[$i]['show']="显示";
+	        }else{
+	            $list[$i]['show']="隐藏";
+	        }
+	    }
+
+         return $list;
+	}
+	
+	//更改订单状态时进行统计筛选
+    public function chanage_state($pl_goods_id,$status){
+        //统计该商品评论数
+        $arr=$this->where(array("goods_id"=>$pl_goods_id,"pl_status"=>1))->select();
+        $count_num = count($arr);
+        $total ='';
+        for($i=0;$i<$count_num;$i++){
+            $total = $total+$arr[$i]['pl_points'];
+        }
+        $star = $total/$count_num;
+        $this->GoodshomeService->setevaluation($pl_goods_id,$star,$count_num);
+    }
+	public function get_commets($data,$field="*"){
+		$this->where($data)->field($field)->select();
+	}
+	public function get_commet_goods($data=array()){
+		$where = "1=1";
+		if(!isset($data['shop_id'])){
+			$where .= " AND shop_id= %d";
+		}
+		if(!isset($data['goods_type'])){//商品类型 0现金商品2积分商品3兑奖商品
+			$where .= " AND goods_type = %d";
+		}
+		$query = "SELECT goods_id,order_id,goods_type,store_id, FROM ddt_pinglun_manage WHERE ";
+
+	}
+	
+}

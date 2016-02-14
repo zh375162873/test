@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+
+<head>
+
+    <meta charset="utf-8">
+    <title>{$title} - 闪购平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/login/css/reset.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/login/css/supersized.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/login/css/style.css">
+
+</head>
+
+<body background="{$uri}__PUBLIC__/admin/login/img/backgrounds/11.jpg" style="background-size: cover">
+{__CONTENT__}
+</body>
+</html>

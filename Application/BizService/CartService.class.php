@@ -1,0 +1,392 @@
+<?php
+
+namespace BizService;
+use BizService\GoodshomeService;
+use BizService\ExtendService;
+/**
+ * 购物车Service
+ * 预留后期，可能需要未登录就加入购物车，登录后自动加入当前登录人购物车功能，设计支持暂存到cookie中
+ *
+ * @author 谢林
+ */
+class CartService extends BaseService
+{
+    /**
+     * 购物车商品总金额
+     */
+    private $cart_all_price = 0;
+
+    /**
+     * 购物车商品总数
+     */
+    private $cart_goods_num = 0;
+
+    /**
+     * 获取购物车商品总数
+     */
+    public function get_cart_goods_num(){
+       return $this->cart_goods_num;
+    }
+
+    /**
+     * 获取购物车商品总金额
+     */
+    public function get_cart_all_price(){
+       return $this->cart_all_price;
+    }
+    /**
+     * 检查购物车内商品是否存在
+     *
+     * @param
+     */
+    public function checkCart($condition = array()) {
+        return M('cart')->where($condition)->find();
+    }
+
+    /**
+     * 取得 单条购物车信息
+     * @param unknown $condition
+     * @param string $field
+     */
+    public function getCartInfo($condition = array(), $field = '*') {
+        return M('cart')->field($field)->where($condition)->find();
+    }
+
+    /**
+     * 将商品添加到购物车中
+     *
+     * @param array	$data	商品数据信息
+     * @param string $save_type 保存类型，可选值 db,cookie
+     * @param int $quantity 购物数量
+     */
+    public function addCart($data = array(), $save_type = '', $quantity = null) {
+        $method = '_addCart'.ucfirst($save_type);
+        $insert = $this->$method($data,$quantity);
+        //更改购物车总商品数和总金额，传递数组参数只是给DB使用
+        $this->getCartNum($save_type,array('buyer_id'=>$data['buyer_id']));
+        return $insert;
+    }
+
+    /**
+     * 添加数据库购物车
+     *
+     * @param unknown_type $goods_info
+     * @param unknown_type $quantity
+     * @return unknown
+     */
+    private function _addCartDb($goods_info = array(),$quantity) {
+        $condition = array();
+        $condition['goods_id'] = $goods_info['goods_id'];
+        $condition['buyer_id'] = $goods_info['buyer_id'];
+
+        $check_cart	= $this->checkCart($condition);
+        //验证购物车商品是否已经存在,数量加1
+        if (!empty($check_cart)){
+            if(isset($goods_info['user_input'])){
+                M('cart')->where("buyer_id = ".$condition['buyer_id']." AND goods_id = ".$condition['goods_id'])->save(array('user_input'=>$goods_info['user_input']));
+            }
+            return M('cart')->where("buyer_id = ".$condition['buyer_id']." AND goods_id = ".$condition['goods_id'])->setInc('goods_num',1);
+        }else{
+            $array    = array();
+            $array['buyer_id']	= $goods_info['buyer_id'];
+            $array['user_input'] = $goods_info['user_input'];
+            $array['shop_id']	= $goods_info['shop_id'];
+            $array['goods_id']	= $goods_info['goods_id'];
+            $array['goods_name'] = $goods_info['goods_name'];
+            $array['goods_price'] = $goods_info['goods_price'];
+            $array['goods_marketprice'] = $goods_info['goods_marketprice'];
+            $array['goods_num']   = $quantity;
+            $array['goods_image'] = $goods_info['goods_image'];
+            $array['is_virtual'] = $goods_info['is_virtual'];
+            return M('cart')->add($array);
+        }
+    }
+
+    /**
+     * 添加到cookie购物车,最多保存5个商品
+     *
+     * @param unknown_type $goods_info
+     * @param unknown_type $quantity
+     * @return unknown
+     */
+    private function _addCartCookie($goods_info = array(), $quantity = null) {
+        //去除斜杠
+        $cart_str = get_magic_quotes_gpc() ? stripslashes(cookie('cart')) : cookie('cart');
+        $cart_str = base64_decode(decrypt($cart_str));
+        $cart_array = @unserialize($cart_str);
+        $cart_array = !is_array($cart_array) ? array() : $cart_array;
+        if (count($cart_array) >= 5) return false;
+
+        if (in_array($goods_info['goods_id'],array_keys($cart_array))) return true;
+        $cart_array[$goods_info['goods_id']] = array(
+            'shop_id' => $goods_info['shop_id'],
+            'user_input' => $goods_info['user_input'],
+            'goods_id' => $goods_info['goods_id'],
+            'goods_name' => $goods_info['goods_name'],
+            'goods_price' => $goods_info['goods_price'],
+            'goods_marketprice' => $goods_info['goods_marketprice'],
+            'goods_image' => $goods_info['goods_image'],
+            'is_virtual' => $goods_info['is_virtual'],
+            'goods_num' => $quantity
+        );
+        setddtCookie('cart',encrypt(base64_encode(serialize($cart_array))),24*3600);
+        return true;
+    }
+
+    /**
+     * 更新购物车
+     *
+     * @param	array	$param 商品信息
+     */
+    public function editCart($data,$condition) {
+        $result	= M('cart')->where($condition)->update($data);
+        if ($result) {
+            $this->getCartNum('db',array('buyer_id'=>$condition['buyer_id']));
+        }
+        return $result;
+    }
+
+    /**
+     * 删除购物车商品
+     *
+     * @param string $type 存储类型 db,cookie
+     * @param unknown_type $condition
+     */
+    public function delCart($type, $condition = array()) {
+        if ($type == 'db') {
+            $result =  M('cart')->where($condition)->delete();
+        } elseif ($type == 'cookie') {
+            $cart_str = get_magic_quotes_gpc() ? stripslashes(cookie('cart')) : cookie('cart');
+            $cart_str = base64_decode(decrypt($cart_str));
+            $cart_array = @unserialize($cart_str);
+            if (array_key_exists($condition['goods_id'],(array)$cart_array)) {
+                unset($cart_array[$condition['goods_id']]);
+            }
+            setddtCookie('cart',encrypt(base64_encode(serialize($cart_array))),24*3600);
+            $result = true;
+        }
+        //重新计算购物车商品数和总金额
+        if ($result) {
+            $this->getCartNum($type,array('buyer_id'=>$condition['buyer_id']));
+        }
+        return $result;
+    }
+    /**
+     * 清空购物车
+     *
+     * @param string $type 存储类型 db,cookie
+     * @param unknown_type $condition
+     */
+    public function clearCart($type='db', $condition = array()) {
+        if ($type == 'cookie') {
+            setddtCookie('cart','',-3600);
+        } else if ($type == 'db') {
+            //数据库清空操作
+            if(!isset($condition['buyer_id'])){
+                $condition['buyer_id'] = session('userId');
+            }
+            $this->delCart('db',$condition);
+        }
+    }
+    /**
+     * 计算购物车总商品数和总金额
+     * @param string $type 购物车信息保存类型 db,cookie
+     * @param array $condition 只有登录后操作购物车表时才会用到该参数
+     */
+    public function getCartNum($type, $condition = array()) {
+        if ($type == 'db') {
+            $cart_all_price = 0;
+            $cart_goods	= $this->listCart('db',$condition);
+            $this->get_goods_cart_list($cart_goods);
+            $this->cart_goods_num = count($cart_goods);
+            if(!empty($cart_goods) && is_array($cart_goods)) {
+                foreach ($cart_goods as $val) {
+                    $cart_all_price	+= $val['goods_price'] * $val['goods_num'];
+                }
+            }
+            $this->cart_all_price = price_format($cart_all_price);
+        } elseif ($type == 'cookie') {
+            $cart_str = get_magic_quotes_gpc() ? stripslashes(cookie('cart')) : cookie('cart');
+            $cart_str = base64_decode(decrypt($cart_str));
+            $cart_array = @unserialize($cart_str);
+            $this->get_goods_cart_list($cart_goods);
+            $cart_array = !is_array($cart_array) ? array() : $cart_array;
+            $this->cart_goods_num = count($cart_array);
+            $cart_all_price = 0;
+            foreach ($cart_array as $v){
+                $cart_all_price += floatval($v['goods_price'])*intval($v['goods_num']);
+            }
+            $this->cart_all_price = $cart_all_price;
+        }
+        @setddtCookie('cart_goods_num',$this->cart_goods_num,2*3600);
+        return $this->cart_goods_num;
+    }
+
+    /**
+     * 购物车列表
+     *
+     * @param string $type 存储类型 db,cookie
+     * @param unknown_type $condition
+     * @param int $limit
+     */
+    public function listCart($type, $condition = array(), $limit = '') {
+        if ($type == 'db') {
+            $cart_list = M('cart')->where($condition)->limit($limit)->select();
+        } elseif ($type == 'cookie') {
+            //去除斜杠
+            $cart_str = get_magic_quotes_gpc() ? stripslashes(cookie('cart')) : cookie('cart');
+            $cart_str = base64_decode(decrypt($cart_str));
+            $cart_list = @unserialize($cart_str);
+        }
+        $cart_list = is_array($cart_list) ? $cart_list : array();
+        //顺便设置购物车商品数和总金额
+        $this->cart_goods_num =  count($cart_list);
+        $cart_all_price = 0;
+        if(is_array($cart_list)) {
+            foreach ($cart_list as $val) {
+                $cart_all_price	+= $val['goods_price'] * $val['goods_num'];
+            }
+        }
+        $this->cart_all_price = price_format($cart_all_price);
+        return !is_array($cart_list) ? array() : $cart_list;
+    }
+
+    /**
+     * 登录之后,把登录前购物车内的商品加到购物车表
+     *
+     */
+    public function mergecart($member_info = array(), $store_id = null){
+        if (!$member_info['member_id']) return;
+        // $save_type = C('cache.type') != 'file' ? 'cache' : 'cookie';
+        $save_type = 'cookie';
+        $cart_new_list = $this->listCart($save_type);
+        if (empty($cart_new_list)) return;
+
+        //取出当前DB购物车已有信息
+        $cart_cur_list = $this->listCart('db',array('buyer_id'=>$member_info['member_id']));
+
+        //数据库购物车已经有的商品，不再添加
+        if (!empty($cart_cur_list) && is_array($cart_cur_list) && is_array($cart_new_list)) {
+            foreach ($cart_new_list as $k=>$v){
+                if (!is_numeric($k) || in_array($k,array_keys($cart_cur_list))){
+                    unset($cart_new_list[$k]);
+                }
+            }
+        }
+
+        //查询在购物车中,未禁售，上架，有库存的商品,并加入DB购物车
+
+        $cart_goods_ids = array_keys($cart_new_list);
+        $goods = new GoodshomeService();
+        $goods_list = $goods->get_online_goods_info($cart_goods_ids,'goods_id');
+//        foreach($cart_goods_ids as $id){
+//            if(empty($id))continue;
+//            $cart_goods_ids_instr = "'".$id."',";
+//        }
+//        $cart_goods_ids_instr = rtrim($cart_goods_ids_instr,',');
+//        $sql = "SELECT goods_id FROM ddt_goods WHERE goods_id IN($cart_goods_ids_instr) AND goods_storage>1 AND goods_state = 1";
+//        $goods_list = M()->query($sql);
+        if (!empty($goods_list)){
+            foreach ($goods_list as $goods_info){
+                $goods_info['buyer_id']	= $member_info['member_id'];
+                $this->addCart($goods_info,'db',$cart_new_list[$goods_info['goods_id']]['goods_num']);
+            }
+        }
+        //最后清空登录前购物车内容
+        $this->clearCart($save_type);
+    }
+
+    /**
+     * 获取渠道优惠商品价格，如果优惠购买数量大于剩余优惠数量，则使用原价，否则使用渠道优惠价
+     * @param $cart_goods
+     * @param $goods_code //优惠口令
+     * @return bool
+     */
+    public function get_qd_code_goods_price($cart_goods){
+        $array = array('qd_state'=>false,'qd_price'=>0);
+        $extendservice = new ExtendService();
+        //判断优惠码，处理优惠信息
+        $qd = json_decode($cart_goods['user_input'],true);
+        if(!$qd['qd_code']) return $array;
+        $extend = $extendservice->checkExtendGoods($cart_goods['goods_id']);
+        if($extend>0){
+            $extend_info = $extendservice->getExtendGoods($cart_goods['goods_id'],$qd['qd_code']);
+            //判断优惠码有效期
+            $qd_code = '';
+            if(time()>$extend_info['begin_time']||time()<$extend_info['end_time']){
+                //判断优惠码数量,如果优惠购买数量大于剩余优惠数量，则使用原价，否则使用渠道优惠价
+                if($cart_goods['goods_num'] > $extend_info['quantity']){
+                    $price = price_format($cart_goods['goods_price']);
+                }else{
+                    //判断渠道优惠价格设置类型1为原价折扣，其他为优惠价
+                    $price_type = $extend_info['discount_type'];
+                    if($price_type==1){
+                        $price = price_format($cart_goods['goods_price']*$extend_info['discount']/100);
+                    }else{
+                        $price = price_format($extend_info['discount_price']);
+                    }
+                    $qd_code = $qd['qd_code'];
+                }
+                return $array = array('qd_state'=>true,'qd_price'=>$price,'qd_code'=>$qd_code);
+            }else{
+                //优惠码已过期
+                return $array;
+            }
+        }else{
+            //优惠码购买数量超过设置
+            return $array;
+        }
+    }
+    /**
+     * 取得商品最新的属性及促销[购物车]
+     * @param $cart_list
+     */
+    public function get_goods_cart_list(&$cart_list){
+        if (empty($cart_list) || !is_array($cart_list)) return $cart_list;
+        //验证商品是否有效
+        $goods_id_array = array();
+        foreach ($cart_list as $key => $c_info) {
+            $goods_id_array[] = $c_info['goods_id'];
+        }
+        $goods_home_service = new GoodshomeService();
+        $goods_info = $goods_home_service->get_online_goods_info($goods_id_array);
+
+        $goods_online_array = array();
+        foreach ($goods_info as $goods) {
+            $goods_online_array[$goods['goods_id']] = $goods;
+        }
+        foreach($cart_list as $key=>$cart_info){
+            $cart_list[$key]['state'] = true;
+            $cart_list[$key]['storage_state'] = true;
+            if (in_array($cart_info['goods_id'],array_keys($goods_online_array))) {
+                $goods_online_info = $goods_online_array[$cart_info['goods_id']];
+                $cart_list[$key]['goods_commonid'] = $goods_online_info['goods_commonid'];
+                $cart_list[$key]['goods_name'] = $goods_online_info['goods_name'];
+                //$cart_list[$key]['gc_id'] = $goods_online_info['gc_id'];
+                $cart_list[$key]['goods_image'] = $goods_online_info['goods_image'];
+                $cart_list[$key]['goods_price'] = $goods_online_info['goods_price'];
+                $cart_list[$key]['goods_old_price'] = $goods_online_info['goods_price'];
+                $cart_list[$key]['goods_storage'] = $goods_online_info['goods_storage'];
+                //$cart_list[$key]['have_gift'] = $goods_online_info['have_gift'];
+                if ($cart_info['goods_num'] > $goods_online_info['goods_storage']) {
+                    $cart_list[$key]['storage_state'] = false;
+                }
+                //todo 此处可添加优惠信息处理
+                //$cart_list[$key]['groupbuy_info'] = $goods_online_info['groupbuy_info'];
+                //$cart_list[$key]['xianshi_info'] = $goods_online_info['xianshi_info'];
+                //计算渠道优惠start
+                $qd_info = $this->get_qd_code_goods_price($cart_info);
+                if($qd_info['qd_state']){
+                    $cart_list[$key]['qd_code'] = $qd_info['qd_code'];
+                    $cart_list[$key]['goods_price'] = $qd_info['qd_price'];
+                }
+                //计算渠道优惠end
+            }else {
+                //如果商品下架
+                $cart_list[$key]['state'] = false;
+                $cart_list[$key]['storage_state'] = false;
+            }
+        }
+        //$this->getCartNum('db',array('buyer_id'=>session('userId')));
+    }
+}

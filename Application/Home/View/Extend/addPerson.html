@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <title>添加推广人员-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/tuiguang.css">
+    <script src="__PUBLIC__/home/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/home/js/jquery.validate.min.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/home/js/common.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/home/js/general.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/home/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/home/js/bootstrap-datepicker.js" type="text/javascript"></script>
+    <script src="__PUBLIC__/home/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+</head>
+<body>
+<script type="text/javascript">
+    function submit(obj){
+        obj.submit();
+    }
+    function Isyx(yx){
+     var reyx= /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+     return(reyx.test(yx));
+    }
+    function checkMobile(sMobile){ 
+        var telReg = !!sMobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+        //如果手机号码不能通过验证
+        if(telReg == false){
+         return false;
+        }        
+    }
+    function check(theForm){
+        var _url = '__APP__/home/extend/checkCode';
+        var phoneNum = theForm.username.value;
+        var check_code = theForm.check_code.value;
+        var _membername = theForm.membername.value;
+        if(checkMobile(theForm.username.value) == false){ 
+            alert("请输入正确的手机号码!");theForm.username.focus();return false; 
+        }
+        if(theForm.check_code.value == "" || theForm.check_code.value.replace(/[ ]/g,"").length !== 4){
+            alert("请输入短信验证码!");theForm.check_code.focus();return false;
+        }
+        $.post(_url,{username:phoneNum,check_code:check_code},
+        function(data){
+            if(data.code==1){
+                 addExtend(phoneNum,_membername);
+            }else{
+                alert(data.msg);
+            }
+        },'json');
+    }
+    function addExtend(phoneNum,_membername){
+        var _action="__APP__/home/extend/addExtend";
+            $.post(_action,{username:phoneNum,membername:_membername},
+            function(data){
+                if(data.error){
+                    alert('操作失败:'+data.msg);
+                }else{
+                    alert(data.msg);
+                    window.location.href = "__APP__/home/extend/personList";
+                }
+            },'json');
+    }
+</script>
+<script type="text/javascript">
+var InterValObj; //timer变量，控制时间
+var count = 30; //间隔函数，1秒执行
+var curCount;//当前剩余秒数
+
+function sendMessage() {
+  　curCount = count;
+    var _url = '__APP__/home/extend/getCode_addextend';
+    var phoneNum = $("#username").val();
+        if(checkMobile(phoneNum) == false){
+            alert("请输入正确的手机号码!");$("#username").focus();return false; 
+        };
+        $.post(_url,{username:phoneNum},
+            function(data){
+                if(data.code == 1){
+                    alert(data.msg);
+                    $("#check_code").focus();
+                    //设置button效果，开始计时
+                     $("#btnSendCode").attr("disabled", "true");
+                     $("#btnSendCode").html(curCount + "秒后重新获取");
+                     InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+                    return false;
+                }else if(data.code == 0){
+                    alert(data.msg);return false;
+                }else if(data.code == 2){
+                    alert(data.msg);return false;
+                }else if(data.code == 3){
+                    alert(data.msg);return false;
+                }           
+            },"json");
+}
+
+//timer处理函数
+function SetRemainTime() {
+            if (curCount == 0) {                
+                window.clearInterval(InterValObj);//停止计时器
+                $("#btnSendCode").removeAttr("disabled");//启用按钮
+                $("#btnSendCode").html("重新发送验证码");
+            }
+            else {
+                curCount--;
+                $("#btnSendCode").html(curCount + "秒后重新获取");
+            }
+        }
+</script>
+<div id="viewport" class="viewport">
+    <div class="spread_logo"><img src="__PUBLIC__/home/images/spread_register.png"></div>
+    <div class="login">
+        <form name="formUser" id="formUser">
+            <div class="item item-username">
+                <input class="txt-input txt-username" type="text" maxlength="11" placeholder="请输入推广人员姓名"  id="membername">
+            </div>
+            <div class="item item-username">
+                <input class="txt-input txt-username" type="text" maxlength="11" placeholder="请输入推广人员手机号"  id="username">
+                <button id="btnSendCode" type="button" class="btn-zc" maxlength="4" onclick="sendMessage()">发送验证码</button>
+            </div>
+            <div class="item item-username">
+                <input class="txt-input txt-username" type="text" maxlength="8" placeholder="请输入对方收到的验证码" id="check_code">
+            </div>
+            <div class="item item-btns" onclick="javascript:return check(formUser);">
+                <a class="btn-login btn-disabled">添加</a>
+            </div>
+        </form>
+    </div>
+</div>
+<include file="Index/footer"/>
+</body>
+</html>

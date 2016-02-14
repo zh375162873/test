@@ -1,0 +1,53 @@
+
+/* ------- This is the CSS Reset ------- */
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, 
+abbr, acronym, address, big, cite, code, del,
+dfn, em, img, ins, kbd, q, s, samp, small,
+strike, strong, sub, sup, tt, var, u, i, center,
+dl, dt, dd, ol, ul, li, fieldset, form, label,
+legend, table, caption, tbody, tfoot, thead, tr,
+th, td, article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup, menu,
+nav, output, ruby, section, summary, time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+
+/* ------- HTML5 display-role reset for older browsers ------- */
+
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after, q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+.code { width:58%;}
+.codeImg img {margin-left:5%;}
+
+.db {color:#fff; margin-top:15%;}
+.ewm {  margin-left: -38%;   margin-top: -8.2%;}
+.ewm img {  border: 0.7em solid rgba(255,255,255,0.15);}
+.ewm span {display:block;}
+.all {background-color:rgba(255,255,255,.15); padding: 1em 1em 3em 1em; width:410px; margin-left:40%;border-bottom-left-radius: 1em;
+  border-bottom-right-radius: 1em;}
+

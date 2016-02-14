@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title><switch name="dispute_info.status"><case value="0">售后处理中</case><case value="1">售后处理完成</case><default />售后申请</switch>-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/shop.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/temp.css">
+</head>
+<body>
+	<if condition="empty($dispute_info)">
+    <form class="customer_service" action="{:U('SaleService/add_dispute')}" method="post">
+        <div class="div_box">
+            <p>申请类型</p>
+            <input type="hidden" name="cs_mode" value="2">
+            <div class="cs_mode">
+                <span onclick="changeCs_mode(this)" data-value="0"><i></i>退换货</span>
+                <span onclick="changeCs_mode(this)" data-value="1"><i></i>问题投诉</span>
+                <span class="on" onclick="changeCs_mode(this)" data-value="2"><i></i>其他</span>
+            </div>
+            <p>问题描述</p>
+            <div class="text_center">
+                <textarea class="ddt_textarea" name="cs_desc" placeholder="非常抱歉给您带来不便，请输入您要求的售后服务详情"></textarea>
+            </div>
+            <p>请留下您的联系方式</p>
+            <div class="text_center"><input name="cs_tel" type="text" placeholder="请输入手机号码"></div>
+            <input name="order_id" type="hidden" value="{$order_id}" />
+        </div>
+        <button class="submitBtn" type="submit">提交</button>
+    </form>
+    <else />
+    <div class="customer_service">
+        <section class="div_box">
+            <p>申请内容<span>{$dispute_info.add_time|date="Y-m-d H:i", ###}</span></p>
+            <div>
+                <p>申请类型：<switch name="dispute_info.type"><case value="0">退换货</case><case value="1">问题投诉</case><case value="2">其它</case><default />未知</switch></p>
+                <p>问题描述：{$dispute_info.content}</p>
+                <p>联系电话：{$dispute_info.tel}</p>
+            </div>
+        </section>
+        <if condition="$dispute_info.status eq 1">
+    	<section class="div_box">
+	        <p>客服回复<span>{$dispute_info.update_time|date="Y-m-d H:i", ###}</span></p>
+	        <div>
+	            <p>{$dispute_info.reply}</p>
+	        </div>
+        </section>
+        <p class="cs_status">售后申请已处理完成，感谢您的配合和谅解。</p>
+        <else />
+        <p class="cs_status">申请已提交成功，我们会尽快联系您进行处理。</p>
+        </if>
+        <div class="noData">
+            <a href="{:U('Index/index')}">去逛逛</a>
+        </div>
+    </div>
+   	</if>
+    <script>
+        function changeCs_mode(t){
+            if(t.className=="on"){
+                return;
+            }else{
+                document.getElementsByClassName("on")[0].className="";
+                t.className = "on";
+                document.getElementsByName("cs_mode")[0].value = t.getAttribute("data-value");
+            }
+        }
+    </script>
+    <include file="Index/footer"/>
+</body>
+</html>

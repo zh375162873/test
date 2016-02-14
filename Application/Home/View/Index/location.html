@@ -1,0 +1,311 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>定位-{$shop_base_info.shop_title}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+<script type="text/javascript" src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js"></script>
+<script>
+<?php
+$lat=session('lat')?session('lat'):"34.26567";
+$lng=session('lng')?session('lng'):"108.953435";
+$s_lat=session('lat')?session('lat'):0;
+$s_lng=session('lng')?session('lng'):0;
+?>
+      var  lat={$lat};
+	  var  lng={$lng};
+	  var getLocation = function(){
+            if (window.navigator.geolocation){
+                window.navigator.geolocation.getCurrentPosition(showPosition,function(){main.alert_warning("位置信息获取失败，请前往地图设置！");},{timeout:2000});
+           //获取不稳定，可以设置超时时间
+            }else{
+                main.alert_warning("Geolocation is not supported by this browser.");
+            }
+        }
+	  <if condition="($s_lat eq 0) or ($s_lng eq 0)">
+        var showPosition = function(position){
+            //$('#juli').html('纬度:'+position.coords.latitude+','+'经度:'+position.coords.longitude);
+			$("#location_lat").val(position.coords.latitude);
+			$("#location_lng").val(position.coords.longitude);
+			lat=position.coords.latitude;
+			lng=position.coords.longitude;
+			
+        }
+      </if>  
+	</script>
+	
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+    //微信定位
+    wx.config({
+        debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: '{$signPackage['appId']}', // 必填，企业号的唯一标识，此处填写企业号corpid
+        timestamp: {$signPackage['timestamp']}, // 必填，生成签名的时间戳
+        nonceStr: '{$signPackage['nonceStr']}', // 必填，生成签名的随机串
+        signature: '{$signPackage['signature']}',// 必填，签名，见附录1
+        jsApiList: [
+            'getLocation',
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'onMenuShareQQ'
+        ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+    });
+  <if condition="($s_lat eq 0) or ($s_lng eq 0)">
+    wx.ready(function () {
+        wx.getLocation({
+            type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+            success: function (res) {
+                var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                var speed = res.speed; // 速度，以米/每秒计
+                var accuracy = res.accuracy; // 位置精度
+				var lat=res.latitude;
+				var lng=res.longitude; // 经度，浮点数，范围为180 ~ -180。
+
+                $.ajax({
+                    type: "POST",
+                    data: {lat: latitude, lng: longitude},
+                    url: "{:U('home/goods/setpostion')}",
+                    dataType: "html"
+                });
+
+            },
+            fail: function (res) {
+                // alert(res);
+            }
+        });
+    });
+</if>
+    wx.error(function (res) {
+        // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+    });
+		
+
+	
+
+//判断是否在微信下，如果不是，就调用手机自带的定位，或者手动定位	
+window.onload = function(){ 
+   if(isWeiXin()){ 
+
+   }else{
+    <?php if(empty($lat)&&empty($lng)){ ?> getLocation() ;<?php } ?>
+   
+   }
+} 
+
+function isWeiXin(){ 
+	var ua = window.navigator.userAgent.toLowerCase(); 
+	if(ua.match(/MicroMessenger/i) == 'micromessenger'){ 
+	return true; 
+	}else{ 
+	return false; 
+	} 
+} 
+
+</script>
+
+	
+	
+<style type="text/css">
+*{ padding:0; margin:0}
+body{font-size: 12px;}
+
+.subBtn {
+    height: 40px;
+    width: 200px;
+    background: #f79c5c;
+	margin:0 auto;
+    border: none;
+    outline: none;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 16px;
+}  
+
+	#r-result{width:100%; position:absolute; top:10px; right:0px; text-align:right; padding-right:50px;}
+		#r-result input{
+		width:70%;
+		border:1px solid gray;
+		height:30px;
+		}
+</style>   
+</head>
+<body> 
+<?php
+$lat=I('lat')?I('lat'):(session('lat')?session('lat'):"34.26567");
+$lng=I('lng')?I('lat'):(session('lng')?session('lng'):"108.953435");
+?>
+<div class="span8 border_d6e1ee border_radius_5" id="baidumap" style=" width:auto; height:700px"></div>
+
+<div id="r-result"><input type="text" id="suggestId"  placeholder="输入地点查询"  /></div>
+<div id="searchResultPanel" style="border:1px solid #C0C0C0;width:150px;height:auto; display:none;"></div>
+
+
+
+<form action="/" method="get" style="position:absolute; bottom:10px;  width:100%; text-align:center">
+<input type="hidden" id="location_lat" value="{$lat}" name="location_lat">
+<input type="hidden" id="location_lng" value="{$lng}" name="location_lng">
+<button class="subBtn" type="submit" style="padding:0px; margin:0px;">确定</button>
+</form>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=Q0O9mkEqXfiLRRfVLUl7sHDZ"></script>
+<!--<script type="text/javascript">
+$(function () {
+    // 百度地图API功能
+    var map = new BMap.Map("baidumap");
+    var point1 = new BMap.Point(lng, lat);
+    map.centerAndZoom(point1, 16);
+    var marker = new BMap.Marker(point1);  // 创建标注
+    map.addOverlay(marker);              // 将标注添加到地图中
+    map.setCenter(point1);
+    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+    
+    map.enableScrollWheelZoom();                            //启用滚轮放大缩小
+    map.addControl(new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_LEFT, type: BMAP_NAVIGATION_CONTROL_SMALL}));  //右上角，仅包含平移和缩放按钮
+    
+    
+    // 定义一个控件类,即function
+    function ZoomControl(){
+      // 默认停靠位置和偏移量
+      this.defaultAnchor = BMAP_ANCHOR_TOP_RIGHT;
+      this.defaultOffset = new BMap.Size(10, 10);
+    }
+
+    // 通过JavaScript的prototype属性继承于BMap.Control
+    ZoomControl.prototype = new BMap.Control();
+
+    // 自定义控件必须实现自己的initialize方法,并且将控件的DOM元素返回
+    // 在本方法中创建个div元素作为控件的容器,并将其添加到地图容器中
+    ZoomControl.prototype.initialize = function(map){
+      // 创建一个DOM元素
+      var input = document.createElement("input");
+      // 设置样式
+      input.style.border = "1px solid gray";
+      input.style.height = "30px";
+      input.style.width = "70%";
+      input.style.paddingLeft = "10px";
+      input.style.backgroundColor = "white";
+	  input.setAttribute("placeholder", "输入地点查询");
+      // 绑定事件,点击一次放大两级
+      input.onkeyup = function(e){
+          var local = new BMap.LocalSearch(map, {
+            renderOptions:{map: map}
+          });
+          local.search(input.value);
+      }
+      // 添加DOM元素到地图中
+      map.getContainer().appendChild(input);
+      // 将DOM元素返回
+      return input;
+    }
+    // 创建控件
+    var myZoomCtrl = new ZoomControl();
+    // 添加到地图当中
+    map.addControl(myZoomCtrl);
+
+    map.addEventListener("click", function(e){
+        var point = new BMap.Point(e.point.lng, e.point.lat);
+        var marker = new BMap.Marker(point);  // 创建标注
+        map.clearOverlays();              // 将标注添加到地图中
+        map.addOverlay(marker);              // 将标注添加到地图中
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        document.getElementById("location_lat").value = e.point.lat;
+		document.getElementById("location_lng").value = e.point.lng ;
+    });
+});
+</script>-->
+
+<script type="text/javascript">
+	// 百度地图API功能
+	function G(id) {
+		return document.getElementById(id);
+	}
+
+	var map = new BMap.Map("baidumap");
+	
+	var point1 = new BMap.Point(lng, lat);
+    map.centerAndZoom(point1, 16);
+    var marker = new BMap.Marker(point1);  // 创建标注
+    map.addOverlay(marker);              // 将标注添加到地图中
+    map.setCenter(point1);
+
+    marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+    
+    map.enableScrollWheelZoom();                            //启用滚轮放大缩小
+    map.addControl(new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_LEFT, type: BMAP_NAVIGATION_CONTROL_SMALL}));  //右上角，仅包含平移和缩放按钮
+
+	
+	 map.addEventListener("click", function(e){
+        var point = new BMap.Point(e.point.lng, e.point.lat);
+        var marker = new BMap.Marker(point);  // 创建标注
+        map.clearOverlays();              // 将标注添加到地图中
+        map.addOverlay(marker);              // 将标注添加到地图中
+        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        document.getElementById("location_lat").value = e.point.lat;
+		document.getElementById("location_lng").value = e.point.lng ;
+    });
+
+
+	var ac = new BMap.Autocomplete(    //建立一个自动完成的对象
+		{"input" : "suggestId"
+		,"location" : map
+	});
+
+	ac.addEventListener("onhighlight", function(e) {  //鼠标放在下拉列表上的事件
+	var str = "";
+		var _value = e.fromitem.value;
+		var value = "";
+		if (e.fromitem.index > -1) {
+			value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+		}    
+		str = "FromItem<br />index = " + e.fromitem.index + "<br />value = " + value;
+		
+		value = "";
+		if (e.toitem.index > -1) {
+			_value = e.toitem.value;
+			value = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+		}    
+		str += "<br />ToItem<br />index = " + e.toitem.index + "<br />value = " + value;
+		G("searchResultPanel").innerHTML = str;
+	});
+
+	var myValue;
+	ac.addEventListener("onconfirm", function(e) {    //鼠标点击下拉列表后的事件
+	var _value = e.item.value;
+		myValue = _value.province +  _value.city +  _value.district +  _value.street +  _value.business;
+		G("searchResultPanel").innerHTML ="onconfirm<br />index = " + e.item.index + "<br />myValue = " + myValue;
+		
+		setPlace();
+	});
+
+	function setPlace(){
+		map.clearOverlays();    //清除地图上所有覆盖物
+		function myFun(){
+			var pp = local.getResults().getPoi(0).point;    //获取第一个智能搜索的结果
+			map.centerAndZoom(pp, 16);
+			map.addOverlay(new BMap.Marker(pp));    //添加标注
+			
+			document.getElementById("location_lat").value = pp.lat;
+		    document.getElementById("location_lng").value = pp.lng ;
+			
+		}
+		var local = new BMap.LocalSearch(map, { //智能搜索
+		  onSearchComplete: myFun
+		});
+		local.search(myValue);
+	}
+</script>
+
+
+
+
+
+
+<!--<include file="Index/footer"/>-->
+
+
+
+</body>
+</html>

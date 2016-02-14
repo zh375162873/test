@@ -1,0 +1,45 @@
+<?php
+namespace Admin\Controller;
+use Think\Controller;
+use BizService\GoodsstoreService;
+use BizService\ExtendService;
+
+class OrderchuliController extends Controller{
+    public $order,$ordergoods,$orderlog,$extend_service;
+    public function __construct(){
+        parent::__construct();
+        $this->order = D("Orders");
+        $this->ordergoods = D("OrdersGoods");
+        $this->orderlog = D("OrdersLog");
+        $this->goodsstoreservice = new GoodsstoreService();
+        $this->extend_service = new ExtendService();
+    }
+
+    public function index(){
+        echo "<pre>";print_r($_SESSION);print_r($_SERVER);exit();
+    }
+    
+    //未支付订单处理
+    public function chuli_wxf_order(){
+        $arr = $this->order->where(array("order_status"=>0))->select();
+      
+        //获取所有订单中商品的数量
+        if($arr){
+            for($i=0;$i<count($arr);$i++){
+                //正数为销售，负数为退货
+                $kucun = -$arr[$i]['goods_num'];
+                $change = $arr[$i]['extend_num'];
+                //库存处理
+                $this->goodsstoreservice->changestoragebyid($arr[$i]['goods_id'],$kucun,$type=1);
+                //优惠码处理（需要赵星给我提供接口）
+                $this->extend_service->updateExtendGoodsStore($arr[$i]['extend_id'], $arr[$i]['goods_id'], $change);
+                
+                //删除订单，订单商品，订单流水操作记录
+                $this->order->where(array("order_id"=>$arr[$i]['order_id']))->delete();
+                $this->ordergoods->where(array("order_id"=>$arr[$i]['order_id']))->delete();
+                $this->orderlog->where(array("order_id"=>$arr[$i]['order_id']))->delete();
+            }
+        }
+        echo "成功！！！";
+    }
+}

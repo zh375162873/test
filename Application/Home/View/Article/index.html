@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta content="telephone=no" name="format-detection">
+	<title>{$article_item.subject}</title>
+	<link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+	<script type="text/javascript" src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js"></script>
+</head>
+
+<body>
+<div id="viewport" class="viewport">
+	<div class="home_nav_huodong">
+		<div class="about_jianjie">
+			<div>文章标题：{$article_item.subject}</div>
+			<div>文章内容：{$article_item.message}</div>
+			<div>发布时间：{$article_item.createtime|date="y-m-d h:i:s",###}</div>
+		</div>
+	</div>
+</div>
+<include file="Index/footer"/>
+</body>
+</html>

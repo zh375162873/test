@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>已支付明细-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <header class="tggl_header">已支付明细</header>
+    <div class="tggl_com yzf">
+        <ul class="ul1">
+            <li>
+                <div>¥{$paid_money}</div>
+            </li>
+        </ul>
+        <table>
+            <tr><th colspan="3">已支付明细</th></tr>
+            <foreach name="is_paid_list" key="key" item="list">
+            <if condition="$list['real_pay']">
+                <if condition="$var">
+                    <tr><td></td><td></td><td>{$var.adjustment_type?'-':'+'}¥{$var.adjustment_money}<div>({$var.pay_desc})</div></td></tr>
+                    <tr><td>{$var.calc_time|date="Y.m.d",###}</td><td></td><td>实际支付: <span>¥{$var.real_pay}</span></td></tr>
+                </if>
+                <assign name="var" value="$is_paid_list[$key]" />
+            </if>
+            <tr><td>{$list.create_time|date="Y(m.d",###}-{$list.calc_time|date="m.d)",###}</td><td></td><td>¥{$list.commission_total}*{$list.commission_rate}%=¥{$list.total}</td></tr>
+            </foreach>
+            <tr><td></td><td></td><td>{$var.adjustment_type?'-':'+'}¥{$var.adjustment_money}<div>({$var.pay_desc})</div></td></tr>
+            <tr><td>{$var.calc_time|date="Y.m.d",###}</td><td></td><td>实际支付: <span>¥{$var.real_pay}</span></td></tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>

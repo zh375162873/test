@@ -1,0 +1,76 @@
+<include file="Index/header" />
+    <div class="row headerNav" id="headerNav">
+  		<ul><li>运行时间：{$shop_info['shop_time']|date="Y-m-d",###}---今(商城运营:{$live_time})</li></ul>
+    </div>
+    <h4><strong>订单统计</strong> &nbsp;&nbsp;&nbsp;&nbsp; <small>成交订单总数（{$order_count.order_total_num}）</small> &nbsp;&nbsp;&nbsp;&nbsp;<small>成交订单总额（{$order_count.order_total_money}）</small></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+	<ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>今日新单</small><small style="margin-left:100px">{$order_count.order_today_time}</small></h4>
+	  </li>
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>本月新单</small><small style="margin-left:100px">{$order_count.order_month_time}</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>未消费总额</small><small style="margin-left:100px">{$order_count.dhm_wxf_money}</small></h4>
+	  </li>
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>已消费总额</small><small style="margin-left:100px">{$order_count.dhm_yxf_money}</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>退款申请</small><small style="margin-left:100px">{$order_count.order_tksq_num}</small></h4>
+	  </li>
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>已退款</small><small style="margin-left:100px">{$order_count.order_ytk_num}</small></h4>
+	  </li>
+	</ul>
+	
+	
+    <h4><strong>商品统计</strong></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>上架中的商品</small><small style="margin-left:100px">{$goods_state1}</small></h4>
+	  </li>
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>已售罄的商品</small><small style="margin-left:100px">{$goods_state2}</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>未上架的商品</small><small style="margin-left:100px">{$goods_state3}</small></h4>
+	  </li>
+	</ul>
+	
+	
+	<!--<h4><strong>访问统计</strong></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>当前在线人数</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>今日访问</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>-->
+	
+    <h4><strong>评论统计</strong>&nbsp;&nbsp;&nbsp;&nbsp;<small>评论总数（{$pl_count.pl_total}）</small></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>已隐藏评论</small><small style="margin-left:100px">{$pl_count.pl_yc_total}</small></h4>
+	  </li>
+	  <li style="margin-left:150px;width:300px;">
+	     <h4><small>已显示评论</small><small style="margin-left:100px">{$pl_count.pl_xs_total}</small></h4>
+	  </li>
+	</ul>
+    <br />
+    <include file="Index/footer" />
+

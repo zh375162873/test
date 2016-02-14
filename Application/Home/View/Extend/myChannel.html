@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>推广管理-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <header class="tggl_header">
+        <a href="__APP__/home/extend/personList"><img src="__PUBLIC__/home/images/spread_tianjia.png"><span>推广人员&nbsp;{$countdata.membercount}</span></a>
+        <a href="addPerson.html">+</a>
+    </header>
+    <div class="tggl_list">
+        <section>
+            <h4>今日数据</h4>
+            <ul class="item1">
+                <li><a href="__APP__/home/extend/recentInfo?type=membercount"><div>{$countdata.today.extendusercount}</div><div>今日注册</div><i></i></a></li>
+                <li><a href="__APP__/home/extend/recentInfo?type=ordercount"><div>{$countdata.today.orderscount}单<br>¥{$countdata.today.dealcount}</div><div>今日订单</div><i></i></a></li>
+                <li><a href="__APP__/home/extend/recentInfo?type=dealcount"><div>¥{$countdata.today.incomecount}</div><div>今日收益分成</div></a></li>
+            </ul>
+        </section>
+        <section>
+            <h4>我的收益</h4>
+            <ul class="item2">
+                <li><a href="__APP__/home/extend/waitPay"><div>¥{$countdata.wait_pay}</div><div>待支付</div><i></i></a></li>
+                <li><a href="__APP__/home/extend/isPaid"><div>¥{$countdata.is_paid}</div><div>已支付</div></a></li>
+            </ul>
+        </section>
+    </div>
+    <div class="tggl_set">
+        <a href="__APP__/home/extend/editDistribute">
+            <div>
+                <h4>收益分成比例</h4>
+				<div class="barBg">
+					<div class="bar" data-percent="{$channelinfo.distribute}"></div>
+				</div>
+                <small>*从推广人员收益中分成的比例</small>
+                <span>修改 ></span>
+            </div>
+        </a>
+    </div>
+    <div style="height:15px;"></div>
+</div>
+<include file="Index/footer"/>
+<script>
+    window.onload = function(){
+        document.getElementsByClassName("bar")[0].style.width = "{$channelinfo.distribute}%";
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+	<title>关于我们-{$shop_base_info.shop_title}</title>
+	<link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+	<script type="text/javascript" src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js"></script>
+</head>
+
+<body>
+	<div id="viewport" class="viewport">
+		<div class="home_nav_huodong">
+			<div class="about_jianjie">
+				<if condition="$info['shop_img']">
+					<img src="__UPLOAD__{$info.shop_img}">
+				<else/>
+					<img src="__PUBLIC__/home/images/about_jianjie.jpg">
+				</if>
+
+
+				<li class="about_lianxi">公司名称<img src="__PUBLIC__/home/images/nav_about_company.png"><p>{$info.shop_company_name}</p></li>
+				<li class="about_lianxi">客服电话<img src="__PUBLIC__/home/images/nav_about_telephone.png"><p>{$info.kefu_phone}</p></li>
+				<li class="about_lianxi">合作电话<img src="__PUBLIC__/home/images/nav_about_telephone.png"><p>{$info.shop_phone}</p></li>
+				<li class="about_lianxi">公司地址<img src="__PUBLIC__/home/images/nav_about_location.png"><p>{$info.shop_address}</p></li>
+			</div>
+		</div>
+	</div>	 
+	<include file="Index/footer"/>
+</body>
+</html>

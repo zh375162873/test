@@ -1,0 +1,86 @@
+<php>
+//调取数据
+$item=D('tempitem')->findbyid($item_id);
+$info=json_decode($item['item_data'],true);
+$used="禁用";
+$i=0;
+$n=count($info['info_data']);
+$n=0;
+foreach($info['info_data'] as $key=>$val ){
+  if($val['info_isused']==0){
+  }else{
+    $n=$n+1;
+  }
+}
+</php>
+<if condition="$item.item_is_used eq 1">
+  <div class="ddt_block home_block">
+<else/>
+<php> $used='启用'; </php>
+  <div class="ddt_block home_block unusable">
+</if>
+    <div id="nav" class="focus">
+        <div class="nav_hd">
+            <ul>
+			
+			</ul>
+        </div>
+        <div class="nav_bd">
+            <ul>
+                <li>
+                    <ul class="home_sort">
+                      <foreach name="info['info_data']" item="val" key="key">
+                        <if condition="$val['info_isused'] eq 0">
+                          <php>continue;</php>
+                        </if>
+                        <li>
+						  <a href="{$val['url']}">
+							<if condition="isset($val['info_gcid']) and ($val['info_gcid'] gt 0)">
+							 <img src="__UPLOAD__/{$val['info_img']}"><p><?php echo isset($val['info_title'])?$val['info_title']:""; ?></p>
+							<else/>
+							 <img src="{$val['info_img']}"><p><?php echo isset($val['info_title'])?$val['info_title']:"";?></p>
+							</if>
+						  </a>
+						</li>		
+						<if condition="(($info['class_type'] eq 1) and ($i eq 3) and ($n gt 4)) or (($info['class_type'] eq 1) and ($i eq 7) and ($n gt 8)) or (($info['class_type'] eq 2) and ($i eq 7) and ($n gt 8))">						
+					  </ul>
+						 </li>
+						 <li>
+							<ul class="home_sort">
+						</if>
+					<php>$i=$i+1;</php>	
+                    </foreach>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+	<if condition="$show neq 1">
+		<div class="headerEdit">
+			模板
+		</div>
+		<div class="footerEdit">
+			<a target="_parent" data-type='btn_move_up' href='{:U('admin/tempitem/itemlistup/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-up'></i>上移</a>
+			<a target="_parent"  data-type='btn_move_down' href='{:U('admin/tempitem/itemlistdown/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-down'></i>下移</a>
+			<a target="_parent"  data-type='btn_usable' href='{:U('admin/tempitem/itemisused/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-off'></i>{$used}</a>
+			<a target="_parent"  data-type='btn_edit_item' href='{:U('admin/tempitem/itemedit/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-edit'></i>编辑</a>
+			<!--<a target="_parent"  data-type='btn_del_item' href='{:U('admin/tempitem/itemdel/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-trash'></i>删除</a>-->
+		</div>
+	</if>
+
+	<if condition="(($info['class_type'] eq 1) and ($n gt 4)) or (($info['class_type'] eq 1) and ($n gt 8)) or (($info['class_type'] eq 2) and ($n gt 8))">
+    <script type="text/javascript">
+        TouchSlide({
+            slideCell:"#nav",
+            titCell:".nav_hd ul",
+            mainCell:".nav_bd ul",
+            delayTime:600,
+            interTime:4000,
+            effect:"leftLoop",
+            autoPlay:false,
+            autoPage:true,
+            switchLoad:"_src"
+        });
+    </script>
+	</if>
+</div>	

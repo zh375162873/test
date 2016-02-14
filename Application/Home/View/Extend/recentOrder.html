@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>最近订单统计-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <header class="tggl_header">推广订单量统计</header>
+    <div class="tggl_com dd">
+        <ul class="ul3">
+            <li>
+                <h4>今日</h4>
+                <div style="line-height:1.5;"><span style="display:block;height:14px;"></span>{$count_data.today.orderscount}单<br>¥{$count_data.today.dealcount}</div>
+            </li>
+            <li>
+                <h4>7日</h4>
+                <div style="line-height:1.5;"><span style="display:block;height:14px;"></span>{$count_data.week.orderscount}单<br>¥{$count_data.week.dealcount}</div>
+            </li>
+            <li>
+                <h4>30日</h4>
+                <div style="line-height:1.5;"><span style="display:block;height:14px;"></span>{$count_data.month.orderscount}单<br>¥{$count_data.month.dealcount}</div>
+            </li>
+        </ul>
+        <table>
+            <tr><th>用户</th><th>订单数</th><th>订单金额</th></tr>
+   <foreach name="recent_data" item="data">
+            <tr><td>{$data.date}</td><td>{$data.orderscount}</td><td>{$data.dealcount}元</td></tr>
+            </foreach>
+        </table>
+    </div>
+    <div style="height:50px;"></div>
+</div>
+</body>
+</html>
