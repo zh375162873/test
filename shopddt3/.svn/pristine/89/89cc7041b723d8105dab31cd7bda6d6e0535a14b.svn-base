@@ -1,0 +1,161 @@
+<?php
+namespace Admin\Controller;
+use BizService\CommissionService;
+
+
+
+class CommissionController extends BaseController {
+     private  $shop_info;    
+     public function _initialize() {
+       $this->shop_info=get_shop_proxy();
+	   parent::_initialize();
+     }   
+
+    //渠道人员分成信息列表
+    public function ChannelList(){
+	 $channel_id=I('channel_id')?I('channel_id'):0;
+	 if($channel_id==0){
+	   $this->error ("参数有误！");
+	 }
+	 $CommissionService = new CommissionService();
+	 $param=array();
+	 $param['channel_id']=$channel_id;
+	 $param['shop_id']=$this->shop_info['shop_id'];
+	 //已支付信息
+     $channlelist=$CommissionService->channel_list($param);
+	 //待结算信息
+	 $channlelist_first=$CommissionService->channel_list_first($param); 
+	 //待支付信息
+	 $channlelist_second=$CommissionService->channel_list_second($param); 
+	 
+	 $this->assign('channlelist_first',$channlelist_first);	
+	 $this->assign('channlelist_second',$channlelist_second);	
+	 $this->assign('channel_id',$channel_id);	
+	 $this->assign('channlelist',$channlelist);	
+     $this->display('ChannelList');
+    }
+	//渠道分成结算
+	public function ChannelSettlement(){
+	   $channel_id=I('channel_id')?I('channel_id'):0;  
+	   $flag=1;
+	   $param=array();
+	   $param['channel_id']=$channel_id;
+	   $param['shop_id']=$this->shop_info['shop_id'];
+	   $CommissionService = new CommissionService();
+	   //先修改订单提成表状态,并添加结算统计信息
+	   $CommissionService->ChannelSettlement($param);
+	   if($flag==1){
+		  $this->success ( '结算成功', U ( 'admin/Commission/ChannelList/channel_id/'.$channel_id) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+    }
+	//渠道分成支付
+	public function ChannelPay(){
+	 $CommissionService = new CommissionService();
+     if(IS_POST){
+	   $channel_id=I('channel_id')?I('channel_id'):0;  
+	   $adjustment_type=I('adjustment_type')?I('adjustment_type'):0;  
+	   $adjustment_money=I('adjustment_money')?I('adjustment_money'):0;  
+	   $pay_desc=I('pay_desc')?I('pay_desc'):""; 
+	   $pay_total=I('pay_total')?I('pay_total'):0; 
+	    
+	   $flag=1;
+	   $param=array();
+	   $param['channel_id']=$channel_id;
+	   $param['shop_id']=$this->shop_info['shop_id'];
+	   $param['adjustment_type']=$adjustment_type;
+	   $param['adjustment_money']=$adjustment_money;
+	   $param['pay_desc']=$pay_desc;
+	   $param['pay_total']=$pay_total;
+	   
+	   $channlelist_second=$CommissionService->channel_list_second($param);
+	   if($channlelist_second[0]['total']!=$param['pay_total']){
+	      $this->error ("操作失败,数据可能发生变化，需重新统计");
+		  exit;
+	   }
+	   
+	   //先修改订单提成表状态,并添加结算统计信息
+	   $CommissionService->ChannelPay($param);
+	   if($flag==1){
+		  $this->success ( '支付成功', U ( 'admin/Commission/ChannelList/channel_id/'.$channel_id ) ); 
+	   }else{
+		  $this->error ("操作失败,数据可能发生变化，需重新统计");
+	   }
+	 }else{ 
+	   $channel_id=I('channel_id')?I('channel_id'):0; 
+	   $param=array();
+	   $param['channel_id']=$channel_id;
+	   $param['shop_id']=$this->shop_info['shop_id'];
+	   //待支付信息
+	   $channlelist_second=$CommissionService->channel_list_second($param);
+	   $this->assign('channlelist_second',$channlelist_second);	 
+	   $this->assign('channel_id',$channel_id);	 
+       $this->display('ChannelPay');
+	 }
+    }
+	
+	
+    //渠道下的推广人员分成信息列表
+	 public function ChannelmemberList(){
+        $extend_id=I('extend_id')?I('extend_id'):0;
+		if($extend_id==0){
+		  $this->error ("参数有误！");
+		}
+		$CommissionService = new CommissionService();
+		$param=array();
+		$param['extend_id']=$extend_id;
+		$param['shop_id']=$this->shop_info['shop_id'];
+		//通过推广id查找用户id
+		$user_id=D('ExtendChannel')->findUserIdByChannelId($extend_id);
+		$param['referee_id']=$user_id;
+		//已支付信息
+		//$channelmemberlist=$CommissionService->channelmember_list($param);
+		//待结算信息
+		$channelmemberlist_first=$CommissionService->channelmember_list_first($param); 
+		//待支付信息
+		$channelmemberlist_second=$CommissionService->channelmember_list_second($param); 
+		print_r($channelmemberlist_first);
+		print_r($channelmemberlist_second);
+		
+		$this->assign('channelmemberlist_first',$channelmemberlist_first);	
+		$this->assign('channlelist_second',$channlelist_second);	
+		$this->assign('channelmemberlist',$channelmemberlist);	
+		$this->assign('extend_id',$extend_id);	
+        $this->display('ChannelmemberList');
+		
+    }
+	//渠道下的推广人员分成结算
+	public function ChannelmemberSettlement(){
+	   $extend_id=I('extend_id')?I('extend_id'):0;  
+	   $flag=1;
+	   $param=array();
+	   $param['extend_id']=$extend_id;
+	   $param['shop_id']=$this->shop_info['shop_id'];
+	   //通过推广id查找用户id
+	   $user_id=D('ExtendChannel')->findUserIdByChannelId($extend_id);
+	   $param['referee_id']=$user_id;
+	   $CommissionService = new CommissionService();
+	   //先修改订单提成表状态,并添加结算统计信息
+	   $CommissionService->ChannelmemberSettlement($param);
+	   if($flag==1){
+		  $this->success ( '结算成功', U ( 'admin/Commission/ChannelmemberList/extend_id/'.$extend_id ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+    }
+	//渠道下的推广人员分成支付
+	public function ChannelmemberPay(){
+	  if(IS_POST){
+	   $flag=1;
+	   if($flag==1){
+		  $this->success ( '支付成功', U ( 'admin/Commission/ChannelmemberList/Channel_id/'.I('Channel_id') ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+	 }else{ 
+       $this->display('ChannelmemberPay');
+	 }
+    }
+	
+}

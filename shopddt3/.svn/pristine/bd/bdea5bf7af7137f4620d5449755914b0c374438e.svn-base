@@ -1,0 +1,45 @@
+@charset "utf-8";
+.home_goods_huodong{
+            background:#fff;
+            height:141px;
+            overflow:hidden;
+            margin:8px 0;
+            /*border-radius: 5px;
+            box-shadow: 1px 3px 5px #d8d7d7;*/
+        }
+        .home_goods_huodong:after{
+            content:"";
+            display:table;
+            clear:both;
+        }
+        .home_goods_huodong ul{
+            position:absolute;
+            top:0;
+            left:0;
+            z-index:1;
+        }
+        .home_goods_huodong ul li{
+            float:left;
+            padding:10px;
+            border-left:1px solid #f3f3f3;
+            font-size:12px;
+            text-align:center;
+        }
+        .home_goods_huodong ins{
+            text-decoration:none;
+            margin-right:5px;
+        }
+        .home_goods_huodong li a{
+            display:block;
+        }
+        .home_goods_huodong li div,.home_goods_huodong li img{
+            width:85px;
+        }
+        .home_goods_huodong li img{
+            height:auto;
+        }
+        .home_goods_huodong li div{
+            overflow:hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }

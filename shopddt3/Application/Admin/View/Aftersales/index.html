@@ -1,0 +1,264 @@
+<include file="Index/header"/>
+<!--日期选择-->
+<link rel="stylesheet" href="__PUBLIC__/admin/css/datepicker.css">
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<style>
+li{display:inline;margin-left:20px;}
+</style>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('aftersales/index')}" onclick="jumpTo(this);" class="active">售后申请列表</li>
+    </ul>
+</div>
+
+<form class="form-inline" id="" name="myform" action="<?php echo U('aftersales/index'); ?>" style="margin-bottom:20px;" method="get">
+	<div class="form-group">
+
+		<select class="form-control" name="dis_type">
+			<option value="99">申请类型(全部)</option>
+			<option value="0"<if condition="$data.type eq 0"> selected</if>>退换货</option>
+			<option value="1"<if condition="$data.type eq 1"> selected</if>>问题投诉</option>
+			<option value="2"<if condition="$data.type eq 2"> selected</if>>其它</option>
+		</select>
+		<select class="form-control" name="dis_status">
+			<option value="99">所有状态(全部)</option>
+			<option value="0"<if condition="$data.status eq 0"> selected</if>>未处理</option>
+			<option value="1"<if condition="$data.status eq 1"> selected</if>>已处理</option>
+		</select>
+	</div>
+	<div class="form-group" style="padding-top:5px;">
+		<label>提交时间:</label>
+		<input id="begin_time" name="begin_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$data.begin_time}">
+		-
+		<input id="end_time" name="end_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$data.end_time}">
+		<label>关键字:</label>  <input type="text" class="form-control" style="width:250px" name="dis_key" value="{$data.key}" placeholder="输入订单号、商品名称、用户名和昵称">
+	</div>
+	<input type="hidden" name="dis_order" value="{$sort.order}" />
+	<input type="hidden" name="dis_sort" value="{$sort.sort}" />
+	<button class="btn btn-default" type="submit">筛选</button>
+	<button class="btn btn-default" onclick="return ddt_export();">导出报表</button>
+</form>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+              	<th class="sortAbility" data-order="order_sn" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('order_sn');">订单号</a></th>
+                <th class="sortAbility" data-order="goods_name" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('goods_name');">商品名称</a></th>
+                <th class="sortAbility" data-order="goods_price" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('goods_price');">单价</a></th>
+                <th class="sortAbility" data-order="goods_num" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('goods_num');">数量</a></th>
+                <th class="sortAbility" data-order="shipping_fee" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('shipping_fee');">运费</a></th>
+				<th class="sortAbility" data-order="order_amount" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('order_amount');">总价</a></th>
+				<th class="sortAbility" data-order="type" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('type');">申请类型</a></th>
+				<th class="sortAbility" data-order="content" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('content');">申请内容</a></th>
+				<th class="sortAbility" data-order="tel" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('tel');">联系电话</a></th>
+				<th class="sortAbility" data-order="user_name" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('user_name');">用户名 / 昵称</a></th>
+				<th class="sortAbility" data-order="add_time" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('add_time');">提交时间</a></th>
+				<th class="sortAbility" data-order="status" style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="javascript:void(0);" onclick="ddt_sort('status');">状态</a></th>
+                <th style="border-right:1px solid #CCCCCC">操作</th>
+            </tr>
+            <volist name="dispute_list" id="vo">
+             <tr class="trbor">
+                <td>{$vo.order_sn}</td>
+                <td>{$vo.goods_name}</td>
+                <td>{$vo.goods_price}</td>
+                <td>{$vo.goods_num}</td>
+                <td>{$vo.shipping_fee}</td>
+                <td>{$vo.order_amount}</td>
+                <td><switch name="vo.type"><case value="0">退换货</case><case value="1">问题投诉</case><case value="2">其它</case><default />未知</switch></td>
+                <td>{$vo.content}</td>
+                <td>{$vo.tel}</td>
+				<td>{$vo.user_name} / {$vo.nick_name}</td>
+				<td>{$vo.add_time|date="Y-m-d H:i", ###}</td>
+				<td><switch name="vo.status"><case value="0">未处理</case><case value="1">已处理</case><default />未知</switch></td>
+                <td>
+                	<span style="display: none;">{$vo.reply}</span>
+                	<span style="display: none;">{$vo.remark}</span>
+                	<a href="{:U('order/orderinfo',array('id'=>$vo['order_id']))}">订单详情</a>　
+                	<if condition="$vo.status eq 0">
+                		<a href="javascript:void(0);" onclick="reply(this, {$vo.id});">售后处理</a>
+                	<else />
+                		<a href="javascript:void(0);" onclick="show_reply(this);">处理结果</a>
+                	</if>
+                </td>
+             </tr>
+            </volist>
+             <tr>
+               <td colspan="13" align="right"><span>{$pages}</span></td>
+             </tr>
+        </table>
+    </div>
+</div>
+<div class="modal fade" id="act_reply" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="act_deliveryLabel">售后处理</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="input-group">
+                    <span>申请类型：</span><span name='modal_dis_type'></span>
+                </div>
+                <div class="input-group">
+                    <span>问题描述：</span><span name='modal_dis_msg'></span>
+                </div>
+                <div class="input-group">
+                    <span>联系电话：</span><span name='modal_dis_tel'></span>
+                </div>
+                <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=2)" width="80%" color="#987cb9">
+                    <input name="dis_id" type="hidden" value="">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:125px">客服回复：</span>
+                    <textarea class="form-control" rows="3" name="dis_reply" style="width: 360px; height: 100px;resize:none;" placeholder="用户会看到回复内容，请注意措辞"></textarea>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:125px">处理备注：</span>
+                    <input name="dis_remark" type="text" class="form-control" placeholder="后台可查看备注内容" style="width:360px">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="do_reply()" class="btn btn-primary" style="width:150px">处理完成</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="width:150px">取消</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<div class="modal fade" id="show_reply" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="act_deliveryLabel">处理结果</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="input-group">
+                    <span>申请类型：</span><span name='show_dis_type'></span>
+                </div>
+                <div class="input-group">
+                    <span>问题描述：</span><span name='show_dis_msg'></span>
+                </div>
+                <div class="input-group">
+                    <span>联系电话：</span><span name='show_dis_tel'></span>
+                </div>
+                <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=2)" width="80%" color="#987cb9">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:125px">客服回复：</span>
+                    <textarea class="form-control" rows="3" disabled="disabled" name="modal_show_reply" style="width: 360px; height: 100px;resize:none;" placeholder="请输入回复内容"></textarea>
+                </div>
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:125px">处理备注：</span>
+                    <input name="modal_show_remark" type="text" disabled="disabled" class="form-control" placeholder="请输入处理备注" style="width:360px">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="width:150px">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+<include file="Index/footer"/>
+<script>
+$(function () {
+    /*初始化时间控件*/
+    $('#begin_time').datepicker({
+        format: "yyyy-mm-dd",
+        todayBtn: "linked",
+        language: "zh-CN",
+        orientation: "top auto",
+        todayHighlight: true
+    });
+    $('#end_time').datepicker({
+        format: "yyyy-mm-dd",
+        todayBtn: "linked",
+        language: "zh-CN",
+        orientation: "top auto",
+        todayHighlight: true
+    });
+    
+    var sort = $('input[name="dis_order"]').val();
+    if(sort){
+        var th = $("th[data-order="+sort+"]");
+        th.addClass("active");
+    }
+});
+function ddt_sort(order){
+	var orderDom = document.getElementsByName("dis_order");
+	var sortDom = document.getElementsByName("dis_sort");
+	var sortVal = sortDom[0].value;
+	orderDom[0].value = order;
+	if(sortVal == 'ASC'){
+		sortDom[0].value = 'DESC';
+	}else{
+		sortDom[0].value = 'ASC';
+	}
+	document.forms['myform'].submit();
+}
+
+function ddt_export(){
+	var dis_type = document.getElementsByName("dis_type")[0].value;
+	var dis_status = document.getElementsByName("dis_status")[0].value;
+	var begin_time = document.getElementsByName("begin_time")[0].value;
+	var end_time = document.getElementsByName("end_time")[0].value;
+	var dis_key = document.getElementsByName("dis_key")[0].value;
+	var dis_order = document.getElementsByName("dis_order")[0].value;
+	var dis_sort = document.getElementsByName("dis_sort")[0].value;
+	var url_field = "dis_type="+dis_type+"&dis_status="+dis_status+"&begin_time="+begin_time;
+	url_field += "&end_time="+end_time+"&dis_key="+dis_key+"&dis_order="+dis_order+"&dis_sort="+dis_sort;
+	var url = "{:U('Aftersales/export')}?"+url_field;
+	location.href = url;
+	return false;
+}
+function reply(obj, id){
+	var dis_type = $(obj).parent().parent().children().eq(6).text();
+	var dis_msg = $(obj).parent().parent().children().eq(7).text();
+	var dis_tel = $(obj).parent().parent().children().eq(8).text();
+	$('span[name="modal_dis_type"]').html(dis_type);
+	$('span[name="modal_dis_msg"]').html(dis_msg);
+	$('span[name="modal_dis_tel"]').html(dis_tel);
+	$('input[name="dis_id"]').val(id);
+	$("#act_reply").modal('show');
+}
+
+function do_reply(){
+	var data = {};
+	data.dis_id = $('input[name="dis_id"]').val();
+	data.dis_reply = $('textarea[name="dis_reply"]').val();
+	data.dis_remark = $('input[name="dis_remark"]').val();
+	if(data.dis_id.length == 0){
+		alert("回复ID不能为空！");
+		return false;
+	}
+	if(data.dis_reply.length == 0){
+		alert("回复内容不能为空！");
+		return false;
+	}
+	$.post("{:U('Aftersales/do_reply')}", data, function(res){
+		alert(res.msg);
+		if(res.status == 1){
+			window.location.reload();
+		}
+	}, 'json');
+}
+
+function show_reply(obj){
+	var dis_type = $(obj).parent().parent().children().eq(6).text();
+	var dis_msg = $(obj).parent().parent().children().eq(7).text();
+	var dis_tel = $(obj).parent().parent().children().eq(8).text();
+	var dis_reply = $(obj).parent().children("span").eq(0).text();
+	var dis_remark = $(obj).parent().children("span").eq(1).text();
+	$('span[name="show_dis_type"]').html(dis_type);
+	$('span[name="show_dis_msg"]').html(dis_msg);
+	$('span[name="show_dis_tel"]').html(dis_tel);
+	$('textarea[name="modal_show_reply"]').val(dis_reply);
+	$('input[name="modal_show_remark"]').val(dis_remark);
+	$("#show_reply").modal('show');
+}
+</script>
+

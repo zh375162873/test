@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/temp/indexTrue.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/home/js/jquery.lazyload.js" type="text/javascript"></script>
+<link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/style1/common.css">
+<link rel="stylesheet" href="/Uploads/temp/temp{$temp_id}/css/style.css">
+<title>编辑页面</title>
+
+</head>
+<body>
+<div class="home_lbs"><a  class="colorC3" href="location.html"><img src="{$uri}__PUBLIC__/home/images/index/nav_place.png"><b>西安市</b></a></div>
+		  <?php
+		foreach($item_data as $val){
+			 $item_id=$val['item_id'];
+			 $style_id=$val['style_id'];
+			 switch($style_id){
+			   case 1:
+			 ?>
+			  <!--加载模板内容1-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp1.html" />
+			  <?php
+			   break;
+			   case 2:
+			  ?>
+			  <!--加载模板内容2-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp2.html" />
+			  <?php
+			   break;
+			   case 3:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp3.html" />
+			  <?php
+			   break;
+			   case 4:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp4.html" />
+			  <?php
+			   break;
+			   case 5:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp5.html" />
+			  <?php
+			   break;
+			   case 6:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp6.html" />
+			  <?php
+			   break;
+			   case 7:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp7.html" />
+			  <?php
+			   break;
+			   case 8:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp8.html" />
+			  <?php
+			   }
+		}
+		?>
+<div class="home_list_end">
+</div>
+<footer class="home_footer">
+    <ul>
+        <li><a href="#"><b class="colorD5">首页</b><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_sy.png"></a></li>
+        <li><a href="#"><img class="home_footer_hd" src="{$uri}__PUBLIC__/home/images/index/nav_fixed_yiy.png"></a></li>
+        <li><a href="mine.html"><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">我的</b></a></li>
+    </ul>
+</footer>
+
+</body>
+</html>
+<script>
+$(function(){
+    $("body").on("click","[data-type='btn_move_up']",function(){
+        var $curDom = $(this).parent().parent();
+        var $prev = $curDom.prev();
+        if($prev.length>0){
+            $prev.before($curDom);
+            updateSort();
+        }else{
+            return;
+        }
+    });
+
+    $("body").on("click","[data-type='btn_move_down']",function(){
+        var $curDom = $(this).parent().parent();
+        var $next = $curDom.next();
+        if($next.length>0){
+            $next.after($curDom);
+            updateSort();
+        }else{
+            return;
+        }
+    });
+
+    $("body").on("click","[data-type='btn_usable']",function(){
+        if($(this).parent().parent().hasClass("unusable")){
+            $(this).html('<i class="icon-off"></i>禁用');
+            $(this).parent().parent().removeClass("unusable").addClass("usable");
+        }else{
+            $(this).html('<i class="icon-off"></i>启用');
+            $(this).parent().parent().removeClass("usable").addClass("unusable");
+        }
+    });
+
+    /*$(".item-list").on("click","[data-type='btn_edit_item']",function(){
+     var opId = $(this).parents('[data-type="special_item"]').attr("data-item-id");
+     window.open("./edit.html?opId="+opId);
+     });*/
+
+    $("body").on("click","[data-type='btn_del_item']",function(){
+        var bl = confirm("确认删除!");
+        if(bl){
+            $(this).parent().parent().remove();
+        }
+    });
+});
+
+function updateSort(){
+    var list = $(".home_block");
+    var arrs = [];
+    list.each(function(index,item){
+        arrs.push($(item).attr("data-item-id"));
+    });
+    //alert(arrs.join(","));
+}
+
+$("#loadgoods img").lazyload({effect:"fadeIn"});
+</script>

@@ -1,0 +1,798 @@
+<?php
+/*
+ * 普通商品订单支付和管理模块
+ */
+namespace Home\Controller;
+
+use BizService\OrderService;
+use Think\Crypt\Driver\Think;
+use BizService\UserService;
+use BizService\GoodsstoreService;
+use BizService\ExtendService;
+use Org\Util\Date;
+use BizService\OthershareService;
+use BizService\PeriodService;
+use BizService\CartService;
+use BizService\AddressService;
+
+class OrderController extends BaseController
+{
+    public $orderdb, $goods_model, $users, $orderservice, $_userid, $refunddb, $refundreason, $pinglundb, $dhm_db,$extendservice;
+
+    public function _initialize(){
+        parent::_initialize();
+        //初始化模型
+        $this->orderdb = D("Orders");
+        $this->refunddb = D("RefundReturn");
+        $this->refundreason = D("RefundReason");
+        $this->pinglundb = D("PinglunManage");
+        $this->dhm_db = D("DhmManage");
+        $this->goods_model = new GoodsstoreService();
+        $this->users = new UserService();
+        $this->orderservice = new OrderService();
+        $this->extendservice = new ExtendService();
+
+       // echo "<pre>";print_r($_SESSION);exit();
+        //判断用户是否登录
+       if (!session("userId")) {
+            $this->error("用户没有登录，请先登录!");
+        } else {
+            $this->_userid = session("userId");
+        }
+ 
+        $this->assign("userid", $this->_userid); 
+    }
+ 
+    public function index()
+    { 
+      $other_service = new OthershareService();
+      $proxy_id = 79;
+      
+      $arr =$other_service->dhm_shop_list($proxy_id);
+      echo "<pre>";print_r($arr);exit();
+      echo '我是Home模块';
+    }
+
+    //生成订单，需要做一个跳转，防止刷新页面生成多余订单
+    //仅仅生成订单
+    public function create()
+    {
+        //判断请求类型
+        if (IS_POST) {
+		    $OrderService = new OrderService(); 
+            //初始化参数
+            $goods_id = I("post.goods_id",0,"intval");
+            $num = I("post.number",0,"intval");
+            $goods_code = I("post.goods_code",0);
+			if($goods_id&&$num){
+			     $input=json_encode(array('qd_code'=>$goods_code));
+				 $goodslist[0]=array('goods_id'=>$goods_id,'goods_num'=>$num,'user_input'=>$input);
+			}else{  
+				 //获取购物车里的商品列表
+				 $model_cart = new CartService();
+				 //购物车列表
+				 $cart_list = $model_cart->listCart('db', array('buyer_id' => session("userId")));
+				 $goodslist=$cart_list;	
+			}
+
+			/* 检查购物车中是否有商品 */
+			if($goodslist){
+			
+			}else{
+			  $this->error("购物车中无可用商品!");
+			}
+		     /* 检查商品库存 */
+			   
+			 /* 检查商品固定优惠是否存在 */
+			 
+			 /* 判断是不是实体商品 */
+			 
+			 
+			 /* 订单中的总额 */
+			  
+			 // 购物车中的商品能享受红包支付的总额
+			  
+			 /* 配送方式 */
+
+			//默认父订单id
+			$parent_id=0;
+			//赠品父订单id，暂时预留，不做
+			$gift_order_id=0;
+			/* 插入订单表 */
+			foreach($goodslist as $val){
+			  //获取购物车中的json输入数据
+			  $user_input=json_decode($val['user_input'],true);
+			  $goods_code="";
+			  if($user_input['qd_code']){
+			    $goods_code=$user_input['qd_code'];
+			  }
+			  $order_id=$OrderService->create_order($val['goods_id'],$val['goods_num'],$parent_id,$gift_order_id,$goods_code);
+			  if($order_id&&$parent_id==0){
+			    $parent_id=$order_id;   
+			  }
+			  if($order_id<0){
+			    $this->error('订单生成失败！');
+			  }
+			}
+			//跳转到支付页面
+			if ($parent_id) {
+                $this->redirect('order/createpay', array('id' => $parent_id));
+            } else {
+                $this->error('订单生成失败！');
+            }
+			exit;
+			
+			//初始化参数
+            $goods_id = I("post.goods_id",0,"intval");
+            $num = I("post.number",0,"intval");
+            $goods_code = I("post.goods_code",0);
+
+			//判断此商品是否开启限时抢购
+			$PeriodService = new PeriodService();
+            $Period = $PeriodService->get_period_sales($goods_id);
+			if($Period){
+			  if($Period['shut']!=0){
+			    $this->error('购买时间错误！');
+			    exit; 
+			  }
+			}
+			
+            
+            if (empty($goods_id) && empty($num)) {
+                $this->error('参数不全');
+            }
+            //获取商品数据
+            $goods = $this->goods_model->getinfo($goods_id, array("goods_id", "goods_name", "shop_id", "store_id", "store_name", "goods_plun", "goods_price","goods_divided", "goods_promotion_price", "goods_marketprice", "goods_storage", "goods_image","virtual_limit"), 1);
+            $bianhao = $this->goods_model->getinfo($goods_id,array('goods_serial'),4);
+            $goods['goods_serial']=$bianhao['goods_serial'];
+            
+            //判断限购
+            if($num>$goods['virtual_limit']){
+               $this->error("购买数量超过限购，请从新下单！");
+            }
+            if($num==0){
+                $this->error('购买数量不能为空！');
+            }
+            //判断购买数量库存是否足够
+            if ($num > $goods['goods_storage']) {
+                $this->error('商品库存不足');
+            } else {
+                $goods['goods_num'] = $num;
+            }
+            
+            
+           //判断优惠码，处理优惠信息 
+            if($goods_code){
+                $extend = $this->extendservice->checkExtendGoods($goods_id);
+                if($extend>0){
+                    $extend_info = $this->extendservice->getExtendGoods($goods_id,$goods_code);
+                    //判断优惠码有效期
+                    if(time()>$extend_info['begin_time']||time()<$extend_info['end_time']){
+                        //判断优惠码数量
+                        if($num > $extend_info['quantity']){
+                            $extend_num = $extend_info['quantity'];
+                        }else{
+                            $extend_num = $num;
+                        }
+                    }else{
+                        $this->error("此优惠码已经过期了");
+                    }
+                }else{
+                    $this->error("此优惠码已经没有了");
+                }
+            }
+            
+            
+            //模拟
+            $goods_arr['goods_id'] = $goods['goods_id'];
+            $goods_arr['goods_serial']=$goods['goods_serial'];
+            $goods_arr['goods_name'] = $goods['goods_name'];
+            $goods_arr['shop_id'] = $goods['shop_id'];
+            $goods_arr['store_id'] = $goods['store_id'];
+            $goods_arr['store_name'] = $goods['store_name'];
+            $goods_arr['market_price'] = $goods['goods_marketprice'];
+            $goods_arr['goods_price'] = $goods['goods_price'];
+            $goods_arr['goods_plun'] = $goods['goods_plun'];
+            $goods_arr['goods_image'] = $goods['goods_image'];
+            $goods_arr['goods_divided'] = $goods['goods_divided'];
+            $goods_arr['goods_num'] = $num;
+            /*
+             * 计算订单金额，由于订单没有其他额外金额支付（物流），所以商品总额和订单总额一样
+             * 首先得判断商户余额状况，如果足够就直接余额支付，如果不足够就计算看需要计算线支付金额和余额支付金额。
+             */
+            $money_info = array();
+            $money_info['goods_amount'] = $goods_arr['goods_price'] * $num;
+            //优惠信息处理
+            if($extend_info){
+                $extend_price = $goods_arr['goods_price']*(1-($extend_info['discount']/100));
+                $extend_money = round($extend_price*$extend_num,2);
+                $money_info['extend_id'] = $extend_info['channel_user'];
+                $money_info['extend_discount'] = $extend_info['discount'];
+                $money_info['extend_num'] = $extend_num;
+                $money_info['order_youhui'] = $extend_money;
+            }
+            $money_info['order_amount'] = $goods_arr['goods_price'] * $num-$extend_money;
+           
+            //获取用户余额账户情况，计算
+            $userinfo = $this->users->userInfo($this->_userid);
+            
+            $ye_money = $userinfo['user_money'];
+            if ($money_info['order_amount'] > $ye_money) {
+                $money_info['ye_paymoney'] = $ye_money;
+                $money_info['online_paymoney'] = $money_info['order_amount'] - $ye_money;
+            }else{
+                $money_info['ye_paymoney'] = $money_info['order_amount'];
+                $money_info['online_paymoney'] = 0;
+            }
+            if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger')) {
+                $http_agent = 1;
+            }
+            
+            //提交订单
+            $orderid = $this->orderdb->createorder($goods_arr, $money_info);
+
+            if ($orderid) {
+                $this->redirect('order/createpay', array('id' => $orderid));
+            } else {
+                $this->error('订单生成失败！');
+            }
+        } else {
+            $this->error('非法请求');
+        }
+    }
+
+    //订单详情页和支付页面，并且动态计算总订单信息
+    public function createpay()  
+    {
+	    //订单信息（主订单id）
+		$order_id = I("get.id",0,"intval");
+		$sendtype = I("get.sendtype",1,"intval");
+		if(!$order_id){
+            $this->redirect("index/index");
+        }
+		//主订单信息
+		$orderinfo = $this->orderdb->getinfo($order_id);
+		//用户信息
+        $userinfo = $this->users->userInfo($this->_userid);
+		//用户余额
+		$ye_amount=$userinfo['user_money'];
+		$this->assign("userinfo", $userinfo);
+		//主订单订单编号
+        $params['order_sn'] = $orderinfo['order_sn'];
+		//处理需要支付的数据，使用哪种支付，是微信支付还是支付宝支付
+		if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger')) {
+            $http_agent = 1;
+            $this->assign("http_agent", $http_agent);
+        }
+		//调出并循环出此批次所有订单信息
+		$orderlist=M("orders")->where("parent_id=$order_id")->select();
+		//定义此批次订单信息列表
+		$orderall=array();
+		//商品总价
+		$goods_amount=0;
+		//余额支付
+		$ye_paymoney=0;
+		//在线支付
+		$online_paymoney=0;
+		//合计支付
+		$order_amount=0;
+		//运费或者优惠金额
+		$yunfei_amount=get_shipping_fee($order_id ,$sendtype);
+		//是否有实物商品
+		$is_entity=0;
+		foreach($orderlist as $key=>$val){
+		  //调取订单商品信息
+		  $orderinfo1 = $this->orderdb->getinfo($val['order_id']);
+		  $orderall[$key]=$orderinfo1;
+		  $goods_amount=$goods_amount+$orderinfo1['goods_amount'];
+		  $ye_paymoney=$ye_paymoney+$orderinfo1['ye_paymoney'];
+		  $online_paymoney=$online_paymoney+$orderinfo1['online_paymoney'];
+		  $order_amount=$order_amount+$orderinfo1['order_amount'];
+		  if($orderinfo1['is_entity']==1){
+		   $is_entity=1;
+		  }
+		}
+		//默认加入运费及其他要修改金额的项目金额的订单总额
+		if($sendtype==1){
+		  $amount=$goods_amount+$yunfei_amount;
+		}elseif($sendtype==2){
+		  $amount=$goods_amount-$yunfei_amount;
+		}
+		//如果没有快递，不用再算快递费用
+		if($is_entity==0){
+		  $amount=$goods_amount;
+		}else{
+		  //调取地址
+		  $addressService  =new AddressService();
+		  $addr_list = $addressService->get_address(session('userId'));
+		  $address = array();
+		  $i = 0;
+		  if($addr_list){
+			  foreach($addr_list as $addr){
+				$province = $addressService->get_region_list($addr['province'], false);
+				$city = $addressService->get_region_list($addr['city'], false);
+				$area = $addressService->get_region_list($addr['district'], false);
+				$address[$i]['id'] = $addr['id'];
+				$address[$i]['name'] = $addr['consignee'];
+				$address[$i]['addr'] = "{$province['region_name']}{$city['region_name']}{$area['region_name']}{$addr['address']}";
+				$address[$i]['tel'] = $addr['tel'];
+				$i ++;
+			  }
+		      $this->assign("address",$address['0']);
+		  }
+		}
+		
+		//判断用户余额是否够用
+		if(round(floatval($ye_amount),2)>=round(floatval($amount),2)){
+		   $ye_paymoney=$amount;
+		   $online_paymoney=0;
+		}else{
+		   //在线支付金额
+		   $am=$amount-$ye_amount;
+		   $ye_paymoney=$ye_amount;
+		   $online_paymoney=$am; 
+		}
+        //判断支付的方式，如果金额足够就直接余额支付，不用调用第三方接口了
+        if ($amount > $userinfo['user_money']) {
+            //生成支付按钮和相关订单信息
+            if ($http_agent == 1) {
+			    $pay=2;//微信
+            }else{
+                $pay=1;//支付宝
+            }
+            //获取模板
+            $this->assign("pay", $pay);
+        }
+		
+		
+		
+		
+		$this->assign("is_entity",$is_entity);
+		$this->assign("amount",$amount);
+		$this->assign("orderall",$orderall);
+		$this->assign("yunfei_amount",$yunfei_amount);
+		$this->assign("goods_amount",$goods_amount);
+		$this->assign("ye_paymoney",$ye_paymoney);
+		$this->assign("online_paymoney",$online_paymoney);
+		$this->assign("order_amount",$order_amount);
+		$this->assign("order_id",$order_id);
+		$this->assign("orderinfo", $orderinfo);
+		$this->assign("sendtype",$sendtype);
+        $this->display("createpay");
+		
+		
+		exit;
+		
+		
+		//获取订单信息
+        $order_id = I("get.id",0,"intval");
+        if(!$order_id){
+            $this->redirect("index/index");
+        }
+        
+        $orderinfo = $this->orderdb->getinfo($order_id);
+        $userinfo = $this->users->userInfo($this->_userid);
+        $params['order_sn'] = $orderinfo['order_sn'];
+        //处理需要支付的数据
+        // echo "<pre>";print_r($orderinfo);exit();
+        if (strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger')) {
+            $http_agent = 1;
+            $this->assign("http_agent", $http_agent);
+        }
+
+        $this->assign("userinfo", $userinfo);
+        //判断支付的方式，如果金额足够就直接余额支付，不用调用第三方接口了
+        if ($orderinfo['online_paymoney'] == 0) {
+            $this->assign("orderinfo", $orderinfo);
+            $this->display("pay"); 
+        } else {
+            //生成支付按钮和相关订单信息
+            if ($http_agent == 1) {
+                //$http_host = $_SERVER['HTTP_HOST'];
+                //$pay['wxpay'] = $this->orderservice->http("http://".$http_host."/index.php/Home/Wxpay/js_api_call.html", $params);//微信
+                $this->redirect("Wxpay/js_api_call",array('id'=>$order_id));
+            }else{
+                $pay['alipay'] = $this->orderservice->online_pay($orderinfo);//支付宝
+            }
+           
+            //获取模板
+            $this->assign("pay", $pay);
+            $this->assign("orderinfo", $orderinfo);
+            $this->display("pay");
+        }
+    }
+	
+	
+	//支付跳转页面，此处通过传来的支付类型，跳转到不同的支付页面，自动跳转到对应的支付界面。如果支付宝就跳到支付宝页面，微信就跳转到微信界面
+	public function pay_online(){
+	     //父订单id
+		$order_id = I("order_id",0,"intval");
+		//支付类型 1：支付宝， 2：微信 
+		$pay_type=I("pay_type",0,"intval");
+		//选择的送货类型，1：快递  ，2：自提
+		$sendtype=I("sendtype",0,"intval");
+		//送货地址id
+		$address_id=I("address",0,"intval");
+		//判断是否有父订单id
+		if(!$order_id){
+            $this->redirect("index/index");
+        }
+		//清理购物车
+		$model_cart = new CartService();
+		$model_cart->clearCart();
+		
+		//用户信息
+		$userinfo=M("users")->where("user_id=".$this->_userid)->find();
+		//用户余额
+		$ye_amount=$userinfo['user_money'];
+		//父订单信息
+		$orderinfo = $this->orderdb->getinfo($order_id);  
+		//此批次订单信息,此处进行提交支付前的统一操作出
+			//调出并循环出此批次所有订单信息,此处重新分配余额,将运费加入到每个订单中
+			$orderlist=M("orders")->where("parent_id=$order_id")->select();
+			foreach($orderlist as $key=>$val){
+			   //订单信息
+		       $orderinfo1 = $this->orderdb->getinfo($val['order_id']);
+			  //此订单运费
+			  $yunfei=get_shipping_fee($val['order_id'] ,$sendtype,1);
+			  //将运费和送货类型写入订单
+			  $this->orderdb->where("order_id=".$val['order_id'])->data(array('send_type'=>$sendtype,'shipping_fee'=>$yunfei))->save();
+			  //此单加入运费后的总金额
+			  $amount=0;
+			  if($sendtype==1){
+				$amount=$orderinfo1['goods_amount']+$yunfei;
+			  }else{
+				$amount=$orderinfo1['goods_amount']-$yunfei;
+			  }
+			  //如果剩余的用户余额够，就全部使用余额支付此单
+			  if($amount<=$ye_amount){
+			    $this->orderdb->where("order_id=".$val['order_id'])->data(array('order_amount'=>$amount,'ye_paymoney'=>$amount,'online_paymoney'=>0))->save();	
+				$ye_amount=$ye_amount-$amount;
+			  }else{
+			   //如果不够支付此订单，就结算还剩多少钱可以用于余额，多少钱要在线支付
+			     $ye=$ye_amount;//余额支付金额
+			     $on=$amount-$ye_amount;//在线支付金额
+				 $ye_amount=0;
+				 $this->orderdb->where("order_id=".$val['order_id'])->data(array('order_amount'=>$amount,'ye_paymoney'=>$ye,'online_paymoney'=>$on))->save();	
+		 	  }
+			  //将地址加入到订单中	
+			   if($address_id&&$orderinfo1['is_entity']==1){
+			      $addressService  =new AddressService();
+				  $addr= $addressService->get_address_by_id($address_id);
+		          $this->orderdb->where("order_id=".$val['order_id'])->data(array('province'=>$addr['province'],'city'=>$addr['city'],'district'=>$addr['district'],'address'=>$addr['address'],'name'=>$addr['consignee'],'tel'=>$addr['tel']))->save();	
+			   }  
+			}
+			
+			
+			
+		//金额变动项目
+		$param=array();
+		//运费
+		$param['sendtype']=$sendtype;
+		//选择显示的支付跳转
+		 switch($pay_type){
+		   //支付宝
+		   case 1:
+		    $pay['alipay'] = $this->orderservice->online_pay_alipay($orderinfo,$param);//支付宝
+		    $this->assign("pay", $pay);
+		    $this->display("pay_online_alipay");
+			break;
+		   //微信
+		   case 2:	
+		   	$this->redirect("Wxpay/js_api_call",array('id'=>$order_id,'sendtype'=>$sendtype));
+		  }	
+	}
+
+
+    //余额支付
+    public function yezhifu()
+    {
+      //清理购物车
+		$model_cart = new CartService();
+		$model_cart->clearCart();
+
+		//获取订单信息
+        $order_id = I("order_id",0,"intval");
+        $orderinfo = $this->orderdb->getinfo($order_id);
+		//送货地址id
+		$address_id=I("address",0,"intval");
+		
+		print_r($_GET);
+		exit;
+		
+		
+		//修改保存送货类型
+		$sendtype = I("post.sendtype",0,"intval");
+	    $orderlist=M("orders")->where("parent_id=$order_id")->select();
+		$orderdb = D("Orders");
+		//用户信息
+		$userinfo=M("users")->where("user_id=".$this->_userid)->find();
+		//用户余额
+		$ye_amount=$userinfo['user_money'];
+		//判断总金额是否足以使用余额支付
+		
+		
+		$orderdb = D("Orders");
+		//此处重新分配余额,将运费加入到每个订单中
+		foreach($orderlist as $key=>$val){
+		  //订单信息
+		  $orderinfo1 = $orderdb->getinfo($val['order_id']);
+		  //此订单运费
+	      $yunfei=get_shipping_fee($val['order_id'] ,$sendtype,1);
+		  //保存运费和类型
+          $orderdb->where("order_id=".$val['order_id'])->data(array('send_type'=>$sendtype,'shipping_fee'=>$yunfei))->save();	
+		  //修改余额为原总金额+上运费信息
+		  $amount=0;
+		  if($sendtype==1){
+		    $amount=$orderinfo1['goods_amount']+$yunfei;
+		  }else{
+	  	    $amount=$orderinfo1['goods_amount']-$yunfei;
+		  }
+		  $orderdb->where("order_id=".$val['order_id'])->data(array('order_amount'=>$amount,'ye_paymoney'=>$amount,'online_paymoney'=>0))->save();	
+		  //将地址加入到订单中	
+			   if($address_id&&$orderinfo1['is_entity']==1){
+			      $addressService  =new AddressService();
+				  $addr= $addressService->get_address_by_id($address_id);
+		          $this->orderdb->where("order_id=".$val['order_id'])->data(array('province'=>$addr['province'],'city'=>$addr['city'],'district'=>$addr['district'],'address'=>$addr['address'],'name'=>$addr['consignee'],'tel'=>$addr['tel']))->save();	
+			   }  
+		  
+		}
+		$orderlist=M("orders")->where("parent_id=$order_id")->select();
+		
+        if (empty($order_id)) {
+            $this->error("参数不足");
+        }
+        if (empty($orderinfo)) {
+            $this->error("该订单不存在");
+        }
+        if ($orderinfo['order_status'] != 0) {
+            $this->error("订单已经过期");
+        }
+		$parameter['out_trade_no']=$orderinfo['order_sn'];
+		//支付成功后，修改定下信息
+        if ($this->orderdb->notiy_order($parameter,0)) {
+            $this->redirect("order/orderlist");
+        } else {
+            $this->error("操作失败",U("index/index"));
+        }
+    }
+
+
+    /*
+     *************用户中心订单管理********************* 
+     */
+    //我的订单
+    public function orderlist()
+    {
+        //订单列表
+        //$userid= $this->userdb->getid();//获取用户id
+        $userid = $this->_userid;
+
+        $page = I("post.curPage", 1);
+        //$rule为筛选规则 1-支付未消费，2-已消费，3-退款单；
+        if($_GET['rule']){
+            $rule = I("get.rule",0);
+        }else{
+            $rule = I("post.rule",0);
+        }
+        
+        $pagenum = I("post.pageNum",10);
+
+        $arr=$this->orderdb->list_order($userid,$page,$pagenum,$rule);
+
+        $this->assign("rule",$rule);
+        $this->assign("arr",$arr['arr']);
+        $this->assign("info",$arr['info']);
+        if($rule == 1){
+            $msg = "您没有未消费商品~";
+        }elseif($rule == 2){
+            $msg = "您没有消费商品~";
+        }elseif($rule == 3){
+            $msg = "您没有退款商品~";
+        }else{
+            $msg = "您未购买任何商品~";
+        }
+
+        $this->assign('empty','<div class="noData"><p>'.$msg.'</p><a href="'.U("home/index/index").'">去逛逛</a></div>');
+        $this->display("order_list");
+    } 
+    
+    public function ajax_orderlist(){
+        $userid = $this->_userid;
+        $pagenum = I("post.pageNum",0,"intval");
+        $curPage = I("post.curPage");
+        $rule = I("post.rule");
+        
+        $list = $this->orderdb->ajax_list_order($userid,$curPage,$pagenum,$rule);
+        
+        if(empty($list)){
+            $type=3;
+        }else{
+            for($i=0;$i<count($list);$i++){
+                //判断订单支付状态
+                $string = "";
+                if($list[$i]['order_status']==2){
+                    $string .="<div class='colorFf'>已消费";
+                    if($list[$i]['evaluation_state']==0){
+                        $string .="<a href=".U('order/pinglun',array('id'=>$list[$i]['order_id']))." class='pingJia'>评价</a></div>";
+                    }else{
+                        $string .="<a href='#' class='pingJia'>已评价</a></div>";
+                    }
+                }
+                elseif (($list[$i]['order_status']==1)&&($list[$i]['refund_state']==3)){
+                        $string .="<div class='colorFf'>退款已完成</div>";
+                }
+                else{
+                    for($j=0;$j<count($list[$i]['dhm']);$j++){
+                        if($list[$i]['dhm'][$j]['status']==0&&$list[$i]['dhm'][$j]['refund_status']==0){
+                            $string .= "<div class='colorC4'>未消费";
+                        }
+                        elseif($list[$i]['dhm'][$j]['status']==0&&$list[$i]['dhm'][$j]['refund_status']==1){
+                            $string .= "<div class='colorFf'>正在退款中";
+                        }
+                        /* elseif($list[$i]['dhm'][$j]['status']==0&&$list[$i]['dhm'][$j]['refund_status']==2){
+                            $string .= "<div class='colorFf'>退款完成";
+                        }
+                        elseif($list[$i]['dhm'][$j]['status']==0&&$list[$i]['dhm'][$j]['refund_status']==3){
+                            $string .= "<div class='colorFf'>退款驳回";
+                        } */
+                        $string .= "<span class='dhm format_code'>".$list[$i]['dhm'][$j]['dhm_code']."</span></div>";
+                    }
+                }
+                $list[$i]['string'] = $string;
+            }
+            if(count($list)==$pagenum){
+                $type=1;
+            }else{
+                $type=2;
+            }
+        }
+         
+        $data['list'] = $list;
+        $data['type'] = $type;
+       
+        $this->ajaxReturn($data);
+    }
+    
+    //订单详情
+    public function orderinfo()
+    {
+        //初始化数据
+        $order_id = I("get.id",0,"intval");
+        if (!$order_id) {
+            $this->error("缺少参数");
+        }
+
+        //订单详情
+        $orderinfo = $this->orderdb->getinfo($order_id);
+        $youxiaoqi = $this->goods_model->getinfo($orderinfo['goods_id'],array('start_date','end_date'),4);
+        
+        $start_time = Date("Y-m-d",$youxiaoqi['start_date']);
+        $end_time = Date("Y-m-d",$youxiaoqi['end_date']);
+        $orderinfo['payment_time'] = date("Y-m-d H:i:s", $orderinfo['payment_time']);
+        $this->assign("orderinfo", $orderinfo);
+        $this->assign("dhm", $orderinfo['dhm']);
+        $this->assign("start_time",$start_time);
+        $this->assign("end_time", $end_time);
+        $this->display("order");
+    }
+
+
+    /**
+     * 评论模块
+     */
+    public function pinglun()
+    {
+        $order_id = I("get.id",0,"intval");
+        if (!$order_id) {
+            $this->error("缺少参数");
+        }
+        $orderinfo = $this->orderdb->getinfo($order_id);
+        $this->assign("orderinfo", $orderinfo);
+        $this->assign("orderid", $order_id);
+        $this->assign("goodstype", 0);
+        $this->display("pinglun");
+    }
+
+    public function add_pl()
+    {
+        $order_id = I("post.orderid",0,"intval");
+        $goodstype = I("post.goodstype",0,"intval");
+        $parentid = I("get.parentid",0,"intval");
+        $desc = I("post.desc");
+        $mc_score = I("post.score",0,"intval");
+        
+        $pl_info = array(
+            "order_id" => $order_id,
+            "goodstype" => $goodstype,
+            "desc" => $desc,
+            "mc_score" => $mc_score,
+            "parentid" => $parentid,
+        );
+     
+        if ($this->pinglundb->addplun($pl_info)) {
+            $error = 1;
+            $this->ajaxReturn($error);
+        } else {
+            $error = 2;
+            $this->ajaxReturn($error);
+        }
+    }
+
+
+    /**
+     * 退款流程开发
+     */
+    public function refund_order()
+    {
+        //初始化参数 order_id
+        $order_id = I("get.id", 0,"intval");
+        $dhm_id = I("dhm_id", 0,"intval");
+        if (!$order_id) {
+            $this->error("缺少参数");
+        }
+
+        //获取订单详情
+        $orderinfo = $this->orderdb->getinfo($order_id);
+        $refundinfo = $this->refundreason->order("sort ASC")->select();
+
+        $this->assign("refundinfo", $refundinfo);
+        $this->assign("orderinfo", $orderinfo);
+        $this->assign("dhm_id", $dhm_id);
+        $this->display("refund_order");
+    }
+
+    /**
+     * 提交退款申请
+     */
+    public function refund_tijiao()
+    {
+        //初始化参数
+        $order_id = I("get.id",0,"intval");
+        if (!$order_id) {
+            $this->error("缺少参数");
+        }
+        $reason = I("post.reason");
+        $dhm_id = I("post.dhm_id",0,"intval");
+
+        $method = I("post.method");
+        $reason_tj = array();
+        $reason_tj['info'] = $reason;
+        $reason_tj['dhm_id'] = $dhm_id;
+        $reason_tj['method'] = $method;
+        if($method !=1){
+        $reason_tj['zh'] = I("post.num");
+        $reason_tj['telephone'] = I("post.tel");
+         } 
+
+        if ($this->refunddb->sh_reason($order_id, $reason_tj)) {
+            $this->ajaxReturn(1);
+        } else {
+            $this->ajaxReturn(2);
+        }
+
+    }
+   /**
+    * 退款取消
+    */
+    public function refund_qx(){
+        //初始化数据
+        $orderid = I("post.orderid",0,"intval");
+        $dhm_id = I("post.dhm_id",0,"intval");
+      
+        $data=array();
+        if($this->refunddb->refund_quxiao($orderid,$dhm_id)){
+            $data['error']=1;
+            $data['msg']="退款取消成功！";
+        }else{
+            $data['error']=2;
+            $data['msg']="退款取消失败！";
+        }
+        $this->ajaxReturn($data);
+    }
+	
+
+	
+
+}
+

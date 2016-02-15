@@ -1,0 +1,289 @@
+<include file="Index/header" />
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<!--文件上传-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/static/uploadify/uploadify.css">
+<script src="{$uri}__PUBLIC__/static/uploadify/jquery.uploadify.min.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/normalize.css">
+<!--[if lte IE 6]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+<!--[if lte IE 7]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+
+<style>
+
+.breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited{
+color:#000000}
+.row-fluid a, .row-fluid a:link, .row-fluid a:visited{
+color:#000000}
+
+</style>
+
+  <!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="<?php echo U('goods/goods_common_list') ;?>">商品管理</a> 
+  </li>
+  <li class="active">商品修改</li>
+</ul>
+  
+  <!--子菜单-->
+  <div class="row-fluid" style=" margin-top:10px;">
+	<ul class="nav nav-tabs">
+	    <li><a href="<?php echo U('goods/goods_common_edit_base?goods_id='.$goods_id) ;?>">基本信息</a></li>
+		<li  class="active"  ><a href="javascript:void(0);">商品上架</a></li>
+        <!--<li ><a href="<?php echo U('goods/goods_common_images?goods_id='.$goods_id) ;?>">图片管理</a></li>-->
+        <!--<li  ><a href="<?php echo U('goods/goods_common_state1?goods_id='.$goods_id) ;?>">现金购买商品上架</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state2?goods_id='.$goods_id) ;?>">积分商品上架</a></li>
+        <li ><a href="javascript:void(0);">活动商品上架</a></li>-->
+	</ul>
+  </div>
+  
+  <div class="row"  style="padding-top:10px; padding-left:20px;">
+   <form id="form1" action="" method="post" enctype="multipart/form-data"  class="form-horizontal" data-toggle="validator" role="form">
+   
+   <hr>
+   <h4>库存信息</h4>
+   <hr>
+   <div class="form-group" style="clear:both">
+        <div class="col-md-2">
+		
+		</div>
+		<div class="col-md-2">
+		 商品总量：{$goodsstore['goods_num']}
+		</div>
+		<div class="col-md-2">
+		 已售：{$goodsstore['goods_salenum']}  
+		</div>
+		<div class="col-md-2">
+		 总库存：{$goodsstore['goods_storage']}  
+		</div>
+		<div class="col-md-2">
+		 未分配：{$goodsstore['num']}  
+		</div>
+		
+		<span class="help-block with-errors"></span>
+  </div>
+  
+  <script>
+   function chgNum(a,n) {
+           var  number;
+           if(n==1){
+            var number =$('number');
+		   }else{
+		    var number =$('number2');
+		   }	
+            var storenum = 100;//$("#msg").html();
+            var p = parseInt(number.val());
+
+            if (a == 1) {
+                //alert("此商品只能购买一个~！");return false;
+               // if (p < storenum) {
+                    number.val(++p);
+
+               // } else {
+                   // alert("已达到最大数量~！");
+                   // return false;
+              //  }
+            }
+            else {
+                if (p > 1) number.val(--p);
+            }
+        }
+  </script>
+ <hr>
+   <h4>商品上架：</h4>
+   <hr>  
+    <div class="row-fluid">
+  <div class="biaoge">
+    <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+      <tr class="biaoti border_d6e1ee" >
+        <th>上架类型</th>
+        <th>上架库存</th>
+		<th>推荐排序</th>
+		<th>是否上架</th>
+		<th>显示库存设置</th>
+      </tr>
+      <tr class="trbor" >
+	    <input type="hidden" name="goods_id1" value="{$goods_data['goods_id']}">
+        <td>现金商品</td>
+        <td>
+		<input class="form-control"  style="width:50px" name="storage1"  type="text"  value="{$goods_data['goods_storage']}" />
+		
+		<input type="button" value="-" class="minus" onClick="chgNum(-1,1)"/>
+        <input type="text" id='number' name="number" value="1" class="goods_qy"/>
+        <input type="button" value="+" class="add" onClick="chgNum(1,1)"/>
+		
+		</td>
+		<td><input id="goods_commend1" style="width:50px" name="goods_commend1" type="text" class="form-control datepicker" value="{$goods_data['goods_commend']}" ></td>
+		<td>
+		<label for="inputName" class="col-md-3 control-label">立即上架</label>
+		<div class="col-md-2">
+		 <input type="radio" value="1" name="state1" <?php if($goods_data['goods_state']==1){?> checked="checked" <?php }?>>
+		</div>
+		<label for="inputName" class="col-md-3 control-label">立即下架</label>
+		<div class="col-md-2">
+		 <input type="radio" value="0" name="state1" <?php if($goods_data['goods_state']==0){?> checked="checked" <?php }?>>
+		</div>
+		</td>
+		<td></td>
+      </tr>
+	  <tr class="trbor" >
+	    <input type="hidden" name="goods_id2" value="{$integralgoods_data['goods_id']}">
+        <td>积分兑换</td>
+        <td><input class="form-control"  style="width:50px" name="storage2"  type="text"  value="{$integralgoods_data['goods_storage']}" /></td>
+		<td><input id="goods_commend2"  style="width:50px"  name="goods_commend2" type="text" class="form-control datepicker" value="{$integralgoods_data['goods_commend']}" ></td>
+		<td>
+		<label for="inputName" class="col-md-3 control-label">立即上架<span>*</span></label>
+		<div class="col-md-2">
+		 <input type="radio" value="1" name="state2"   <?php if($integralgoods_data['goods_state']==1){?> checked="checked" <?php }?>>
+		</div>
+		<label for="inputName" class="col-md-3 control-label">立即下架<span>*</span></label>
+		<div class="col-md-2">
+		 <input type="radio" value="0" name="state2"   <?php if($integralgoods_data['goods_state']==0){?> checked="checked" <?php }?>>
+		</div>
+		
+		</td>
+		<td>
+		
+			<div class="form-group" style="clear:both">
+                <label for="goods_integral" class="col-xs-3 control-label">积分兑换<span></span></label>
+                <div class="col-xs-3">
+				<input class="form-control "  name="goods_integral"  type="text"  value="{$integralgoods_data['goods_integral']}"     />
+
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+			
+			
+		</td>
+      </tr>
+	  <tr class="trbor" >
+	    <input type="hidden" name="goods_id3" value="{$prizegoods_data['goods_id']}">
+        <td>抽奖商品</td>
+        <td><input class="form-control"  style="width:50px;"  name="storage3"  type="text"  value="{$prizegoods_data['goods_storage']}" /></td>
+		<td></td>
+		<td>
+		<label for="inputName" class="col-md-3 control-label">立即上架<span>*</span></label>
+		<div class="col-md-2">
+		 <input type="radio" value="1" name="state3" <?php if($prizegoods_data['goods_state']==1){?> checked="checked" <?php }?> >
+		</div>
+		<label for="inputName" class="col-md-3 control-label">立即下架<span>*</span></label>
+		<div class="col-md-2">
+		 <input type="radio" value="0" name="state3" <?php if($prizegoods_data['goods_state']==0){?> checked="checked" <?php }?> >
+		</div>
+		</td>
+		<td>
+		
+		    <div class="form-group" style="clear:both">
+                <label for="prize_goods_price" class="col-md-3 control-label">
+		         <input type="radio" value="0" name="prize_goods_price" <?php if($prizegoods_data['goods_price']==0){?> checked="checked" <?php }?> >免费获取<span></span>
+				</label>
+            </div>
+		
+		
+		   <div class="form-group" style="clear:both">
+                <label for="prize_goods_price" class="col-md-3 control-label">
+		         <input type="radio" name="prize_goods_price" value="1" <?php if($prizegoods_data['goods_price']>0){?> checked="checked" <?php }?> >优惠购买<span></span>
+				</label>
+                <div class="col-xs-7">
+		<input class="form-control"  name="prize_price_value"  type="text"  value="{$prizegoods_data['goods_price']}"   data-msg="请输入优惠购买"  style="width:100px;" />
+		<span style="display:block; margin:0px; clear:both">原价：{$goods_data['goods_marketprice']}&nbsp; &nbsp;  售价：{$goods_data['goods_price']}</span>
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+		</td>
+      </tr>
+    </table>
+  </div>
+</div>
+	
+	
+ <hr>
+   <h4>SEO关键词：</h4>
+   <hr>	
+	
+	<div class="form-group" style="clear:both">
+		<label for="inputName" class="col-md-2 control-label">SEO关键词<span>*</span></label>
+		<div class="col-md-7">
+		 <input class="form-control"   name="keywords"  type="text"  value="{$goodscommon_data['keywords']}" />
+		</div>
+		
+		<span class="help-block with-errors"></span>
+	</div>
+	
+	
+	<div class="form-group" style="clear:both">
+		<label for="inputName" class="col-md-2 control-label">关键词描述<span>*</span></label>
+		<div class="col-md-7">
+		 <input class="form-control"    name="description"  type="text"  value="{$goodscommon_data['description']}" />
+		</div>
+		
+		<span class="help-block with-errors"></span>
+	</div>
+	
+	
+	<input type="hidden" name="goods_commonid" value="{$goods_id}">
+	 <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-7">
+                    <button type="button"  onclick="window.location.href='<?php echo U('admin/goods/goods_common_edit_base/goods_id/'.$goodscommon_data['goods_commonid']) ;?>'"  class="btn btn-primary">上一步</button>
+                    <button type="submit" name="sub"  class="btn btn-default">上架</button>
+                </div>
+      </div>
+	</form>
+  </div>
+
+<include file="Index/footer" />
+
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time1').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+        $('#begin_time2').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+		$('#begin_time3').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+    });
+</script>

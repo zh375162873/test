@@ -1,0 +1,48 @@
+<?php
+/*
+ * 订单支付模型
+ */
+namespace Admin\Model;
+use Think\Model;
+use BizService\GoodsstoreService;
+class RefundReturnModel extends Model {
+    public $goodservice;
+    public function __construct(){
+        parent::__construct();
+        $this->goodservice = new GoodsstoreService();
+        
+    }
+    
+    public function seller_chuli($refund_id,$data){
+        $info = $this->where(array("id" => $refund_id))->field("dhm_id,goods_id,order_id")->find();
+        $dhm_id = $info['dhm_id'];
+        $statue = $data['seller_state'];
+        
+        //处理兑换码状态
+        if($this->where(array("id"=>$refund_id))->data($data)->save()&&D("DhmManage")->where(array("id"=>$dhm_id))->data(array("refund_status"=>$statue))->save()){
+           if($statue==2){
+               //判断订单下相关核销码数据,如果退款审核通过后，该订单没有其他未消费或退款中的核销码信息，就修改订单状态。
+               $arr = D("DhmManage")->where(array("order_id"=>$info['order_id'],"status"=>0,"refund_status"=>array("neq",2)))->find();
+               $arr_yxh = D("DhmManage")->where(array("order_id"=>$info['order_id'],"status"=>1))->find();
+               if(empty($arr)&&!empty($arr_yxh)){
+                   D("Orders")->where(array("order_id"=>$info['order_id']))->data(array("order_status"=>2))->save();
+               }
+               //如果核销码没有退款状态为（未退款或正在退款中）同时没有消费过的核销码则该核销码的退款状态为2(为已经完成)
+               if(empty($arr)&&empty($arr_yxh)){
+                   D("Orders")->where(array("order_id"=>$info['order_id']))->data(array("refund_state"=>2))->save();
+               }
+               
+               //相关库存处理
+               $this->goodservice->changestoragebyid($info['goods_id'],-1,$type=1);
+           }
+           return true;
+        }else{
+            return false;
+        }
+    }
+    
+ 
+
+}
+
+?>

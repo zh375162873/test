@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <title>我的-点点通闪购平台</title>
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">   
+     
+   
+</head>
+<body>
+	<div id="viewport" class="viewport">
+		<div class="mine">
+			<ul class="mine_name">
+				<h3>{$userdata['nick_name']?$userdata['nick_name']:'昵称未设置'}</h3><a href="__APP__/user/changeNickname"><p>修改<img src="__PUBLIC__/home/images/btn_more.png"></p></a>
+				<h4>{$userdata['user_name']}</h4>
+			</ul>
+			<ul class="mine_account">
+				<li class="mine_ye"><span>{$userdata['user_money']}元</span><small>我的余额</small></li>
+				<li class="mine_jf"><span>{$userdata['pay_points']}</span><small>我的积分</small></li>
+			</ul>
+		</div>
+
+		<div class="home_nav_huodong">
+			<ul class="mine_nav">
+				<li class="mine_nav_line">
+					<a href="__APP__/order/orderlist">
+						<img src="__PUBLIC__/home/images/nav_order.png">
+						<p>我的订单<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<!--2015-11-12 暂未实现
+				<li class="mine_nav_line">
+					<a href="#">
+						<img src="__PUBLIC__/home/images/nav_exchange.png">
+						<p>我的兑换(不可用)<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<li class="mine_nav_line">
+					<a href="#">
+						<img src="__PUBLIC__/home/images/nav_lottery.png">
+						<p>我的抽奖(不可用)<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>-->
+			 	<li class="mine_nav_line">
+					<a href="__APP__/favorite/index">
+						<img src="__PUBLIC__/home/images/nav_collect.png">
+						<p>我的收藏<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="home_nav_huodong">
+			<ul class="mine_nav">
+				<li class="mine_nav_line">
+					<a href="__APP__/user/changePassword">
+						<img src="__PUBLIC__/home/images/nav_password.png">
+						<p>修改密码<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+				<li class="">
+					<a href="__APP__/user/about">
+						<img src="__PUBLIC__/home/images/nav_about.png">
+						<p>关于我们<span><img src="__PUBLIC__/home/images/btn_more.png"></span></p>
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="mine_nav_buttom">
+            <a class="item-btns" href="__APP__/index/userLoginOut">退出登录</a>
+        </div>
+	</div>	  
+	<include file="User/footer"/>
+</body>
+</html>

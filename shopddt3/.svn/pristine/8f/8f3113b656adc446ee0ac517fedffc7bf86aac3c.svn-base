@@ -1,0 +1,44 @@
+<php>
+//调取数据
+$item_data=D("tempitem")->where("item_id=$item_id")->find();
+$info=json_decode($item_data['item_data'],true);
+$info_data=$info['info_data'];
+$used="禁用";
+</php>
+<style>
+.home_img_adv{
+            position:relative;
+            margin:8px 6px;
+        }
+        .home_img_adv>a img{
+            width:100%;
+            height:auto;
+        }
+</style>
+<if condition="$item_data.item_is_used eq 1">
+  <div class="home_img_adv home_block">
+<else/>
+  <php> $used="����";</php>
+  <div class="home_img_adv home_block unusable">
+</if>
+			<if condition="!empty($info_data)">
+			  <foreach name="info_data" item="val" key="key">
+			    <a href="{$val['url']}"><img src="{$val['info_img']}" ></a>
+			  </foreach>  
+			<else/>
+			  <a href=""><img src="{$uri}__PUBLIC__/temp/images/640_260.png"  ></a>
+			</if>
+      
+<if condition="$show neq 1">
+		<div class="headerEdit">
+			模板
+		</div>
+		<div class="footerEdit">
+			<a target="_parent" data-type='btn_move_up' href='{:U('admin/tempitem/itemlistup/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-up'></i>上移</a>
+			<a target="_parent"  data-type='btn_move_down' href='{:U('admin/tempitem/itemlistdown/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-down'></i>下移</a>
+			<a target="_parent"  data-type='btn_usable' href='{:U('admin/tempitem/itemisused/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-off'></i>{$used}</a>
+			<a target="_parent"  data-type='btn_edit_item' href='{:U('admin/tempitem/itemedit/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-edit'></i>编辑</a>
+			<a target="_parent"  data-type='btn_del_item' href='{:U('admin/tempitem/itemdel/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-trash'></i>删除</a>
+		</div>
+</if>
+</div>

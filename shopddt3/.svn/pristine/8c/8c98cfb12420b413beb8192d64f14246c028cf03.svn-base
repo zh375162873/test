@@ -1,0 +1,163 @@
+<?php
+/*
+ * 普通商品订单支付和管理模块
+ */
+namespace Home\Controller;
+use Think\Controller;
+use BizService\UserService;
+
+class WxpayController extends Controller {
+   public $orderdb,$ordergoods,$users;
+   public function __construct(){
+       parent::__construct();
+       $this->orderdb=D("Orders");
+       $this->ordergoods = D("OrdersGoods");
+       $this->users = new UserService();
+       if (!session("userId")) {
+           $this->error("用户没有登录，请先登录!");
+       } else {
+           $this->_userid = session("userId");
+       }
+       
+       $this->assign("userid", $this->_userid);
+      // $this->assign("userid", session("userId"));
+   }
+    
+    public function js_api_call(){
+         $order_id = I("get.id",0,"intval");
+        if(!$order_id){
+            $this->redirect("index/index");
+        } 
+        vendor("WxPayPubHelper.WxPayPubHelper");
+       
+        $orderinfo = $this->orderdb->getinfo($order_id);
+        $userinfo = $this->users->userInfo($orderinfo['buyer_id']);
+        $jsapi_call_url = "http://".$_SERVER['HTTP_HOST']."".U("Home/Wxpay/js_api_call",array("id"=>$order_id));
+        $notiy_url = "http://".$_SERVER['HTTP_HOST']."".U("Home/Wxpay/wx_notiy_do");
+        
+        //使用jsapi接口
+        $jsApi = new \JsApi_pub();
+       // echo $jsapi_call_url."<pre>";print_r($wxconfig);exit();
+        //=========步骤1：网页授权获取用户openid============
+        //通过code获得openid
+    
+        if (!isset($_GET['code']))
+        {
+            //触发微信返回code码
+            $url = $jsApi->createOauthUrlForCode($jsapi_call_url);
+           
+            Header("Location: $url");
+        }
+        else
+        {
+            //获取code码，以获取openid
+            $code = $_GET['code'];
+            $jsApi->setCode($code);
+            $openid = $jsApi->getOpenId();
+        }
+      
+        //=========步骤2：使用统一支付接口，获取prepay_id============
+        //使用统一支付接口
+        $unifiedOrder = new \UnifiedOrder_pub();
+         
+        //设置统一支付接口参数
+        //设置必填参数
+        //appid已填,商户无需重复填写
+        //mch_id已填,商户无需重复填写
+        //noncestr已填,商户无需重复填写
+        //spbill_create_ip已填,商户无需重复填写
+        //sign已填,商户无需重复填写
+        $unifiedOrder->setParameter("openid","$openid");//商品描述
+        $unifiedOrder->setParameter("body","购买".$data['goods_name']."在线支付".$data['online_paymoney']);//商品描述
+        //自定义订单号，此处仅作举例
+        //$timeStamp = time();
+        $out_trade_no = $orderinfo['order_sn'];
+        $total_fee = $orderinfo['online_paymoney']*100;
+        $unifiedOrder->setParameter("out_trade_no","$out_trade_no");//商户订单号
+        $unifiedOrder->setParameter("total_fee",$total_fee);//总金额
+        $unifiedOrder->setParameter("notify_url",$notiy_url);//通知地址
+        $unifiedOrder->setParameter("trade_type","JSAPI");//交易类型
+        //非必填参数，商户可根据实际情况选填
+        //$unifiedOrder->setParameter("sub_mch_id","XXXX");//子商户号
+        //$unifiedOrder->setParameter("device_info","XXXX");//设备号
+        //$unifiedOrder->setParameter("attach","XXXX");//附加数据
+        //$unifiedOrder->setParameter("time_start","XXXX");//交易起始时间
+        //$unifiedOrder->setParameter("time_expire","XXXX");//交易结束时间
+        //$unifiedOrder->setParameter("goods_tag","XXXX");//商品标记
+        //$unifiedOrder->setParameter("openid","XXXX");//用户标识
+        //$unifiedOrder->setParameter("product_id","XXXX");//商品ID
+         
+        $prepay_id = $unifiedOrder->getPrepayId();
+        //=========步骤3：使用jsapi调起支付============
+        $jsApi->setPrepayId($prepay_id);
+         
+        $jsApiParameters = $jsApi->getParameters();
+        
+        $this->assign("jsApiParameters",$jsApiParameters);
+        $this->assign("orderinfo", $orderinfo);
+        $this->assign("userinfo", $userinfo);
+        $this->display("pay");
+        /* echo $jsApiParameters;
+        exit();  
+        $html_info .= "<script type='text/javascript'>
+                		//调用微信JS api 支付
+                		function jsApiCall(){
+                			WeixinJSBridge.invoke(
+                				'getBrandWCPayRequest',
+                				 ".$jsApiParameters.",
+                				function(res){
+                					WeixinJSBridge.log(res.err_msg);
+                					//alert(res.err_code+res.err_desc+res.err_msg);});}
+                		function callpay(){
+                			if (typeof WeixinJSBridge == 'undefined'){
+                			    if(document.addEventListener){
+                			        document.addEventListener('WeixinJSBridgeReady',jsApiCall, false);
+                			    }else if(document.attachEvent){
+                			        document.attachEvent('WeixinJSBridgeReady',jsApiCall);
+                			        document.attachEvent('onWeixinJSBridgeReady',jsApiCall);
+                			    }}else{jsApiCall();}}</script>";
+        $html_info .="<form><button class='sub_wx' type='submit' onclick='callpay()'>微信支付</button></form>";
+        
+        echo $html_info; */
+    }
+    
+    /*
+     * 微信支付相应
+     */
+    public function wx_notiy_do(){
+        //处理相关订单数据
+        Vendor("WxPayPubHelper.WxPayPubHelper");
+        vendor("WxPayPubHelper.log_");
+        //使用通用通知接口
+        $notify = new \Notify_pub();
+    
+        //存储微信的回调
+        $xml = $GLOBALS['HTTP_RAW_POST_DATA'];
+        $notify->saveData($xml);
+
+        //验证签名，并回应微信。
+        //对后台通知交互时，如果微信收到商户的应答不是成功或超时，微信认为通知失败，
+        //微信会通过一定的策略（如30分钟共8次）定期重新发起通知，
+        //尽可能提高通知的成功率，但微信不保证通知最终能成功。
+        // $this->log_result("【checkSign】:\n".$notify->checkSign()."\n");
+        if($notify->checkSign() == FALSE){
+            $notify->setReturnParameter("return_code","FAIL");//返回状态码
+            $notify->setReturnParameter("return_msg","签名失败");//返回信息
+        }else{
+            $notify->setReturnParameter("return_code","SUCCESS");//设置返回码
+        }
+            $returnXml = $notify->returnXml();
+         //echo $returnXml;
+        // $this->log_result("【返回回调信息】:\n".$returnXml."\n");
+        //==商户根据实际情况设置相应的处理流程，此处仅作举例=======
+            
+        //以log文件形式记录回调信息 
+        $log_ = new \Log_();
+        $log_name="./notify_url.log";//log文件路径
+        $log_->log_result($log_name,"【接收到的notify通知】:\n".$xml."\n");  
+        
+       
+    }
+    
+}
+

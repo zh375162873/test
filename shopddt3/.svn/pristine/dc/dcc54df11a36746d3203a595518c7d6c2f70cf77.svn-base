@@ -1,0 +1,87 @@
+<layout name="layoutExtend"/>
+
+<div class="container">
+	<div class="secondaryMenu" style="border-bottom:1px solid #d6e1ee;">
+    	<ul class="nav nav-tabs">
+			<li>
+				<span><a class="btn btn-success btn-sm" href="__APP__/admin/extend/memberList">返回推广列表</a></span>
+			</li>
+			<li style="float:right"><span>共推广{$count}个注册人员</span></li>
+		</ul>
+    </div>
+
+	<form class="input-group" name="searchForm" style="width:500px" method="get" action="__APP__/admin/extend/extendGoodsList"	>
+<!-- 		<span class="input-group-btn" style="width:150px">
+			<select name="channelid" class="form-control">
+			<option {$search_form['channelid'] == -1?'selected="selected"':''} value="-1">所有人员</option>
+			<foreach name="channel_list" item="channel" >
+				<option {$search_form['channelid'] == $channel['id']?'selected="selected"':''} value="{$channel.id}">{$channel.name}</option>
+			</foreach>
+		</select>
+       	</span>
+		<span class="input-group-btn" style="width:300px">
+			<input class="form-control" type="text" maxlength="11" value="{$search_form['username']}" placeholder="输入姓名或手机号码查询人员" name="username"/>
+       	</span> -->
+       		<input name="extendId" type="hidden" value="{$extendid}" />
+       		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+       		<input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+	<!-- 	<span class="input-group-btn">
+			<button class="btn btn-info btn-sm" onclick="submit()">查询</button>
+       	</span> -->
+	</form>
+
+    <div class="biaoge">
+        <table class="table table-hover">
+            <thead class="biaoti">
+         		<th name="user_id" onclick="changeOrder(this)">用户ID</th>
+         		<th name="user_name" onclick="changeOrder(this)">用户名</th>
+         		<th name="nick_name" onclick="changeOrder(this)">昵称</th>
+                <th name="reg_time" onclick="changeOrder(this)">注册时间</th>
+                <th name="order_num" onclick="changeOrder(this)">订单数</th>
+                <th name="order_money" onclick="changeOrder(this)">交易额</th>
+            </thead>
+            <tbody>
+            	<foreach name="user_list" item="user" key="k" >
+		           <tr class="trbor" style="background: rgb(237, 244, 253);">
+		                <td>{$user.user_id}</td>
+		                <td>{$user.user_name}</td>
+		                <td>{$user.nick_name}</td>
+		                <td>{$user.reg_time|date="m月d日 H:i",###}</td>
+                        <td>{$user.order_num}</td>
+                        <td>{$user.order_money}</td>
+		            </tr>
+	            </foreach>
+            </tbody>
+        </table>
+    </div>
+    <div style="float:right">
+    	{$page}
+    </div>
+</div>
+
+<script type="text/javascript">
+	页面加载时执行函数
+    // $(function(){
+    //     /*初始化时间控件*/
+    //     $('#begin_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    //     $('#end_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    // });
+
+   
+</script>
+	
+	

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <title>摇一摇-点点通闪购平台</title>
+    <link rel="stylesheet" type="text/css" href="{$uri}__PUBLIC__/home/yiy/yiy_css.css">
+
+</head>
+<body>
+<header class="hand-animate"><img src="{$uri}__PUBLIC__/home/yiy/images/yaoyiyao_yiy.png"></header>
+<div id="yiy" class="yiy_hongbao">
+    <div class="yiy_zhongjiang">{$res}</div>
+    <div class="yiy_icon">
+        <a href="user.php?act=user_center">
+            <li class="yiy_icon_01"></li>
+        </a>
+        <a href="integral.php">
+            <li class="yiy_icon_02"></li>
+        </a>
+        <a href="index.php">
+            <li class="yiy_icon_03"></li>
+        </a>
+        <a href="">
+            <li class="yiy_icon_04"></li>
+        </a>
+    </div>
+</div>
+</body>
+</html>

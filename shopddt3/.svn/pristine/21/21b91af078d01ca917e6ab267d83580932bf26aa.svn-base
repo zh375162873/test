@@ -1,0 +1,17 @@
+<?php
+namespace Admin\Controller;
+use BizService\OrderDisputeService;
+class AftersalesController extends BaseController
+{
+	public $disputeService;
+	public function _initialize()
+    {
+        parent::_initialize();
+		$this->disputeService = new OrderDisputeService();
+    }
+	
+	public function index(){
+		$dispute_list = $this->disputeService->dispute_list();
+		dump($dispute_list);
+	}
+}

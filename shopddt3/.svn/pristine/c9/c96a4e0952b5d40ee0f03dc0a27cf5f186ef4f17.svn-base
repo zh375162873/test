@@ -1,0 +1,90 @@
+<?php
+//调取数据
+$item_data=D("tempitem")->where("item_id=$item_id")->find();
+$info=json_decode($item_data['item_data'],true);
+$info_data=$info['info_data'];
+?>
+<?php
+$used="禁用";
+if($item_data['item_is_used']==1){
+?>
+<div class="home_goods_huodong home_block">
+<?php
+}else{
+$used="启用";
+?>
+<div class="home_goods_huodong home_block unusable">
+<?php
+}
+?>
+<script src="{$uri}__PUBLIC__/temp/js/iscroll.js" type="text/javascript"></script>
+    <div id="wrapper">
+            <ul>
+			 <?php
+			 if(!empty($info_data)){
+			   foreach($info_data as $key=>$val){
+			 ?>
+			  <li>
+			  <a href="{$val['url']}">
+			  <?php
+			  if($val['info_img']==""){
+			  ?>
+			  <img src="{$uri}__PUBLIC__/temp/images/300_300.png"  >
+			  <?php
+			  }else{
+			  ?>
+			  <img src="{$val['info_img']}" >
+			  <?php
+			  }
+			  ?>
+			  </a>
+			    <?php
+				if($val['info_type']==1){
+				?>
+			    <div>{$val['info_title']}</div>
+				<?php
+				}else{
+				?>
+				<div>{$val['data']['goods_name']}</div>
+				<?php
+				}
+				?>
+                <div><ins class="colorD5">¥{$val['data']['goods_price']}</ins><del>¥{$val['data']['goods_marketprice']}</del></div>
+			  </li>
+			  <?php
+				}
+			  }else{
+			   ?>
+			 <li> <a href=""><img src="{$uri}__PUBLIC__/temp/images/2.png"  ></a></li>  
+			  <?php
+			  }
+			  ?> 
+            </ul>
+    </div>
+	    <script>
+        $(function(){
+            var lis = $("#wrapper ul li");
+            var liCount = lis.length;
+            var liWidth = lis[0].offsetWidth;
+            $("#wrapper ul").width(liWidth*liCount+1);
+            var iscroll = new IScroll('#wrapper', { scrollX: true, scrollY: false,preventDefault: false,preventDefaultException:{tagName:/^(INPUT|TEXTAREA|BUTTON|SELECT|A)$/}});
+            document.getElementById("wrapper").addEventListener("touchmove",function(e){e.preventDefault()},false);
+        });
+    </script>
+	<?php
+	if($show!=1){
+	?>
+		<div class="headerEdit">
+			模板
+		</div>
+		<div class="footerEdit">
+			<a target="_parent" data-type='btn_move_up' href='{:U('admin/tempitem/itemlistup/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-up'></i>上移</a>
+			<a target="_parent"  data-type='btn_move_down' href='{:U('admin/tempitem/itemlistdown/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-down'></i>下移</a>
+			<a target="_parent"  data-type='btn_usable' href='{:U('admin/tempitem/itemisused/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-off'></i>{$used}</a>
+			<a target="_parent"  data-type='btn_edit_item' href='{:U('admin/tempitem/itemedit/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-edit'></i>编辑</a>
+			<a target="_parent"  data-type='btn_del_item' href='{:U('admin/tempitem/itemdel/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-trash'></i>删除</a>
+		</div>
+	<?php
+	}
+	?>
+</div>

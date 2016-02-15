@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>订单详情-点点通闪购平台</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <script src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/home/js/common.js" type="text/javascript"></script>
+</head>
+
+<body>
+<section class="order_goods">
+    <a href="{:U('goods/goodsview',array('id'=>$orderinfo['goods']['goods_id']))}">
+          <img src="{$orderinfo.goods.goods_image}"> 
+        <div class="og_info">
+            <h3>{$orderinfo.goods.goods_name}</h3>
+            <p>{$orderinfo.goods.goods_plun}</p>
+            <div>{$orderinfo.goods.goods_price}元</div>
+        </div>
+    </a>
+    <!-- <div class="og_tk">
+        <div class="og_tkLeft"><span class="og_tkIcon iconYes"></span>支持随时退款</div>
+        <div class="og_tkRight"><span class="og_tkIcon iconNo"></span>不支持过期退款</div>
+    </div> -->
+</section>
+
+<if condition="$orderinfo['is_entity'] eq 0">
+<section class="og_desc order_dhm">
+    <h3>兑换码:</h3>
+    <volist name="dhm" id="vo">
+	   <section>
+			<div class="dhm"><span class="format_code">{$vo.dhm_code}</span>
+			<strong class="order_status colorC4">
+			   <if condition="($vo.status eq 0) AND ($vo.refund_status eq 0)">未消费
+			   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 1)" />退款中
+			   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 2)" />退款完成
+			   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 3)" />退款申请驳回
+			   <elseif condition="($vo.status eq 1)" />已消费
+			   </if>
+			</strong>
+			</div>
+			
+			<div class="btn_div" id="refund_qx">
+			<if condition="($vo.status eq 0) AND ($vo.refund_status eq 0)">
+				<a class="tk" href="{:U('order/refund_order',array('id'=>$orderinfo['order_id'],'dhm_id'=>$vo['id']))}">退款</a>
+				<if condition="$vo['zs_status'] eq 0">
+				<a class="zs" href="{:U('Zsonghy/donation',array('dhm_id'=>$vo['id']))}">赠送好友</a>
+				<else />
+				<a class="zs" href="{:U('Zsonghy/donation',array('dhm_id'=>$vo['id']))}">再次赠送</a>
+				</if>
+			<elseif condition="($vo.status eq 0 ) AND ($vo.refund_status eq 1)" />
+				<a class="tk" href="#" onClick="refund_qx({$orderinfo.order_id},{$vo.id});">取消退款</a>
+			</if>
+			</div>
+		</section>
+       </volist>
+         <section>
+            <div>有效期：</div>
+            <div>{$start_time}至{$end_time}(周末，法定节假日通用)</div>
+            <if condition="$orderinfo.order_status eq 2">
+            <div class="btn_div">
+             <if condition="$orderinfo['evaluation_state'] eq 0">
+             <a class="tk" href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">评价</a>
+             <else />
+              <a class="tk" href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">已评价</a>
+             </if>
+            </div>
+            </if>
+        </section>
+</section>
+
+</if>
+
+
+
+<if condition="$orderinfo['is_entity'] eq 1">
+	<if condition="$orderinfo['send_type'] eq 1">
+		<section class="og_desc order_dhm order_shxx">
+			<h3>收货信息
+			<?php
+			if($deliverinfo['delivery_id'] > 0){
+			?>
+			   <span>已发货</span>
+			<?php
+			}
+			?>
+			</h3>
+			
+			<section>
+				<p>{$orderinfo['name']}<span>{$orderinfo['tel']}</span></p>
+				<p>{$orderinfo['address']}</p>
+			</section>
+			<?php  if($deliverinfo['delivery_id'] > 0){ ?>
+			<section>
+				<p>发货时间：{$deliverinfo['add_time']}<a href="{:U('order/deliverinfo',array('id'=>$deliverinfo['delivery_id']))}">查看物流</a></p>
+				<p>快递类型：{$deliverinfo['shipping_name']}</p>
+				
+				<p>快递单号：{$deliverinfo['delivery_sn']}
+				<?php if($orderinfo.evaluation_state == 0){?>
+             <a  href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">评价</a>
+			 <?php }else{?>
+              <a href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">已评价</a>
+             <?php }?>
+			
+				
+				</p>
+			</section>
+			<?php }else {?>
+		    将尽快为亲发货，请稍等！
+			<?php }?>
+		</section>
+	<else  />
+	
+
+<section class="og_desc order_dhm">    
+		<h3>提货码:</h3>
+      <volist name="dhm" id="vo">
+	   <section>
+			<div class="dhm"><span class="format_code">{$vo.dhm_code}</span>
+			  <strong class="order_status colorC4">
+			   <if condition="($vo.status eq 0) AND ($vo.refund_status eq 0)">未提货
+			   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 1)" />退款中
+			   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 2)" />退款完成
+			   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 3)" />退款申请驳回
+			   <elseif condition="($vo.status eq 1)" />已提货
+			   </if>
+			  </strong>
+			</div>
+			<div class="btn_div" id="refund_qx">
+			  <if condition="($vo.status eq 0) AND ($vo.refund_status eq 0)">
+				<!--<a class="tk" href="{:U('order/refund_order',array('id'=>$orderinfo['order_id'],'dhm_id'=>$vo['id']))}">退款</a>-->
+				<if condition="$vo['zs_status'] eq 0">
+				<!--<a class="zs" href="{:U('Zsonghy/donation',array('dhm_id'=>$vo['id']))}">赠送好友</a>-->
+				<else />
+				<a class="zs" href="{:U('Zsonghy/donation',array('dhm_id'=>$vo['id']))}">再次赠送</a>
+				</if>
+			  <elseif condition="($vo.status eq 0 ) AND ($vo.refund_status eq 1)" />
+				<a class="tk" href="#" onClick="refund_qx({$orderinfo.order_id},{$vo.id});">取消退款</a>
+			  </if>
+			</div>
+		</section>
+       </volist>
+         <section>
+            <div>有效期：</div>
+            <div>{$start_time}至{$end_time}(周末，法定节假日通用)</div>
+			<?php if($orderinfo.order_status == 2){?>
+            <div class="btn_div">
+			 <?php if($orderinfo.evaluation_state == 0){?>
+             <a class="tk" href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">评价</a>
+			 <?php }else{?>
+              <a class="tk" href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">已评价</a>
+             <?php }?>
+            </div>
+            <?php }?>
+        </section>
+</section>
+		
+		<section class="goods_shopDesc ztdz">
+			<div class="title">自提地址</div>
+			<div class="loc_tel">
+				<div class="dz">
+					<a href="#">
+						<p>地址：{$orderinfo['store']['address']}</p>
+						<div><img src="__PUBLIC__/home/images/btn_location.png" width="12px" height="15px">   <?php
+			if(session('lat')){
+			$n_latitude = session('lat')?session('lat'):"34.26567";
+            $n_longitude = session('lng')?session('lng'):"108.953435";
+			$distance = getDistance($n_latitude, $n_longitude, $orderinfo['store']['latitude'], $orderinfo['store']['longitude']);
+			echo number_format($distance/1000, 2, '.', '');;
+			?>
+                    km
+                    <?php
+			}
+			?></div>
+					</a>
+				</div>
+				<a class="tel" href="tel:">12345678911<img src="__PUBLIC__/home/images/btn_telephone.png"></a>
+			</div>
+		</section>
+	</if>
+</if>
+
+
+
+
+
+
+<section class="order_info">
+    <h3>订单信息</h3>
+	<table>
+		<tr><td>订单号：</td><td>{$orderinfo.order_sn}</td></tr>
+		<tr><td>付款时间：</td><td>{$orderinfo.payment_time}</td></tr>
+		<!-- <tr><td>商品总价：</td><td>{$orderinfo.goods_amount}元</td></tr> -->
+		<if condition="$orderinfo['extend_id'] neq 0">
+		<tr><td>优惠口令使用数量：</td><td>{$orderinfo.extend_num}</td></tr>
+		<tr><td>优惠金额：</td><td>{$orderinfo.order_youhui}元</td></tr>
+		</if>
+		<tr><td>数量：</td><td>{$orderinfo.goods_num}</td></tr>
+		<tr><td>在线支付：</td><td>{$orderinfo.online_paymoney}元</td></tr>
+		<tr><td>余额支付：</td><td>{$orderinfo.ye_paymoney}元</td></tr>
+		<tr><td>总价：</td><td>{$orderinfo.order_amount}元</td></tr>
+	</table>
+</section> 
+<include file="Index/footer"/>
+<script>
+function refund_qx(orderid,dhm_id){
+	$.post("{:U('order/refund_qx')}",{orderid:orderid,dhm_id:dhm_id},function(data){
+		 if(data['error']==1){
+			alert(data['msg']);
+			window.location.href="{:U('Home/order/orderinfo',array('id'=>$orderinfo['order_id']))}";
+		 }else{
+			 alert(data['msg']);
+		 }
+	},"json");
+}
+</script>
+</body>
+</html>

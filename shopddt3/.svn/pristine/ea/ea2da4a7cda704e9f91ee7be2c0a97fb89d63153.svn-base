@@ -1,0 +1,22 @@
+<footer class="home_footer">
+    <ul>
+        <li><a href="__APP__/index/index"><b class="colorD5">首页</b><img src="__PUBLIC__/home/images/index/nav_fixed_sy.png"></a></li>
+        <li><a href="__APP__/cart/index"><img class="home_footer_hd" src="__PUBLIC__/home/images/index/nav_fixed_yiy.png"></a></li>
+        <li>
+	        <if condition="session('userName')">
+	        <a href="__APP__/user/mine"><img src="__PUBLIC__/home/images/index/nav_fixed_wd_after.png"><b class="colorD5">我的</b></a>
+	        <else />
+	        	<a class="loginOut" id="login_tag" href="javascript:void(0)"><img src="__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">登录</b></a>
+	        </if>
+        </li>
+    </ul>
+</footer>
+<script language='javascript'>
+    var SITE_URL = "http://{$Think.server.HTTP_HOST}";
+$(document).ready(function(){
+    var currentUrl = encodeURIComponent(this.location.href);
+    $("#login_tag").attr("href","__APP__/index/userLogin?before_url="+currentUrl);
+});
+    
+ 
+</script>

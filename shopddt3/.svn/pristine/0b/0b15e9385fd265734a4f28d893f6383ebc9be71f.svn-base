@@ -1,0 +1,825 @@
+<?php
+namespace Admin\Controller;
+use BizService\UserService;
+use Think\Controller;
+use Think\Model;
+use Think\Upload; 
+
+class TempitemController extends BaseController {
+	public $shop_id;
+	public function _initialize() {
+       parent::_initialize();
+       //获取商城信息
+       $shop_proxy=get_shop_proxy();
+	   $this->shop_id=$shop_proxy['shop_id'];
+    }
+	
+	
+	
+	/**
+	 * 模板编辑首页
+	 * @author zhanghui
+	 */
+    public function index(){
+	    //获取商城信息
+		$shop_proxy=get_shop_proxy();
+		$shop_id=$shop_proxy['shop_id']?$shop_proxy['shop_id']:1;
+		//搜索本商城首页信息
+		$shouye = D("temp")->getinfo(array('shop_id'=>$shop_id,'temp_type'=>1));
+	    $temp_id=$shouye['temp_id'];
+		//获取所有样式
+		$res = D("tempstyle")->getlist(array('style_is_used'=>1));
+		//获取已添加的样式
+		$item_param=array();
+		$item_param['temp_id']=$temp_id;
+		$item_param['shop_id']=$shop_id;
+		$item_order='item_order asc ,item_id asc';
+		$item_data = D("tempitem")->getlist($item_param,$item_order);
+		//判断此商城是否有默认首页，如果没有，就自动创建。
+		if($item_data){
+		
+		}elseif($shop_id){  
+		  $temp_id=$this->createindex();
+		  $item_param=array();
+		  $item_param['temp_id']=$temp_id;
+		  $item_param['shop_id']=$shop_id;
+		  $item_order='item_order asc ,item_id asc';
+		  $item_data = D("tempitem")->getlist($item_param,$item_order);
+		}
+		$this->assign('res',$res);
+		$this->assign('item_data',$item_data);
+		$this->assign('temp_id',$temp_id);
+		$this->display("tempitem_index");
+    }
+	
+	private function createindex(){
+	
+	   //获取商城信息
+		$shop_proxy=get_shop_proxy();
+		$shop_id=$shop_proxy['shop_id']?$shop_proxy['shop_id']:1;
+	   //新建首页模板信息
+	    $temp_id=D('temp')->addtemp(array('temp_title'=>'首页模板','shop_id'=>$shop_id));
+	   //为此模板填入默认数据
+	    if($temp_id){
+		  //生成资源样式
+		  $this->createstyle($temp_id);
+		  //导入默认模板样式数据
+		  $item_param=array();
+		  $item_param['temp_id']=1;
+		  $item_order='item_order asc ,item_id asc';
+		  $item_data = D("tempitem")->getlist($item_param,$item_order);
+		  foreach($item_data as $val){
+		     //添加样式到模板中
+			  $Temp_item=array();
+			  $Temp_item['item_title']=$val['item_title'];
+			  $Temp_item['style_id']=$val['style_id'];
+			  $Temp_item['temp_id']=$temp_id;
+			  $Temp_item['shop_id']=$shop_id;
+			  $Temp_item['item_is_used']=$val['item_is_used'];
+			  $Temp_item['item_order']=$val['item_order'];
+			  if($val['style_id']==2){
+			    //调取分类信息
+				$class_data=D('goodsclass')->getTree(0,true,$shop_id);
+				//保存分类信息为导航
+				foreach($class_data as $i=>$val){
+				  $flag=0;
+				  foreach($info['info_data'] as $key=>$val2){
+					if($val2['info_gcid']==$val['gc_id']){
+					$flag=1;
+					$i=$key;
+				   } 
+				  }
+				  if($flag==0){
+					 //将此分类添加到导航列表中
+					 $k=$key+1;
+					 $info_title=$val['gc_name'];
+					 $info_url=U("/home/goods/index/gc_id/".$val['gc_id']);
+					 $info_img=$val['gc_images'];
+					 $info_gcid=$val['gc_id'];
+					 $info_order=225;
+					 $info['info_data'][$k]['info_title']=$info_title;
+					 $info['info_data'][$k]['info_type']=3;
+					 $info['info_data'][$k]['url']=$info_url;
+					 $info['info_data'][$k]['info_img']=$info_img;
+					 $info['info_data'][$k]['info_gcid']=$info_gcid;
+					 $info['info_data'][$k]['info_order']=$info_order;
+					 if($info_title=="随便看看"){
+					   $info['info_data'][$k]['info_isused']=1;  
+					 }else{
+					   $info['info_data'][$k]['info_isused']=0;  
+					 }
+				   }else{  
+					 $info_title=$val['gc_name'];
+					 $info_url=U("/home/goods/index/gc_id/".$val['gc_id']);
+					 $info_img=$val['gc_images'];
+					 $info['info_data'][$i]['info_title']=$info_title;
+					 $info['info_data'][$i]['info_type']=3;
+					 $info['info_data'][$i]['url']=$info_url;
+					 $info['info_data'][$i]['info_img']=$info_img;
+				   }  
+				}
+				$json_data=json_encode($info);
+				$Temp_item['item_data']=$json_data;
+			  }else{
+			    $Temp_item['item_data']=$val['item_data'];
+			  }
+			  
+			  D('tempitem')->data($Temp_item)->add();
+		  }
+		}  
+	}
+	
+	
+	/**
+	 * 模板编辑首页中iframe调取的模板展示页面
+	 * @author zhanghui
+	 */
+    public function index_edit(){
+	    //获取商城信息
+		$shop_proxy=get_shop_proxy();
+		$shop_id=$shop_proxy['shop_id'];
+		//搜索本商城首页信息
+		$shouye = D("temp")->getinfo(array('shop_id'=>$shop_id,'temp_type'=>1));
+	    $temp_id=$shouye['temp_id'];
+		//获取所有样式
+		$res = D("tempstyle")->getlist();
+		//获取已添加的样式
+		$item_param=array();
+		$item_param['temp_id']=$temp_id;
+		//$item_param['shop_id']=$shop_id;
+		$item_order='item_order asc ,item_id asc';
+		$item_data = D("tempitem")->getlist($item_param,$item_order);
+		$this->assign('res',$res);
+		$this->assign('item_data',$item_data);
+		$this->assign('temp_id',$temp_id);
+		$this->display("index_edit");
+    }
+	
+	
+	/**
+	 * 模板演示页面
+	 * @author zhanghui
+	 */
+    public function index_show(){
+	    //获取商城信息
+		$shop_proxy=get_shop_proxy();
+		$shop_id=$shop_proxy['shop_id']?$shop_proxy['shop_id']:1;
+		//搜索本商城首页信息
+		$shouye = D("temp")->getinfo(array('shop_id'=>$shop_id,'temp_type'=>1));
+	    $temp_id=$shouye['temp_id']?$shouye['temp_id']:0;
+		//获取所有样式
+		$res = D("tempstyle")->getlist();
+		//获取已添加的样式
+		$item_param=array();
+		$item_param['temp_id']=$temp_id;
+		$item_param['item_is_used']=1;
+		$item_param['shop_id']=$shop_id;
+		$item_order='item_order asc ,item_id asc';
+		$item_data = D("tempitem")->getlist($item_param,$item_order);
+		//生成资源样式
+		$this->createstyle($temp_id);
+		$this->assign('show',1);
+		$this->assign('res',$res);
+		$this->assign('item_data',$item_data);
+		$this->assign('temp_id',$temp_id);
+		$this->display("index_show");
+    }
+	
+//在查看预览死，就是生成对应的生成资源文件
+private function createstyle($temp_id){
+  $res = D('tempstyle')->select();
+  $item_data = D("tempitem")->where("temp_id=$temp_id ")->order('item_order asc ,item_id asc')->select();
+//生成css文件夹
+  $temppath="Uploads/temp/temp$temp_id/";
+  if (!file_exists($temppath."css/")){    mkdir(iconv("UTF-8", "GBK",$temppath."css/"),0777,true);  }
+  //如果没有css文件，就生成
+  if (!file_exists($temppath."css/style.css")){   echo fopen($temppath."css/style.css", "w"); }
+  //清空原有css数据
+  $myfile = fopen($temppath."css/style.css", "w") or die("Unable to open file!1");
+  //将文件属性改为添加
+  $myfile = fopen($temppath."css/style.css", "a+") or die("Unable to open file!2");
+  //记录已经写入的样式，如果已经写入就不需要再次写入
+  $arrstyle=array();
+  foreach($item_data as $key=>$val){
+   $style_id=$val['style_id'];
+   $filepath="Public/temp/style$style_id/web/css/style.css";
+   if(file_exists($filepath)&&!in_array($style_id,$arrstyle)){
+	 $s=file_get_contents($filepath);
+	 fwrite($myfile,$s);
+   }
+   $arrstyle[$key]=$val['style_id'];
+  }
+  fclose($myfile);
+//生成js文件夹
+  if (!file_exists($temppath."js/")){    mkdir(iconv("UTF-8", "GBK",$temppath."js/"),0777,true); }
+  //如果没有js文件，就生成
+  if (!file_exists($temppath."js/style.js")){    fopen($temppath."js/style.js", "w"); }
+  //清空原有js数据
+  $jsfile = fopen($temppath."js/style.js", "w") or die("Unable to open file!3");
+  //将文件属性改为添加
+  $jsfile = fopen($temppath."js/style.js", "a+") or die("Unable to open file!4");
+  //记录已经写入的样式，如果已经写入就不需要再次写入
+  $arrjs=array();
+  foreach($item_data as $key=>$val){
+   $style_id=$val['style_id'];
+   $filepath="Public/temp/style$style_id/web/js/style.js";
+   if(file_exists($filepath)&&!in_array($style_id,$arrjs)){
+	 $s=file_get_contents($filepath);
+	 fwrite($jsfile,$s);
+   }
+   $arrjs[$key]=$val['style_id'];
+  }
+  fclose($jsfile);
+
+}
+
+
+//将模板样式添加到模板列表中
+public function itemadd()
+{ 
+  //获取商城信息
+  $shop_proxy=get_shop_proxy();
+  //获取此模板已选择的个数
+        $item_param=array();
+		$item_param['temp_id']=I('temp_id');
+		$item_param['item_is_used']=1;
+		$item_param['shop_id']=$shop_proxy['shop_id'];
+		$item_param['style_id']=I('style_id');
+		$item_data = D("tempitem")->getlist($item_param);
+		$num=count($item_data);
+  //判断此模板添加的最大个数
+  if(I('style_id')==2&&$num>=1){
+     $this->error ( '此模板只能添加一个！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+  }elseif(I('style_id')==8&&$num>=1){
+     $this->error ( '此模板只能添加一个！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+  }else{
+	  //添加样式到模板中
+	  $Temp_item=array();
+	  $Temp_item['item_title']="  ";
+	  $Temp_item['style_id']=I('style_id');
+	  $Temp_item['temp_id']=I('temp_id');
+	  $Temp_item['shop_id']=$shop_proxy['shop_id'];
+	  $Temp_item['item_is_used']=0;
+	  $Temp_item['item_data']="";
+	  $Temp_item['item_order']=225;
+	  D('tempitem')->data($Temp_item)->add();
+  }
+  $this->success ( '添加成功！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+}
+
+
+//将模板样式从模板列表中删除
+public function itemdel()
+{
+  //添加样式到模板中
+  $data=array();
+  $data['item_id']=I('item_id');
+  $data['temp_id']=I('temp_id');
+  $data['style_id']=I('style_id');
+  //$data['shop_id']=$this->shop_id;
+  D('tempitem')->itemdel($data);
+  $this->success ( '删除成功！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+}
+
+
+	
+//编辑一个模板列表中的一个模板样式
+public function itemedit()
+{
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  $item_data=json_decode($Temp_item["item_data"],true);
+  $this->assign('data',$item_data);
+  $this->assign('item_id',$item_id);	
+  $this->assign('style_id',$style_id);	
+  $this->assign('temp_id',$temp_id);	
+  $this->display("tempitem_edit");
+}
+
+//保存编辑后的模板样式数据
+public function editupdate()
+{
+  $item_id=$_POST['item_id'];
+  $style_id=$_POST['style_id'];
+  $temp_id=$_POST['temp_id'];
+  $info_title=$_POST['info_title'];
+  //产品列表1
+  $info_type=$_POST['info_type'];
+  $info_page=$_POST['ispage'];
+  $info_num=$_POST['num'];
+  //导航1
+  $class_type=$_POST['class_type']?$_POST['class_type']:1;
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  $data=json_decode($Temp_item["item_data"],true);
+  //公共信息
+  $data['info_title']= $info_title;
+  //通过不同的样式id，确定保存的数据
+  switch($style_id){
+    case 1:
+ 
+	 break; 
+    case 2:
+     $data['class_type']=$class_type;
+	 break; 
+    case 7:
+	  //封装信息
+	  $data['info_type']= $info_type;
+	  $data['info_page']= $info_page;
+	  $data['info_num']= $info_num;
+	  //数值等于的字段
+	  if(isset($_POST['searchkey'])&&is_array($_POST['searchkey'])){
+		foreach($_POST['searchkey'] as $key=>$val){
+		  if(!empty($val)){
+		   $data['info_data']['0'][$key]=$val;
+		  } 
+		}
+	  }
+	  //数值like的字段
+	  if(isset($_POST['keyword'])&&!empty($_POST['keyword'])&&is_array($_POST['searchkey'])){
+		foreach($_POST['keyword'] as $key=>$val){
+		  if(!empty($val)){
+		   $data['info_data']['1'][$key]=$val;
+		  } 
+		}
+	  }
+	  break;
+  }
+  $json_data=json_encode($data);
+  //保存
+  D("tempitem")->itemedit(array('item_data'=>$json_data,'item_title'=>$info_title),$item_id);
+  $this->success ( '修改成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+
+}
+
+
+
+//编辑模板样式一个数据信息
+public function subedit()
+{
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id'];
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  $item_data=json_decode($Temp_item["item_data"],true);
+  $info_data=$item_data['info_data'];
+  $arr=array();
+  if(is_array($info_data)&&array_key_exists($id, $info_data)){
+    $arr =$info_data[$id];
+  }else{
+	$arr['info_title']="null";
+    $arr['info_type']="null";
+	$arr['info_value']="null";
+	$arr['img']="null";
+  }
+  $this->assign('temp_id',$temp_id);
+  $this->assign('style_id',$style_id);
+  $this->assign('item_id',$item_id);
+  $this->assign('id',$id);
+  $this->assign('data',$arr);
+  $this->display("item_subedit");
+  
+ // return $this->render('item_subedit',['item_id'=>$item_id,'style_id'=>$style_id,'temp_id'=>$temp_id,'id'=>$id,'data'=>$arr]);
+}
+
+//保存一个模板样式的一个数据信息
+public function subeditupdate()
+{
+  $item_id=$_POST['item_id'];
+  $style_id=$_POST['style_id'];
+  $temp_id=$_POST['temp_id'];
+  $id=$_POST['id'];
+  $info_title=isset($_POST['info_title'])?$_POST['info_title']:"";
+  $info_content=isset($_POST['info_content'])?$_POST['info_content']:"";
+  $info_type=$_POST['info_type'];
+  $info_value=$_POST['info_value'];
+  $info_image=$_POST['info_image'];
+  $img_data_old=$_POST['img_data_old'];
+  if($info_image){
+  
+  }else{
+	   $info_image=$img_data_old;
+  }
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  $data['info_data'][$id]['info_img']= $info_image;
+  $data['info_data'][$id]['info_type']= $info_type;
+  $data['info_data'][$id]['info_value']= $info_value;
+  $data['info_data'][$id]['info_title']= $info_title;
+  $data['info_data'][$id]['info_content']= $info_content;
+  if($info_type==1){
+    $data['info_data'][$id]['url']= $info_value;
+  }
+  //判断信息类型
+  if($info_type==2){
+    $p_data = D("goods")->getinfobyid($info_value);
+    $data_info=array();
+    $data['info_data'][$id]['info_data']['goods_name']=$p_data['goods_name'];
+    $data['info_data'][$id]['info_data']['goods_price']=$p_data['goods_price'];
+    $data['info_data'][$id]['info_data']['goods_url']="goods.php?id=".$p_data['goods_id'];
+    $data['info_data'][$id]['info_data']['goods_img']=$p_data['goods_image'];  
+	$data['info_data'][$id]['url']= "goods.php?id=".$p_data['goods_id'];
+  }else{
+    $data['info_data'][$id]['info_data']= "";
+  }
+  $json_data=json_encode($data);
+  //保存
+  D("tempitem")->itemedit(array('item_data'=>$json_data),$item_id);
+  $this->success ( '添加成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+
+//编辑给模板样式增加一个数据（给数据不确定数量的使用）
+public function itemsubadd()
+{
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id'];
+  $this->assign('temp_id',$temp_id);
+  $this->assign('style_id',$style_id);
+  $this->assign('item_id',$item_id);
+  $this->assign('id',$id);
+  $this->display("item_subadd");
+}
+
+//保存样式的一个数据数据
+public function subaddupdate()
+{
+  $item_id=$_POST['item_id'];
+  $style_id=$_POST['style_id'];
+  $temp_id=$_POST['temp_id'];
+  $id=$_POST['id']; 
+  $info_title=$_POST['info_title'];
+  $info_type=$_POST['info_type'];
+  $info_value=$_POST['info_value'];
+  $info_image=$_POST['info_image'];
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  $data['info_data'][$id]['info_title']= $info_title;
+  $data['info_data'][$id]['info_img']= $info_image;
+  $data['info_data'][$id]['info_type']= $info_type;
+  $data['info_data'][$id]['info_value']= $info_value;
+  //判断信息类型
+  if($info_type==2){
+    $p_data = D("goods")->getGoodsBySerial($info_value);
+    $data_info=array();
+    $data['info_data'][$id]['info_data']['goods_name']=$p_data['goods_name'];
+    $data['info_data'][$id]['info_data']['goods_price']=$p_data['goods_price'];
+    $data['info_data'][$id]['info_data']['goods_url']="goods.php?id=".$p_data['goods_id'];
+    $data['info_data'][$id]['info_data']['goods_img']=$p_data['goods_image'];  
+  }else{
+    $data['info_data'][$id]['info_data']= "";
+  }
+  $json_data=json_encode($data);
+  //保存
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+  $this->success ( '添加成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+//删除模板样式的一个数据信息
+public function   subdel(){
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id'];
+  $Temp_item = D("tempitem")->findbyid($item_id);
+ //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  unset($data[$id]);
+  $json_data=json_encode($data);
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+   $this->success ( '删除成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+
+
+//已选择到模板中的样式向上
+public function itemlistup(){
+  $item_id=I('item_id');
+  $style_id=I('style_id');
+  $temp_id=I('temp_id');
+  $item_param=array();
+  $item_param['temp_id']=$temp_id;
+  //$item_param['shop_id']=$shop_id;
+  $item_order='item_order asc ,item_id asc';
+  $item_data = D("tempitem")->getlist($item_param,$item_order);
+  //删除最后一个商品列表，让他保持到最后一个
+  array_pop($item_data);
+  $num=0;
+  foreach($item_data as $key=>$val){
+	if($val['item_id']==$item_id&&$num>0){
+	  D("tempitem")->where('item_id='.$num)->data(array('item_order'=>$key))->save()  ;
+	  D("tempitem")->where('item_id='.$val['item_id'])->data(array('item_order'=>$key-1))->save()  ;
+	}else{
+	  D("tempitem")->where('item_id='.$val['item_id'])->data(array('item_order'=>$key))->save()  ;
+	}
+	$num=$val['item_id'];
+  }
+   $this->success ( '操作成功！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+}
+
+
+//已选择到模板中的样式向下
+public function itemlistdown(){
+  $item_id=I('item_id');
+  $style_id=I('style_id');
+  $temp_id=I('temp_id');
+  $item_param=array();
+  $item_param['temp_id']=$temp_id;
+  //$item_param['shop_id']=$shop_id;
+  $item_order='item_order asc ,item_id asc';
+  $item_data = D("tempitem")->getlist($item_param,$item_order);
+  //删除最后一个商品列表，让他保持到最后一个
+  array_pop($item_data);
+  $flag=0;
+  $num=0;
+  //判断他的下个是否为商品列表
+  $f=0;
+ foreach($item_data as $key=>$val){
+     if($val['item_id']==$item_id){
+		  $f=1;
+	 }else{
+	   if($f==1&&$val['style_id']==7){
+		    $this->success ( '操作成功！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+			exit;
+	   }
+	   $f=0;  
+	 }
+  }
+
+  foreach($item_data as $key=>$val){
+		  if($flag==1){
+			D("tempitem")->where('item_id='.$num)->data(array('item_order'=>$key))->save()  ;
+			D("tempitem")->where('item_id='.$val['item_id'])->data(array('item_order'=>$key-1))->save()  ;
+			$flag=0;
+		  }else{
+		    D("tempitem")->where('item_id='.$val['item_id'])->data(array('item_order'=>$key))->save()  ;
+		  } 
+		  if($val['item_id']==$item_id){
+	       $flag=1;
+	      }
+	      $num=$val['item_id'];
+  }
+ 
+ $this->success ( '操作成功！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+}
+
+
+//已选择到模板中的样式是否可用
+public function itemisused(){
+  $item_param=array();
+  $item_param['item_id']=I('item_id');
+  $item_param['style_id']=I('style_id');
+  $item_param['temp_id']=I('temp_id');
+  //$item_data['shop_id']=$this->shop_id;
+  //获取模板内容
+  $item_data=array();
+  $item_data=D('tempitem')->info($item_param);
+  $param=array();
+  if($item_data['item_is_used']==1){
+    $param['item_is_used']=0;
+  }else{
+    $param['item_is_used']=1;
+  }
+  
+   D('tempitem')->itemedit($param, $item_param['item_id']);
+ 
+ $this->success ( '操作成功！', U ( 'admin/tempitem/index/temp_id/'.I('temp_id') ) );
+}
+
+
+
+
+
+
+
+//编辑样式给导航栏目模板样式增加一个数据
+public function itemsubclassadd()
+{
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id'];
+  $this->assign('temp_id',$temp_id);
+  $this->assign('style_id',$style_id);
+  $this->assign('item_id',$item_id);
+  $this->assign('id',$id);
+  $this->display("item_subclassadd");
+}
+
+
+//保存导航样式的一个数据数据
+public function subclassaddupdate()
+{
+  $item_id=$_POST['item_id'];
+  $style_id=$_POST['style_id'];
+  $temp_id=$_POST['temp_id'];
+  $id=$_POST['id']; 
+  $info_title=$_POST['info_title'];
+  $info_type=$_POST['info_type'];
+  $info_value=$_POST['info_value'];
+  $info_image=$_POST['info_image'];
+  
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  $data['info_data'][$id]['info_title']= $info_title;
+  $data['info_data'][$id]['info_img']= $info_image;
+  $data['info_data'][$id]['info_type']= $info_type;
+  $data['info_data'][$id]['info_value']= $info_value;
+  $data['info_data'][$id]['info_order']=225;
+  $data['info_data'][$id]['info_isused']=0;
+  //判断信息类型
+  if($info_type==1){
+    $data['info_data'][$id]['url']= $info_value;
+  }
+  
+  if($info_type==2){
+    $p_data = D("goods")->getGoodsBySerial($info_value);
+    $data_info=array();
+    $data['info_data'][$id]['data']['goods_name']=$p_data['goods_name'];
+    $data['info_data'][$id]['data']['goods_price']=$p_data['shop_price'];
+    $data['info_data'][$id]['data']['goods_url']="goods.php?id=".$info_value;
+    $data['info_data'][$id]['data']['goods_img']=$p_data['goods_img'];  
+	$data['info_data'][$id]['url']= "goods.php?id=".$info_value;
+  }
+  if($info_type==3){
+    $data['info_data'][$id]['url']= "classgoods.php?id=".$info_value;
+  }
+
+  $json_data=json_encode($data);
+  //保存
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+  $this->success ( '添加成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+//保存导航样式的一个数据数据,启用
+public function subclassisused()
+{
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id']; 
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  
+  //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  
+  if($data['info_data'][$id]['info_isused']==1){
+    $data['info_data'][$id]['info_isused']=0;
+  }else{
+    $data['info_data'][$id]['info_isused']=1;
+  }
+  
+
+  $json_data=json_encode($data);
+  //保存
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+  $this->success ( '添加成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+//编辑样式给样式一个数据（给数据不确定数量的使用）
+public function itemsubclassedit()
+{
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id'];
+  
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  
+  //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  
+  $this->assign('info',$data['info_data'][$id]);
+  $this->assign('temp_id',$temp_id);
+  $this->assign('style_id',$style_id);
+  $this->assign('item_id',$item_id);
+  $this->assign('id',$id);
+  $this->display("item_subclassedit");
+}
+//保存导航样式的一个数据数据
+public function subclasseditupdate()
+{
+  $item_id=$_POST['item_id'];
+  $style_id=$_POST['style_id'];
+  $temp_id=$_POST['temp_id'];
+  $id=$_POST['id']; 
+  $info_title=$_POST['info_title'];
+  $info_type=$_POST['info_type'];
+  $info_value=$_POST['info_value'];
+  $info_image=$_POST['info_image']; 
+  $Temp_item = D("tempitem")->findbyid($item_id);
+  //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  $data['info_data'][$id]['info_title']= $info_title;
+  $data['info_data'][$id]['info_img']= $info_image;
+  $data['info_data'][$id]['info_type']= $info_type;
+  $data['info_data'][$id]['info_value']= $info_value;
+  //判断信息类型
+  if($info_type==1){
+    $data['info_data'][$id]['url']= $info_value;
+  }
+  
+  if($info_type==2){
+    $p_data = D("goods")->getGoodsBySerial($info_value);
+    $data_info=array();
+    $data['info_data'][$id]['data']['goods_name']=$p_data['goods_name'];
+    $data['info_data'][$id]['data']['goods_price']=$p_data['shop_price'];
+    $data['info_data'][$id]['data']['goods_url']="goods.php?id=".$info_value;
+    $data['info_data'][$id]['data']['goods_img']=$p_data['goods_img'];  
+  }
+  
+  if($info_type==3){
+    $data['info_data'][$id]['url']= "goods.php?id=".$info_value;
+  }
+  
+  $json_data=json_encode($data);
+  //保存
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+  $this->success ( '添加成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+
+
+//删除样式的一个数据
+public function   itemsubclassdel(){
+  $item_id=$_GET['item_id'];
+  $style_id=$_GET['style_id'];
+  $temp_id=$_GET['temp_id'];
+  $id=$_GET['id'];
+  $Temp_item = D("tempitem")->findbyid($item_id);
+ //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);
+  unset($data['info_data'][$id]);
+  $json_data=json_encode($data);
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+   $this->success ( '删除成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+
+//已选择的导航栏目中的样式向上
+public function itemsubclassup(){
+  $item_id=I('item_id');
+  $style_id=I('style_id');
+  $temp_id=I('temp_id');
+  $id=I('id');
+  $Temp_item = D("tempitem")->findbyid($item_id);
+ //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);  
+  $up_id=$id-1;
+  $up_data=$data['info_data'][$up_id];
+  if($up_data){
+    $data['info_data'][$up_id]=$data['info_data'][$id];
+	$data['info_data'][$id]=$up_data;
+  }
+  $json_data=json_encode($data);
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+   $this->success ( '操作成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+
+//已选择的导航栏目中的样式向下
+public function itemsubclassdown(){
+  $item_id=I('item_id');
+  $style_id=I('style_id');
+  $temp_id=I('temp_id');
+  $id=I('id');
+  $Temp_item = D("tempitem")->findbyid($item_id);
+ //封装信息
+  $data=array();
+  $data=json_decode($Temp_item['item_data'],true);  
+  $up_id=$id+1;
+  $up_data=$data['info_data'][$up_id];
+  if($up_data){
+    $data['info_data'][$up_id]=$data['info_data'][$id];
+	$data['info_data'][$id]=$up_data;
+  }
+  $json_data=json_encode($data);
+  D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+   $this->success ( '操作成功！', U ( "admin/tempitem/itemedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id") );
+}
+
+
+
+
+
+
+
+	
+	
+}

@@ -1,0 +1,4 @@
+<div class="col-md-7" style="padding-bottom:10px;">
+			  <input class="form-control"  name="rules[]"     type="text"  style="display:inline"  />
+			  <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" style="display:inherit">删除栏目</button>
+</div>  

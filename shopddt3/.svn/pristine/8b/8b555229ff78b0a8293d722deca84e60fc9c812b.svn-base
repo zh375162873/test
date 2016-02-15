@@ -1,0 +1,97 @@
+<?php
+/*
+ * 核销码管理模型
+ * 对核销码的管理核销操作
+ */
+namespace Home\model;
+use Think\Model;
+use BizService\OrderService;
+
+class DhmManageModel extends Model {
+    public $orderservice,$order,$inte_order,$price_order;
+    public function __construct(){
+        parent::__construct();
+        $this->orderservice=new OrderService();
+    }
+	protected $fields=array("id","goods_id","order_id","shop_id","store_id","buyer_id","dhm_code","add_time","dh_time","status","refund_status","type","_pk"=>"id");
+	protected $auto=array(
+		array("add_time","time",1,"function"),
+		array("dh_time","time",1,"function"),
+	);
+	
+	
+	//生成核销码
+	public function create_dhm($orderinfo,$type){
+		//初始化数据
+		$num=$orderinfo['goods_num'];
+		$info=array(
+		    "goods_id"=>$orderinfo['goods']['goods_id'],
+		    "order_id"=>$orderinfo['order_id'],
+		    "shop_id"=>$orderinfo['shop_id'],
+		    "store_id"=>$orderinfo['store_id'],
+		    "buyer_id"=>$orderinfo['buyer_id'],
+		    "status"=>0,
+		    "type"=>$type,
+		);
+		
+	    for($i=0;$i<$num;$i++){
+	       $dhm_code=$this->recreatedhm();
+	       $info['dhm_code']=$dhm_code;
+	       $info['add_time']=time();
+	       $this->data($info)->add();
+	    }
+         return true;		
+	}
+	
+	//验证核销码
+	/*
+	 * $type 1:普通商品兑换码；2：积分商城兑换码；3：兑奖活动商品兑换码
+	 */
+	public function yanzheng_dhm($dhm_code){
+		
+	    //验证验证码
+	    $dhm_code=trim($dhm_code);
+	    $arr=$this->where(array("dhm_code"=>$dhm_code))->find();
+	    if($arr){
+	        if($this->where(array("dhm_code"=>$dhm_code))->data(array("status"=>1,"dh_time"=>time()))->save()){
+	           //判断相关订单的核销码还有吗
+	            if($this->where(array("order_id"=>$arr['order_id'],"type"=>$arr['type']))->find()){
+	                 
+	            }else{
+	                $this->order=D("Orders");
+	                $this->inte_order=D("IntegralOrders");
+	                $this->price_order=D("PriceOrders");
+	                 if($arr['type']==1){
+	                    
+	                     $this->order->changestatus($arr['order_id'],2);
+	                 }elseif ($arr['type']==2){
+	                     $this->inte_order->changestatus($arr['order_id'],2);
+	                 }elseif ($arr['type']==3){
+	                     $this->price_order->changestatus($arr['order_id'],2);
+	                 }
+	            }   
+	         
+	        }
+	    }
+	    
+	}
+	
+	//核销码列表
+	public function list_dhm(){
+		
+	}
+	
+	//判断生成码是否重复
+	public function recreatedhm(){
+	    $dhm_code=$this->orderservice->CreateExchangeCode();
+	    $arr=$this->where(array("dhm_code"=>$dhm_code))->find();
+	    if(!$arr){
+	        return $dhm_code;
+	    }else{
+	        $this->recreatedhm();
+	    }
+	}
+	
+	
+	
+}

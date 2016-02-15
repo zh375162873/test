@@ -1,0 +1,92 @@
+<?php
+namespace Admin\Controller;
+use Think\Controller;
+use BizService\UserService;
+use Org\Util\Date;
+use BizService\OrderService;
+use BizService\ExeclService;
+use BizService\DeliveryService;
+
+class DeliveryController extends BaseController {
+    public $shop_id,$users,$orders,$refundreturn_db,$orderservice;
+    public function _initialize(){
+        parent::_initialize();
+        $shop_info=get_shop_proxy();
+        $this->shop_id = $shop_info['shop_id']?$shop_info['shop_id']:1;
+        $this->users = new UserService();
+        $this->orderservice = new OrderService();
+        $this->orders = D("Orders");
+        $this->refundreturn_db = D("RefundReturn");
+    }
+    
+    public function index(){
+        $order=new OrderService(); 
+        $order_list=$order->get_delivery_order_list();
+        // var_dump($order_list);exit;
+        $this->assign("orderlist",$order_list['list']);
+        $this->assign("page",$orderlist['page']);
+        $this->display("list");
+    }
+	
+   //导出excel订单列表
+    public function orderlist_exe(){
+        $orderlist = $this->orders->order_list_excel($this->shop_id);
+        $data=array();
+        for($i=0;$i<count($orderlist);$i++){
+            $data[$i]['order_sn']= "'".$orderlist[$i]['order_sn']."'";
+            $data[$i]['goods_name']=$orderlist[$i]['goods_name'];
+            $data[$i]['buyer_name']= $orderlist[$i]['buyer_name'];
+            $data[$i]['nick_name']=$orderlist[$i]['nick_name'];
+            $data[$i]['goods_price']= $orderlist[$i]['goods_price'];
+            $data[$i]['goods_num']=$orderlist[$i]['goods_num'];
+            $data[$i]['order_amount']= $orderlist[$i]['order_amount'];
+            $data[$i]['payment_time']=$orderlist[$i]['payment_time'];
+            $data[$i]['finnshed_time']= $orderlist[$i]['finnshed_time'];
+            $data[$i]['order_status']="";
+            if($orderlist[$i]['order_status']==1){
+             $data[$i]['order_status'] .= "未消费";
+            }elseif ($orderlist[$i]['order_status']==2){
+              $data[$i]['order_status'] .= "已消费";
+            }elseif ($orderlist[$i]['order_status']==3){
+              $data[$i]['order_status'] .= "已取消";
+            }
+            if($orderlist[$i]['$vo.refund_state']==1){
+                $data[$i]['order_status'] .= "  有退款";
+            }
+            if($orderlist[$i]['evaluation_state']==0){
+               $data[$i]['order_status'] .= "  待评价";
+            }elseif ($orderlist[$i]['evaluation_state']==0){
+               $data[$i]['order_status'] .= "  已评价";
+            }
+        }
+        $ExeclService = new ExeclService();       
+        $ExeclService->downMoreColumnDateToExel($data,"订单列表信息",array('order_sn','goods_name','buyer_name','nick_name','goods_price','goods_num','order_amount','payment_time','finnshed_time','order_status'),array('订单编号','商品名称','用户账号','用户昵称','单价','数量','总价','下单时间','消费时间','订单状态'),array(20,20,35,10,10,15,25,25,25,20),200);
+    }  
+	public function addDelivery(){
+        $deliveryAdd = array();
+        $deliveryAdd['orderId'] = I('post.order_id',0,'intval');
+        $deliveryAdd['deliveryType'] = I('post.delivery_type','','strval');
+        $deliveryAdd['deliverySn'] = I('post.delivery_sn','','strval');
+        $deliveryAdd['deliveryRemark'] = I('post.delivery_remark','','strval');
+        $Delivery = new DeliveryService();
+        $deliveryRes = $Delivery->addDeliveryMission($deliveryAdd);
+    }
+    public function getDeliveryInfo(){
+
+        $Delivery = new DeliveryService();
+
+        $deliveryId = I('post.delivery_id',0,'intval');
+        $deliveryInfo = $Delivery->getDeliveryInfo($deliveryId);
+        $deliveryInfo['log'] = $Delivery->getDeliverylog($deliveryId);
+        echo json_encode($deliveryInfo);
+    }
+    public function updateDeliveryInfo(){
+
+        $Delivery = new DeliveryService();
+        $deliveryId = I('post.delivery_id',0,'intval');
+        $infoText = I('post.info_text','','strval');
+        $deliveryRes = $Delivery->updateDeliveryInfo($deliveryId,$infoText);
+    }
+   
+}
+

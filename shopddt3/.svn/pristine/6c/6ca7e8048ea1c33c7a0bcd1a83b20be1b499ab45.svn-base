@@ -1,0 +1,157 @@
+<?php
+/*
+ * 普通商品订单支付和管理模块
+ */
+namespace Home\Controller;
+use BizService\IntegralOrderService;
+use BizService\UserService;
+use BizService\GoodsstoreService;
+
+class IntegralorderController extends BaseController {
+	public $integralgoods_db,$integralorder,$orderservice,$users,$_userid;
+	public function __construct() {
+		parent::__construct();
+		//模型初始化验证
+		$this->integralorder=D("IntegralOrders");
+		$this->integralgoods=new GoodsstoreService();//没有商品添加表，先模拟
+		$this->orderservice=new IntegralOrderService();
+		$this->users = new UserService();
+		if(empty(session("userId"))){
+		    // $this->error("用户没有登录，请先登录!");
+		}else{
+		    $this->_userid=session("userId");
+		}
+	}
+	
+    public function index(){
+        echo '积分商城模块';
+    }
+    
+    
+    //生成订单，需要做一个跳转，防止刷新页面生成多余订单
+    //仅仅生成订单
+    public function create(){
+       //判断请求类型
+      
+       if(IS_GET){
+       	//初始化参数
+        $goods_id=I("post.id",1);
+        $num=I("post.num",2);
+        if(empty($goods_id)&&empty($num)){
+            $this->error('参数不全');
+        }
+       	//获取商品数据
+      	 $goods_arr=$this->integralgoods->getinfo($goods_id,array("goods_id","goods_name","shop_id","store_id","store_name","goods_price","goods_integral","goods_marketprice","goods_storage","goods_image"),2);
+        
+	       	//判断购买数量库存是否足够
+	       	if($num>$goods_arr['goods_storage']){
+	       		$this->error('商品库存不足');
+	       	}else{
+	       	    $goods_arr['goods_num']=$num;   
+	       	}
+        
+            $goods_info=array(
+                      "goods_id" => $goods_arr['goods_id'],
+                      "shop_id" => $goods_arr['shop_id'],
+                      "store_id" => $goods_arr['store_id'],
+                      "stroe_name" => $goods_arr['stroe_name'],
+                      "goods_name" => $goods_arr['goods_name'],
+                      "integral_num"=>$goods_arr['goods_integral'],
+                      "goods_marketprice"=>$goods_arr['goods_marketprice'],
+                      "goods_image"=>$goods_arr['goods_image'],
+                      "goods_num"=>$num,
+                      "integral_amount"=>$goods_arr['goods_integral']*$num,
+            );
+            
+            //判断用户积分余额是否足够购买商品
+            $userinfo = $this->users->userInfo($this->_userid);
+       	    $zh_integral = $userinfo['pay_points'];
+       	    
+            if($zh_integral < $goods_info['integral_amount']){
+                $this->error("用户账户积分不足");
+            }
+            
+            $order_id=$this->integralorder->createorder($goods_info);
+
+	       	//提交订单,生成订单
+	       	if ($order_id){
+	       		 $this->redirect('Integralorder/createpay', array('id'=>$order_id));
+	       	}else{
+	       		$this->error('生成订单失败');
+	       	}
+	       
+       }else{
+       	    $this->error('非法请求');
+       }
+
+    }
+    
+    
+    //订单详情页和支付页面
+    public function createpay(){
+        $orderid=I("get.id");
+    	//获取订单信息
+    	$orderinfo=$this->integralorder->getinfo($orderid);
+    	$userinfo = $this->users->userInfo($this->_userid);
+       	$zh_integral = $userinfo['pay_points'];
+    	//处理需要支付的数据
+    	$intepay=$orderinfo['integral_amount'];//订单基金支付额
+    	//$user_inteamount=300;//用户积分账户额
+    	
+    	//生成支付按钮和相关订单信息
+        echo "用户积分账户:".$zh_integral."<br/>";
+        echo "<a href='".U("Integralorder/return_do",array("id"=>$orderid))."'>确认积分支付".$intepay."积分</a>";
+    	//获取模板
+    	//$this->assign("pay",$pay);
+    	//$this->display();
+    }
+    
+    //支付成功后的回调函数
+    public function return_do(){
+        /*
+         * 初始化数据
+         * 牵扯订单号的返回和支付好的返回
+         */
+         $orderid=I("get.id");
+         $orderinfo=$this->integralorder->where(array("order_id"=>$orderid))->find();
+       
+         if($orderinfo['status']==0){
+             if($this->integralorder->notiy_order($orderinfo)){
+                 $this->success("支付成功");
+             }else{
+                 $this->error("支付失败");
+             }
+         }else{
+             $this->error("订单已经过期了");
+         }
+         
+    }
+    
+    /*
+     * 用户中心订单管理 
+     */
+    // 我的订单
+    public function orderlist(){
+    	
+    	//订单列表
+    	$arr=$this->integralorder->list_order();
+    }
+    
+    //订单详情
+    public function orderinfo(){
+    	//订单详情
+    	$this->integralorder->getinfo($order_sn);
+    }
+    
+    /*
+     * 退款流程开发
+     */
+    public function refund_money(){
+    	//初始化参数 order_id
+    	
+    	//获取订单详情
+    	$this->integralorder->getinfo();
+    	
+    }
+    
+}

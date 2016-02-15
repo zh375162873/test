@@ -1,0 +1,57 @@
+<?php
+
+namespace BizService;
+
+/**
+ * 接口操作
+ *
+ * @author 王春一
+ */
+class OthershareService extends BaseService
+{
+    
+    /**
+     * 兑换码验证
+     * @param unknown $dhm_code 兑换码
+     * @param unknown $store_id 商户id
+     * 返回array(
+     *     error 错误编号 0成功 1 不存在数据  2操作失败
+     *     data  返回数据
+     *  )
+     */
+    public function dhm_yanzheng($dhm_code,$store_id,$proxy_id){
+       $shop=new ShopService();
+       $arr=$shop->get_shop_info_by_proxy($proxy_id);
+       $shop_id = $arr[0]['shop_id'];
+        //处理兑换码数据
+       $arr = D("Home/DhmManage")->yanzheng_dhm($dhm_code,$store_id,$shop_id);
+       
+       return $arr;
+    }
+    /**
+     * 商户兑换码列表
+     * @param unknown $store_id 商户id
+     * @param unknown $proxy_id 代理商id
+     * @param unknown $status 兑换码状态
+     */
+    
+    public function dhm_store_list($store_id,$proxy_id,$status){
+        $shop=new ShopService();
+        $arr=$shop->get_shop_info_by_proxy($proxy_id);
+        $shop_id = $arr[0]['shop_id'];
+        //获取商户兑换码列表
+        $arr = D("Home/DhmManage");
+    }
+    /**
+     * 统计核销码
+     * @param unknown $userid
+     * @param unknown $proxy_id
+     * @param unknown $start_time
+     * @param unknown $end_time
+     */
+    public function dhm_count($userid,$proxy_id,$start_time,$end_time){
+        
+    }
+    
+    
+}

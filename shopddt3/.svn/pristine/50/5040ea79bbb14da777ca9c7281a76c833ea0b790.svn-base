@@ -1,0 +1,255 @@
+<layout name="Extend/layout"/>
+<style>
+.title1:link,.title1:visited{
+color:#FFFFFF}
+.title1:hover{
+text-decoration:underline;}
+</style>
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+
+<div class="container">
+<div class="secondaryMenu" style="border-bottom:1px solid #d6e1ee;">
+    	<ul class="nav nav-tabs">
+			<li >
+				<span><a class="btn btn-success btn-sm" href="__APP__/admin/extend/index">返回渠道列表</a></span>
+			</li>
+		</ul>
+    </div>
+
+
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+                <tr class="biaoti border_d6e1ee">
+                    <th style="border-right:1px solid #CCCCCC">ID</th>
+					<th style="border-right:1px solid #CCCCCC">结算日期</th>
+					<th style="border-right:1px solid #CCCCCC">佣金总额</th>
+					<th style="border-right:1px solid #CCCCCC">分成比例</th>
+                    <th style="border-right:1px solid #CCCCCC">分成金额</th>
+					<th style="border-right:1px solid #CCCCCC">合计</th>
+					<th style="border-right:1px solid #CCCCCC">调整金额</th>
+					<th style="border-right:1px solid #CCCCCC">实际支付</th>
+					<th style="border-right:1px solid #CCCCCC">支付说明</th>
+					<th style="border-right:1px solid #CCCCCC">结算日期</th>
+					<th style="border-right:1px solid #CCCCCC">支付日期</th>
+                </tr>
+		   <?php
+		   foreach($channlelist_first as $key=>$val){
+		   ?>		
+            <tr class="trbor"  >
+                <td>1</td>
+                <td><?php echo date('Y-m-d',$val['qd_calc_time1']);?>至<?php echo date('Y-m-d',time());?></td>
+                <td>{$val['commission_total']}</td>
+				<td>{$val['income_rate']}%</td>
+				<td>{$val['pay_num']}</td>
+				<td>{$val['pay_total']}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<?php
+				$c=count($channlelist_first);
+				if($key==1){
+				?>
+				<td rowspan="{$c}" ><a href="{:U('/admin/Commission/ChannelSettlement/channel_id/'.$channel_id)}">结算</a></td>
+				<?php
+				}else{
+				?>
+				<?php
+				}
+				?>
+				<td></td>
+            </tr>
+           <?php
+		   }
+		   ?>
+		   
+		   
+		   <?php
+		   foreach($channlelist_second as $key=>$val){
+		   ?>		
+            <tr class="trbor"  >
+                <td>1</td>
+                <td><?php echo date('Y-m-d',$val['create_time']);?>至<?php echo date('Y-m-d',$val['calc_time']);?></td>
+                <td>{$val['commission_total']}</td>
+				<td>{$val['commission_rate']}%</td>
+				<td>{$val['pay_total']}</td>
+				<td>{$val['total']}</td>
+				<td></td>
+				<td></td>
+				<td></td>   
+				<td><?php echo date('Y-m-d',$val['calc_time']); ?></td>
+				<?php
+				$c=count($channlelist_second);
+				if($key==0){
+				?>
+				<td rowspan="{$c}" ><a href="{:U('/admin/Commission/ChannelPay/channel_id/'.$channel_id)}">支付</a></td>
+				<?php
+				}else{
+				?>
+				<?php
+				}
+				?>
+				
+            </tr>
+           <?php
+		   }
+		   ?>
+		   
+		    <?php
+		   foreach($channlelist['list'] as $key=>$val){
+		   ?>		
+            <tr class="trbor"  >
+                <td>{$val['id']}</td>
+                <td><?php echo date('Y-m-d',$val['create_time']);?>至<?php echo date('Y-m-d',$val['calc_time']);?></td>
+                <td>{$val['commission_total']}</td>
+				<td>{$val['commission_rate']}%</td>
+				<td>{$val['total']}</td>
+				<td>{$val['pay_total']}</td>
+				<td><?php if($val['adjustment_type']==0&&$val['adjustment_money']){?>+<?php }elseif($val['adjustment_money']>0){?> -<?php }?><?php echo $val['adjustment_money']; ?></td>
+				<td>{$val['real_pay']}</td>
+				<td>{$val['pay_desc']}</td>
+				<td><?php echo date('Y-m-d',$val['calc_time']); ?></td>
+				
+				<!--<td><?php echo date('Y-m-d',$val['pay_time']); ?></td>-->
+				
+				<?php
+				if($channlelist['list'][$num]['pay_tatal']>0){
+					$num=$key+1;
+					$n=0;
+					$count=count($channlelist['list']);
+					for($i=0;$i<$count;$i++){
+					   if($channlelist['list'][$num]['pay_tatal']>0){
+						  break;
+					   }else{
+						 $n=$n+1;
+					   }
+					   $num=$num+1;
+					}
+					 
+				}
+				if($key==0){
+				?>
+				<td rowspan="{$n}" ><?php echo date('Y-m-d',$val['pay_time']); ?></td>
+				<?php
+				}else{
+				?>
+				<?php
+				}
+				?>
+				
+				
+            </tr>
+           <?php
+		   }
+		   ?>
+		   
+		   
+		   
+            <tr class="trbor"  >
+                <td>1</td>
+                <td>2015-11-30至2015-12-4</td>
+                <td>1000</td>
+				<td>10%</td>
+				<td>100</td>
+				<td>100</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td rowspan="3"><a href="{:U('/admin/Commission/ChannelSettlement')}">结算</a></td>
+				<td></td>
+            </tr>
+			<tr class="trbor"  >
+                <td>1</td>
+                <td>2015-11-30至2015-12-4</td>
+                <td>1000</td>
+				<td>10%</td>
+				<td>100</td>
+				<td>100</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+            </tr>
+			<tr class="trbor"  >
+                <td>1</td>
+                <td>2015-11-30至2015-12-4</td>
+                <td>1000</td>
+				<td>10%</td>
+				<td>100</td>
+				<td>100</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+            </tr>
+			<tr class="trbor"  >
+                <td>1</td>
+                <td>2015-11-30至2015-12-4</td>
+                <td>1000</td>
+				<td>10%</td>
+				<td>100</td>
+				<td>100</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>2015-12-4</td>
+				<td rowspan="2"><a href="{:U('/admin/Commission/ChannelPay')}">支付</a></td>
+            </tr>
+			<tr class="trbor"  >
+                <td>1</td>
+                <td>2015-11-30至2015-12-4</td>
+                <td>1000</td>
+				<td>10%</td>
+				<td>100</td>
+				<td>100</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+				<td>2015-12-4</td>
+			</tr>
+			<tr class="trbor"  >
+                <td>1</td>
+                <td>2015-11-30至2015-12-4</td>
+                <td>1000</td>
+				<td>10%</td>
+				<td>100</td>
+				<td>100</td>
+				<td>10</td>
+				<td>90</td>
+				<td>税费</td>
+				<td>2015-12-4</td>
+				<td>2015-12-4</td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+</div>
+<include file="Index/footer"/>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+    });
+
+</script>
+
+
+

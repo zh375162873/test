@@ -1,0 +1,13 @@
+<footer class="home_footer">
+    <ul>
+        <li><a href="__APP__/index/index"><b class="colorD5">首页</b><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_sy.png"></a></li>
+        <li><a href="#"><img class="home_footer_hd" src="{$uri}__PUBLIC__/home/images/index/nav_fixed_yiy.png"></a></li>
+        <li>
+	        <if condition="session('userName')">
+	        <a href="__APP__/index/mine"><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">我的</b></a>
+	        <else />
+	        	<a href="__APP__/index/userLogin"><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">登录</b></a>
+	        </if>
+        </li>
+    </ul>
+</footer>

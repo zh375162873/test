@@ -1,0 +1,41 @@
+<?php
+/*
+ * 订单支付模型
+ */
+namespace Home\model;
+use Think\Model;
+class CommissionOrderModel extends Model {
+    
+    
+    /**
+     * 获取今日、7日、30日订单数据
+     * @param unknown $days 统计的天数,以今天往后推几天
+     * @param unknown $userid 推广人id或渠道id
+     * @param number $type 判断统计人员角色1为推广人2渠道
+     */
+    public function get_order_total($days,$userid,$type=1){
+        //获取时间区间
+        $start_time = time()-($days*86400);
+        $end_time = time();
+        $map = array();
+        $map['create_time'] = array("gt",$start_time);
+        $map['create_time'] = array("lt",$end_time);
+        if($type==1){
+            $map['referee_id'] = $userid;
+        }else{
+            $map['channel_id'] = $userid;
+        }
+        
+    }
+    
+    /**
+     * 获取今日、7日、30日收益分成接口
+     * @param unknown $days 统计的天数,以今天往后推几天
+     * @param unknown $userid 推广人id或渠道id
+     * @param number $type 判断统计人员角色1为推广人2渠道
+     */
+    public function get_shouyi_total($days,$userid,$type=1){
+        
+        
+    }
+}

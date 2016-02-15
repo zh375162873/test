@@ -1,0 +1,97 @@
+<?php
+//调取数据
+$item=D('tempitem')->findbyid($item_id);
+$info=json_decode($item['item_data'],true);
+?>
+<?php
+$used="禁用";
+if($item['item_is_used']==1){
+?>
+<div class="ddt_block home_block">
+<?php
+}else{
+$used='启用';
+?>
+<div class="ddt_block home_block unusable">
+<?php
+}
+?>
+    <div id="nav" class="focus">
+        <div class="nav_hd">
+            <ul></ul>
+        </div>
+        <div class="nav_bd">
+            <ul>
+                <li>
+                    <ul class="home_sort">
+					  <?php
+					     $i=0;
+                         foreach($info['info_data'] as $key=>$val ){
+						   if($val['info_isused']==0){
+						    continue;
+						   }
+                      ?>
+                        <li>
+						  <a href="{$val['url']}">
+							<?php
+							if($val['info_gcid']>0){
+							?>
+							<img src="__PUBLIC__/{$val['info_img']}"><p><?php echo isset($val['info_title'])?$val['info_title']:""; ?></p>
+							<?php
+							}else{
+							?>
+							 <img src="{$val['info_img']}"><p><?php echo isset($val['info_title'])?$val['info_title']:"";?></p>
+							<?php
+							}
+							?>
+						  </a>
+						</li>		
+						<?php
+						if(($info['class_type']==1&&$i==3)||($info['class_type']==2&&$i==7)){
+						?>						
+					  </ul>
+						 </li>
+						 <li>
+							<ul class="home_sort">
+						<?php
+						}
+						?>	
+                       <?php
+					   $i=$i+1;
+					 }
+					 ?>	
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+	<?php
+	if($show!=1){
+	?>
+		<div class="headerEdit">
+			模板
+		</div>
+		<div class="footerEdit">
+			<a target="_parent" data-type='btn_move_up' href='{:U('admin/tempitem/itemlistup/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-up'></i>上移</a>
+			<a target="_parent"  data-type='btn_move_down' href='{:U('admin/tempitem/itemlistdown/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-down'></i>下移</a>
+			<a target="_parent"  data-type='btn_usable' href='{:U('admin/tempitem/itemisused/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-off'></i>{$used}</a>
+			<a target="_parent"  data-type='btn_edit_item' href='{:U('admin/tempitem/itemedit/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-edit'></i>编辑</a>
+			<!--<a target="_parent"  data-type='btn_del_item' href='{:U('admin/tempitem/itemdel/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-trash'></i>删除</a>-->
+		</div>
+	<?php
+	}
+	?>
+    <script type="text/javascript">
+        TouchSlide({
+            slideCell:"#nav",
+            titCell:".nav_hd ul",
+            mainCell:".nav_bd ul",
+            delayTime:600,
+            interTime:4000,
+            effect:"leftLoop",
+            autoPlay:false,
+            autoPage:true,
+            switchLoad:"_src"
+        });
+    </script>
+</div>	

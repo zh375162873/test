@@ -1,0 +1,71 @@
+<?php
+
+namespace Home\Controller;
+
+use BizService\GeohashService;
+
+header("Content-type:text/html;charset=utf-8");
+
+class CommissionorderController extends BaseController
+{
+    public $commission_order_db,$userid;
+    public function _initialize(){
+        parent::_initialize();
+        $this->commission_order_db = D("CommissionOrder");
+        $this->userid = session('userId');
+    }
+    
+    //推广人首页
+    public function tgrindex(){
+        
+        $this->display("tuiguang_mine");
+    }
+    
+    //推广人订单统计列表
+    public function tgrorderlist(){
+        //初始化数据
+        $this->userid = 1;
+        $days['day1'] = $this->commission_order_db->get_order_total(1,$this->userid);
+        $days['day7'] = $this->commission_order_db->get_order_total(7,$this->userid);
+        $days['day30'] = $this->commission_order_db->get_order_total(30,$this->userid);
+        $list = $this->commission_order_db->get_order_list($this->userid);
+        
+        $this->assign("list",$list);
+        $this->assign("days",$days);
+        $this->display("zuijindingdan_mine");
+    }
+    
+    //推广人收益统计列表
+    public function tgrshouyilist(){
+        $this->userid = 1;
+        $days['day1'] = $this->commission_order_db->get_shouyi_total(1,$this->userid);
+        $days['day7'] = $this->commission_order_db->get_shouyi_total(7,$this->userid);
+        $days['day30'] = $this->commission_order_db->get_shouyi_total(30,$this->userid);
+        $list = $this->commission_order_db->get_shouyi_list($this->userid);
+
+        $this->assign("list",$list);
+        $this->assign("days",$days);
+        $this->display("zuijinshouyi_mine");
+    }
+    
+    //推广人最近注册
+    public function tgrzhucelist(){
+        
+        $this->display("zuijinzhuce_mine");
+    }
+    
+    //推广人待支付
+    public function tgrdzf(){
+        
+        $this->display("daizhifu_mine");
+    }
+    
+    //推广人已支付
+    public function tgryzf(){
+        
+        $this->display("yizhifu_mine");
+    }
+    
+    
+    
+}

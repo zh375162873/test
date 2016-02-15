@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>我的推广</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <header class="tggl_header">
+        <img src="{$uri}__PUBLIC__/home/images/spread_geren.png"><span>赵钱孙李 123****4567</span>
+    </header>
+    <div class="tggl_list">
+        <section>
+            <h4>今日数据</h4>
+            <ul class="item1">
+                <li><a href="{:U('Commissionorder/tgrzhucelist')}"><div>100</div><div>今日注册</div><i></i></a></li>
+                <li><a href="{:U('Commissionorder/tgrorderlist')}"><div>{$today_order.order_count}单<br>¥{$today_order.shouyi_total}</div><div>今日订单</div><i></i></a></li>
+                <li><a href="{:U('Commissionorder/tgrshouyilist')}"><div>¥{$today_shouyi}</div><div>今日收益分成</div></a></li>
+            </ul>
+        </section>
+        <section>
+            <h4>我的收益</h4>
+            <ul class="item2">
+                <li><a href="{:U('Commissionorder/tgrdzf')}"><div>¥{$dzf}<!-- /<span style="color:#6f6e70;">¥1000</span> --></div><div>待支付</div><i></i></a></li>
+                <li><a href="{:U('Commissionorder/tgryzf')}"><div>¥{$yzf}</div><div>已支付</div></a></li>
+            </ul>
+        </section>
+    </div>
+    <div class="tggl_set">
+        <a href="paymode.html">
+            <div>
+                <h4>我的支付账号<img src="{$uri}__PUBLIC__/home/images/spread_zhifubao.png"></h4>
+                <p>110@qq.com</p>
+                <span>修改 ></span>
+            </div>
+        </a>
+        <a href="erweima.html" class="ewm">
+            <div>
+                <h4>我的二维码<img src="{$uri}__PUBLIC__/home/images/spread_erweima.png"></h4>
+                <span>修改 ></span>
+            </div>
+        </a>
+    </div>
+</div>
+</body>
+</html>

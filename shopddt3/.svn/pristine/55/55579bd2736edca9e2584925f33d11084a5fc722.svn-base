@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>用户评价</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+</head>
+<body>
+<header class="reviews_title"><h3>西树泡芙</h3></header>
+<div class="re_content">
+<section class="re_count">
+    <div class="re_countRight">
+        <ul>
+            <li><span>5星</span><div class="re_scale"><div style="width:{$info.five_bfb}%;"></div></div><span> {$info.five}</span></li>
+            <li><span>4星</span><div class="re_scale"><div style="width:{$info.four_bfb}%;"></div></div><span> {$info.four}</span></li>
+            <li><span>3星</span><div class="re_scale"><div style="width:{$info.three_bfb}%;"></div></div><span> {$info.three}</span></li>
+            <li><span>2星</span><div class="re_scale"><div style="width:{$info.two_bfb}%;"></div></div><span> {$info.two}</span></li>
+            <li><span>1星</span><div class="re_scale"><div style="width:{$info.one_bfb}%;"></div></div><span> {$info.one}</span></li>
+        </ul>
+    </div>
+    <div class="re_countLeft">
+        <div class="score">
+            <span class="font_big">{$info.count_bfb}</span><span class="font_small">{$info.count}人评价</span>
+        </div>
+        <div class="star_gray">
+            <div class="star"></div>
+        </div>
+    </div>
+</section>
+<section class="re_list">
+    <volist name="list" id="vo">
+      <div class="re_item">
+        <div class="item_title">
+            <div><if condition="$vo.nickname eq ''">点点通网友<else/>{$vo.nickname}</if>({$vo.user_name})</div>
+        </div>
+        <div class="item_date">{$vo.pl_addtime}</div>
+        <p class="item_content">{$vo.pl_content}</p>
+      </div>
+    </volist>
+</section>
+</div>
+<footer class="home_footer">
+    <ul>
+        <li><a href="#"><b class="colorD5">首页</b><img src="__PUBLIC__/home/images/index/nav_fixed_sy.png"></a></li>
+        <li><a href="#"><img class="home_footer_hd" src="__PUBLIC__/home/images/index/nav_fixed_yiy.png"></a></li>
+        <li><a href="#"><img src="__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">我的</b></a></li>
+    </ul>
+</footer>
+</body>
+</html>

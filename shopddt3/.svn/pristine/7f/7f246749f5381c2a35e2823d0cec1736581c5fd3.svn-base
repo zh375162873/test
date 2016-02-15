@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>添加地址</title>
+    <script src="__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/shop.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/temp.css">
+</head>
+<body>
+    <form class="add_address_form" action="" method="POST">
+        <div>
+            <input type="text" name="name" placeholder="收货人姓名">
+            <input type="text" name="tel" placeholder="收货人联系电话">
+            <div>
+                <select onchange="changeSelect(this)" name="province">
+                	<option value="0">选择省</option>
+                	<volist name="region_list" id="vo">
+                	<option value="{$vo.region_id}">{$vo.region_name}</option>
+                	</volist>
+                </select>
+                <select onchange="changeSelect(this)" name="city">
+                	<option value="0">选择市</option>
+                </select>
+                <select onchange="changeSelect(this)" name="district">
+                	<option value="0">选择区/县</option>
+                </select>
+            </div>
+            <input type="text" name="address" placeholder="详细地址">
+        </div>
+        <button class="submitBtn" onclick="check();">保存</button>
+    </form>
+<script>
+    var proDom = document.getElementsByName("province")[0];
+    var cityDom = document.getElementsByName("city")[0];
+    var disDom = document.getElementsByName("district")[0];
+    function changeSelect(t){
+    	var p_id = t.options[t.options.selectedIndex].value;
+        if(t.name==="province"){
+            $.post("{:U('Address/regionList')}", {id:p_id}, function(res){
+            	if(res){
+					var obj = eval(res);
+            		var _html = "<option value='0'>选择市</option>";
+            		for(var i=0;i<obj.length;i++){
+            			_html += "<option value='"+obj[i]['region_id']+"'>"+obj[i]['region_name']+"</option>";
+            		}
+            		cityDom.options.length = 0;
+            		cityDom.innerHTML = _html;
+            	}
+            });
+        }else if(t.name==="city"){
+            $.post("{:U('Address/regionList')}", {id:p_id}, function(res){
+            	if(res){
+					var obj = eval(res);
+            		var _html = "<option value='0'>选择区/县</option>";
+            		for(var i=0;i<obj.length;i++){
+            			_html += "<option value='"+obj[i]['region_id']+"'>"+obj[i]['region_name']+"</option>";
+            		}
+            		disDom.options.length = 0;
+            		disDom.innerHTML = _html;
+            	}
+            });
+        }else{
+            return false;
+        }
+    }
+    function check(){
+    	alert('check');
+    	return false;
+    }
+</script>
+</body>
+</html>

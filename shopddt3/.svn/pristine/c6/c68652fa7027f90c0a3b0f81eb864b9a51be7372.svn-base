@@ -1,0 +1,21 @@
+<?php
+/**
+ * Created by ddt.
+ * User: 谢林
+ * Date: 2015/9/16 14:59
+ * Description:前台控制器基类，所有前台控制器需要继承该控制器
+ */
+
+namespace Home\Controller;
+use Think\Controller;
+
+class BaseController extends Controller {
+	    public function _initialize(){
+        if (!session('userId')) {
+            //如果判断session过期后，输出0，从其他地方请求跳转至登录页面
+            $url=C('SHOP_URL').'/index.php/index/userLogin';
+            //echo("<script language='javascript'>alert('请先登录！')</script>");
+            echo("<script language='javascript'>window.location.href='{$url}'</script>");
+        }
+    }
+}

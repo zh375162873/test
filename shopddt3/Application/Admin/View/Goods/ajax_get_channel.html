@@ -1,0 +1,9 @@
+<select name="channel_id" class="form-control" required data-msg="请输入选择框">
+<?php
+foreach($channelList as $val){
+?>
+<option value="{$val['id']}"  <?php if($val['id']==$id){?>selected="selected"  <?php }?> >{$val['user_name']}{$val['nick_name']?'——':''}{$val['nick_name']?$val['nick_name']:''}</option>
+<?php
+}
+?>					   
+</select>

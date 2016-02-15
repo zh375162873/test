@@ -1,0 +1,101 @@
+<?php
+namespace Admin\Controller;
+use BizService\CommissionService;
+
+
+
+class CommissionController extends BaseController {
+     private  $shop_info;    
+     public function _initialize() {
+       $this->shop_info=get_shop_proxy();
+	   parent::_initialize();
+     }   
+
+    //渠道人员分成信息列表
+    public function ChannelList(){
+	 $channel_id=I('channel_id')?I('channel_id'):0;
+	 if($channel_id==0){
+	   $this->error ("参数有误！");
+	 }
+	 $CommissionService = new CommissionService();
+	 $param=array();
+	 $param['channel_id']=$channel_id;
+	 $param['shop_id']=$this->shop_info['shop_id'];
+     $channlelist=$CommissionService->channel_list($param);
+	 //待结算信息
+	 $channlelist_first=$CommissionService->channel_list_first($param); 
+	 //待支付信息
+	 $channlelist_second=$CommissionService->channel_list_second($param); 
+	 
+	 $this->assign('channlelist_first',$channlelist_first);	
+	 $this->assign('channlelist_second',$channlelist_second);	
+	 $this->assign('channel_id',$channel_id);	
+     $this->display('ChannelList');
+    }
+	//渠道分成结算
+	public function ChannelSettlement(){
+	   $channel_id=I('channel_id')?I('channel_id'):0;  
+	   $flag=1;
+	   $param=array();
+	   $param['channel_id']=$channel_id;
+	   $param['shop_id']=$this->shop_info['shop_id'];
+	   $CommissionService = new CommissionService();
+	   //先修改订单提成表状态,并添加结算统计信息
+	   $CommissionService->ChannelSettlement($param);
+	   if($flag==1){
+		  $this->success ( '结算成功', U ( 'admin/Commission/ChannelList/channel_id/'.$channel_id) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+    }
+	//渠道分成支付
+	public function ChannelPay(){
+     if(IS_POST){
+	   $channel_id=I('channel_id')?I('channel_id'):0;  
+	   $flag=1;
+	   $param=array();
+	   $param['channel_id']=$channel_id;
+	   $param['shop_id']=$this->shop_info['shop_id'];
+	   $CommissionService = new CommissionService();
+	   //先修改订单提成表状态,并添加结算统计信息
+	   $CommissionService->ChannelPay($param);
+	   if($flag==1){
+		  $this->success ( '支付成功', U ( 'admin/Commission/ChannelList/channel_id/'.$channel_id ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+	 }else{ 
+       $this->display('ChannelPay');
+	 }
+    }
+	
+	
+    //渠道下的推广人员分成信息列表
+	 public function ChannelmemberList(){
+      
+     $this->display('ChannelmemberList');
+    }
+	//渠道下的推广人员分成结算
+	public function ChannelmemberSettlement(){
+       $flag=1;
+	   if($flag==1){
+		  $this->success ( '结算成功', U ( 'admin/Commission/ChannelmemberList/Channel_id/'.I('Channel_id') ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+    }
+	//渠道下的推广人员分成支付
+	public function ChannelmemberPay(){
+	  if(IS_POST){
+	   $flag=1;
+	   if($flag==1){
+		  $this->success ( '支付成功', U ( 'admin/Commission/ChannelmemberList/Channel_id/'.I('Channel_id') ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+	 }else{ 
+       $this->display('ChannelmemberPay');
+	 }
+    }
+	
+}

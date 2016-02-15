@@ -1,0 +1,68 @@
+<style>
+.breadcrumb a:link, .breadcrumb a:visited{
+color:#000000;
+}
+.box a:link, .box a:visited{
+color:#000000;
+}
+</style>
+<?php
+//数据调取  
+$item=D('tempitem')->findbyid($item_id);
+$info=json_decode($item['item_data'],true);
+$info_data=$info['info_data'];
+?>
+<!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="{:U('admin/tempitem/index/temp_id/'.$temp_id)}">样式管理</a> 
+  </li>
+  <li class="active">编辑内容</li>
+</ul>
+<form id="form1" method="post" action="{:U('admin/tempitem/editupdate')}" enctype="multipart/form-data" class="form-horizontal" role="form" >
+<div class="form-group" style="clear:both">
+	<label for="info_title" class="col-md-2 control-label">标题<span>*</span></label>
+	<div class="col-xs-7">
+	   <input class="form-control required"  style="width:280px;" name="info_title"  type="text"  value="<?php  echo isset($data['info_title'])?$data['info_title']:"";?>"  id="title" />
+	</div>
+</div>
+<div class="form-group" style="clear:both; padding-top:10px;">
+	<label for="goods_serial" class="col-md-2 control-label">内容编辑<span>*</span></label>
+	<div class="col-xs-7">
+	 <?php
+	 $i=0;
+	 if(!empty($info_data)){ 
+	   foreach($info_data as $key=>$val){
+	 ?>
+		   <div  class="box" style=" clear:both;padding-top:10px;" >
+			 <div><img src="{$val['info_img']}" width="200px;"  class="img-thumbnail"></div>
+			 <div>
+			 <a href="{:U("admin/tempitem/subedit/style_id/$style_id/temp_id/$temp_id/item_id/$item_id/id/$key")}">编辑</a> | 
+			 <a href="{:U("admin/tempitem/subdel/style_id/$style_id/temp_id/$temp_id/item_id/$item_id/id/$key")}">删除</a> 
+			 </div>
+		   </div>
+	   <?php
+	       $i=$key;
+	    }
+	  }
+	   ?>
+     </div>
+</div>
+<div class="form-group" style=" clear:both;padding-top:10px; padding-bottom:10px;">
+   <div class="col-sm-offset-2 col-sm-7">
+ <?php
+  $n=$i+1;
+ ?>
+ <a class="btn btn-info" href="{:U("admin/tempitem/itemsubadd/style_id/$style_id/temp_id/$temp_id/item_id/$item_id/id/$n")}">添加图片</a>
+   </div>
+</div>
+
+<input type="hidden" name="style_id" value="{$style_id}">
+	  <input type="hidden" name="temp_id" value="{$temp_id}">
+	  <input type="hidden" name="item_id" value="{$item_id}">
+      <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button type="submit" value="1" name="sub" class="btn btn-primary">保存样式信息</button>
+            </div>
+      </div>
+</form>

@@ -1,0 +1,6 @@
+<div class="form-group" >
+		           <label for="select11" class="col-md-2 control-label"><input type="text"   class="form-control"></label>   
+			       <div class="col-md-7" style="text-align:right"  id="addcontent">
+			          <textarea id="texte" name="texte" class="form-control" required="" data-msg="请输入" aria-required="true"></textarea>
+			       </div>
+		        </div>   

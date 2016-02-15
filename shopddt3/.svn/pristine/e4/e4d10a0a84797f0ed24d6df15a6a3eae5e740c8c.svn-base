@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>赠送好友-</title>
+    <style>
+        html,body{min-height:100%;}
+        body{
+            margin:0;
+            padding:0;
+            font-size:14px;
+            color:#7d7d7d;
+            background:#f3f3f3;
+            font-family:"Microsoft YaHei", "微软雅黑","黑体", "宋体";
+        }
+        ul{
+            list-style:none;
+            margin:0;
+            padding:0;
+        }
+        a{
+            text-decoration:none;
+            color:#555;
+        }
+        img{
+            vertical-align:top;
+            border:none;
+            outline:none;
+        }
+        /*赠送*/
+        .zengsong_bg{
+            position:absolute;
+            width:100%;
+            height:100%;
+            top:0;
+            left:0;
+            background:rgba(0,0,0,0.5);
+            z-index:10000;
+            overflow:hidden;
+        }
+        .zengsong_bg .closeBtn{
+            position:relative;
+            cursor:pointer;
+            width:40px;
+            height:40px;
+            -webkit-transform:rotate(45deg);
+            -moz-transform:rotate(45deg);
+            -ms-transform:rotate(45deg);
+            -o-transform:rotate(45deg);
+            transform:rotate(45deg);
+        }
+        .zengsong_bg .closeBtn::before{
+            position:absolute;
+            display:block;
+            content:"";
+            width:40px;
+            height:3px;
+            top:18px;
+            left:0;
+            background:#fff;
+        }
+        .zengsong_bg .closeBtn::after{
+            position:absolute;
+            display:block;
+            content:"";
+            width:3px;
+            height:40px;
+            top:0;
+            left:18px;
+            background:#fff;
+        }
+        .zengsong_bg .jiantou{
+            position:absolute;
+            top:0;
+            right:0;
+        }
+        .zengsong_bg p.marTop{
+            margin-top:130px;
+        }
+        .zengsong_bg p{
+			position:relative;
+            color:#fff;
+            margin:5px 0 0 0;
+            text-align:center;
+            font-size:25px;
+			z-index:1;
+        }
+        .zengsong_bg p.fasong{
+            font-size:27px;
+        }
+        .zengsong_bg .robot{
+            position:absolute;
+            right:0;
+            bottom:0;
+            height:200px;
+            width:auto;
+			z-index:0;
+        }
+		.handsel{
+			text-align:center;
+		}
+        .handsel>h2{
+            margin: 12px 0;
+		    text-align: center;
+		    color: #353535;
+		    font-size: 20px;
+		    font-weight: bold;
+        }
+        .handsel>img{
+			width:100%;
+            max-width:100%;
+            height:auto;
+        }
+        .handsel>p{
+            text-align:center;
+            color:#db5e3b;
+            margin:10px 12px;
+        }
+        .handsel>div{
+            background:#fff;
+            padding:40px 12px;
+        }
+        .handsel>div a{
+            display:block;
+            text-align:center;
+            padding:10px 0;
+            font-weight:bold;
+        }
+        .handsel>div p{
+            text-align:center;
+            color:#ce2c32;
+            font-size:18px;
+            margin:10px 0;
+        }
+        .handsel footer{
+            margin:20px 12px 10px 12px;
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+<section class="handsel">
+    <h2>我买单你消费</h2>
+    <img src="{$info.goods_image}">
+    <p>{$info.goods_name}</p>
+    <div>
+        <a href="<?php echo U('goods/goodsview',array('id'=>$info['goods_id'])); ?>">点击这里查看商品详情 >></a>
+        
+        <p>兑换码：{$info.dhm_code}</p>
+    </div>
+    <footer>西安点点通</footer>
+</section>
+<div class="zengsong_bg">
+    <div class="closeBtn" onclick="this.parentElement.style.display = 'none';"></div>
+    <img class="jiantou" src="__PUBLIC__/home/images/handsel_02.png">
+    <p class="marTop">点击右上角按钮"···"</p>
+    <p>选择</p>
+    <p class="fasong">【发送给朋友】</p>
+    <img class="robot" src="__PUBLIC__/home/images/handsel_03.png">
+</div>
+</body>
+<script>
+    function show(flag){
+        if(1==flag){
+            document.getElementsByClassName("zengsong_bg")[0].style.display = 'none';
+        }
+    }
+    window.onload  = function(){
+        show({$show});
+    }
+</script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+    wx.config({
+        debug: true,
+        appId: '{$share_sign.appId}',
+        timestamp: '{$share_sign.timestamp}',
+        nonceStr: '{$share_sign.nonceStr}',
+        signature: '{$share_sign.signature}',
+        jsApiList: [
+            // 所有要调用的 API 都要加到这个列表中
+            'checkJsApi',
+            'openLocation',
+            'getLocation',
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage'
+        ]
+    });
+
+    wx.ready(function () {
+        wx.onMenuShareAppMessage({
+            title: '有钱任性！送你一份【{$info.goods_name}】，快去领取吧~',
+            desc: '{$info.goods_name}',
+            link: "{$url}",
+            imgUrl: "{$info.goods_image}",
+            trigger: function (res) {
+                // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回
+                // alert('用户点击发送给朋友');
+            },
+            success: function (res) {
+                // alert('已分享');
+            },
+            cancel: function (res) {
+                // alert('已取消');
+            },
+            fail: function (res) {
+                // alert(JSON.stringify(res));
+            }
+        });
+
+        wx.onMenuShareTimeline({
+            title: '有钱任性！送你一份【{$info.goods_name}】，快去领取吧~',
+            link: "{$url}",
+            imgUrl: "{$info.goods_image}",
+            trigger: function (res) {
+                // 不要尝试在trigger中使用ajax异步请求修改本次分享的内容，因为客户端分享操作是一个同步操作，这时候使用ajax的回包会还没有返回
+                // alert('用户点击分享到朋友圈');
+            },
+            success: function (res) {
+                // alert('已分享');
+            },
+            cancel: function (res) {
+                // alert('已取消');
+            },
+            fail: function (res) {
+                // alert(JSON.stringify(res));
+            }
+        });
+        wx.onMenuShareQQ({
+            title: '有钱任性！送你一份【{$info.goods_name}】，快去领取吧~',
+            desc: '{$info.goods_name}', // 分享描述
+            link: "{$url}",
+            imgUrl: "{$info.goods_image}",
+            success: function () {
+                // 用户确认分享后执行的回调函数
+            },
+            cancel: function () {
+                // 用户取消分享后执行的回调函数
+            }
+        });
+    });
+</script>
+</html>

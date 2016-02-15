@@ -1,0 +1,6 @@
+<div class="col-md-12" style="padding-bottom:10px;">
+             <div class="col-md-9" >
+			  <input class="form-control"  name="rules[]"     type="text"   />
+			 </div>
+			  <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+</div>  

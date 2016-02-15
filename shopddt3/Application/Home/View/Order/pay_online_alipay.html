@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>订单支付-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <script src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<script>
+	window.onload=function(){document.alipaysubmit.submit();}
+	</script>
+</head>
+<body>
+
+          <if condition="$pay neq ''">
+            <if condition = "$http_agent eq 1">
+	           <!--  
+	            <form>
+	            	<button class="sub_wx" type="submit">微信支付</button>
+		        </form>-->
+		        {$pay.wxpay} 
+	        <else />
+	          {$pay.alipay} 
+	        </if>
+	     
+          </if>
+     
+<include file="Index/footer"/>
+</body>
+</html>

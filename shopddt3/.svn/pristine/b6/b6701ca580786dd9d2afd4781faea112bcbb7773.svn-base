@@ -1,0 +1,143 @@
+<?php
+//调取代理信息
+$shop_info = get_shop_proxy();
+$shop_id=$shop_info['shop_id']?$shop_info['shop_id']:1;
+//调取数据
+$item=D('Admin/tempitem')->findbyid($item_id);
+$info=json_decode($item['item_data'],true);
+$goodslist=D("Admin/goods")->getindexgoods($info);
+?>
+<style>
+.prolist {
+color:#000000}
+</style>
+<?php
+$used="禁用";
+if($item['item_is_used']==1){
+?>
+<div class="home_list home_block">
+<?php
+}else{
+$used="启用";
+?>
+<div class="home_list home_block unusable">
+<?php
+}
+?>	
+    <section>
+       <b class="list_nav_title colorD5">猜你喜欢</b>
+        <img class="list_nav_img" src="{$uri}__PUBLIC__/home/images/index/nav_like.png">
+        <!--<a class="home_search" href="{:U('search/index')}">点此搜索商品...</a>-->
+    </section>
+   
+    <section id="loadgoods">
+	<?php
+	 if(!empty($goodslist)){
+	   foreach($goodslist as $key=>$val){
+	 ?>
+	 <section>
+        <a class="goods_content" href="{:U('/home/goods/goodsview/id/'.$val['goods_id'])}">
+            <div class="goodImg">
+                <img src="__ROOT__{$val['goods_image']}">
+            </div>
+            <div class="goodInfo">
+                <div class="title_line">
+                    <div class="title">
+                        <h3 class="item_name color35">{$val['goods_name']}</h3>
+                    </div>
+					<span class="home_wz color7d">{$val['distance']}km</span>
+                    <span class="wz color7d">{$val['position_tags']}</span>
+                </div>
+                <p class="desc color7d">[{$val['position_tags']}]{$val['subtitle']}</p>
+                <div class="price_line color7d">
+                    <ins class="colorD5">{$val['goods_price']}</ins>
+                    <del>{$val['goods_marketprice']}</del>
+                    <span>剩余{$val['goods_storage']}</span>
+                </div>
+            </div>
+        </a>
+		</section>
+	  <?php
+	   }
+	  } 
+	   ?>	
+    </section>
+	<?php
+	if($show!=1){
+	?>
+	<div class="headerEdit">
+        模板
+    </div>
+    <div class="footerEdit">
+        <a target="_parent" data-type='btn_move_up' href='{:U('admin/tempitem/itemlistup/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-up'></i>上移</a>
+        <a target="_parent"  data-type='btn_move_down' href='{:U('admin/tempitem/itemlistdown/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-arrow-down'></i>下移</a>
+        <a target="_parent"  data-type='btn_usable' href='{:U('admin/tempitem/itemisused/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-off'></i>{$used}</a>
+        <a target="_parent"  data-type='btn_edit_item' href='{:U('admin/tempitem/itemedit/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-edit'></i>编辑</a>
+        <a target="_parent"  data-type='btn_del_item' href='{:U('admin/tempitem/itemdel/style_id/'.$style_id.'/temp_id/'.$temp_id."/item_id/".$item_id)}'><i class='icon-trash'></i>删除</a>
+    </div>
+	<?php
+	}
+	?>
+</div>
+<?php
+if($info['info_page']==1){
+?>
+<div id="more" class="color7d"  style="line-height:30px; text-align:center  height:30px; clear:both">
+	    往下滑，内容更精彩！
+</div>
+	<script type="text/javascript">
+        var counting = 2;
+        var winHeight = $(window).height();
+        var over = 0;
+        var oncenum = 5;
+        $(function () {
+          $(window).scroll(function () {
+            var docTop = $(document).scrollTop();
+            var contentHeight = $("#body").height();//获取body加载高度
+            if (docTop + winHeight >= contentHeight-110 && over==0) {
+				  
+              $.post("{:U('admin/tempstyle/Style7/item_id/'.$item_id)}", {counting:counting,oncenum:oncenum,info:<?php echo json_encode($info);?>},function(goods_list){ 
+                var _html = '';
+                if(goods_list.length>0){ 
+                  for (var i = 0; i<oncenum; i++) {
+                    if(goods_list[i]){
+
+					_html += '<a class="goods_content" href="/index.php/home/goods/goodsview/id/'+goods_list[i]['goods_id']+'">';
+					_html += '<div class="goodImg">'
+							_html += '<img src="__ROOT__'+goods_list[i]['goods_image']+'">'
+						_html += '</div>'
+						_html += '<div class="goodInfo">'
+							_html += '<div class="title_line">'
+								_html += '<div class="title">'
+									_html += '<h3 class="item_name color35">'+goods_list[i]['goods_name']+'</h3>'
+								_html += '</div>'
+								_html += '<span class="home_wz color7d">'+goods_list[i]['distance']+' km</span>'
+								_html += '<span class="wz color7d">'+goods_list[i]['position_tags']+'</span>'
+							_html += '</div>'
+							_html += '<p class="desc color7d">['+goods_list[i]['position_tags']+']'+goods_list[i]['subtitle']+'</p>'
+							_html += '<div class="price_line color7d">'
+								_html += '<ins class="colorD5">'+goods_list[i]['goods_price']+'</ins>'
+								_html += '<del>'+goods_list[i]['goods_marketprice']+'</del>'
+								_html += '<span>剩余'+goods_list[i]['goods_storage']+'</span>'
+							_html += '</div>'
+						_html += '</div>'
+					_html += '</a>'
+                    }else{break;};
+                  };
+                  $("#loadgoods").append(_html); 
+                }else{
+				  
+                  $("#more").find('span:last').text('已经木有商品了哦~!');
+          
+                  over = 1;
+                }     
+              },'json');
+              counting = counting+1;
+            }
+          });
+        });
+       
+    </script>
+<?php
+}
+?>

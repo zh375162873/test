@@ -1,0 +1,5 @@
+/**--------商品列表区域-------------------*/
+    .search_div{
+            margin: 0 8px;
+            background: #fff;
+        }

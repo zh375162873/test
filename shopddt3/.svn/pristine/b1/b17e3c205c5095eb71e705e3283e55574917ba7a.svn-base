@@ -1,0 +1,23 @@
+/**--------商品列表区域-------------------*/
+    .search_div{
+            margin: 0 8px;
+            background: #fff;
+        }
+		
+		.home_search{
+            display:block;
+            height:43px;
+            margin-right:45px;
+            line-height:43px;
+            color:#fbbeb4;
+        } 
+        .home_search::before{  
+            content:"";
+            display:inline-block;
+            width:35px;  
+            height:35px;
+            background:url(/Public/temp/style7/web/images/nav_search_0.png) center;
+            background-size:100% 100%;
+            vertical-align:middle;
+            margin-right:10px;
+        }

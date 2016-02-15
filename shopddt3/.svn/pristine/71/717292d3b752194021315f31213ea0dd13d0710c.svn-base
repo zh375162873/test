@@ -1,0 +1,19 @@
+<?php
+/**
+ * 售后服务
+ * @author 梁健
+ */
+namespace Home\Controller;
+use BizService\OrderDisputeService;
+class SaleServiceController extends BaseController
+{
+	public $disputeService;
+    public function _initialize(){
+        parent::_initialize();
+		$this->disputeService = new OrderDisputeService();
+    }
+	
+	public function index(){
+		$this->display('customer_service_apply');
+	}
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>点点通</title>
+        <meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1" />
+        <link href="{$uri}__PUBLIC__/admin/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+		<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/font.css">
+		<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/style.css">
+		<style>
+			body{ background:#fff; color:#000;font-size:12px;font-family: "微软雅黑","黑体", "宋体";min-width:1300px;}
+			a{text-decoration:none;}
+			a:link,a:visited,a:hover,a:active{ text-decoration:none;}
+			ul{ list-style-type:none; margin:0px; padding:0px;}
+			/*禁止响应化*/
+			.container{min-width:975px!important;}
+			/*导航条*/
+			.nva{ height:77px; background:#FA580F;margin-bottom:0;}
+			.nvamain{ height:75px; background:#FA580F;padding:0;}
+			.logo{width:215px; height:55px; float:left; margin-right:15px;}
+			.logo a img{margin-top:9px;}
+			.nva_cd{display:block; float:left; margin:0px;}
+			.nva_cd li{display:block; float:left; width:auto; height:75px;text-align:center;}
+			.nva_cd li a{color:#FFF;display:block;width:auto;height:75px;padding:0px 10px;border-top:5px solid #FA580F;}
+			.nva_cd li a span{display: block;width: 30px;height: 30px;font-size: 30px;margin: 5px auto;background: none;}
+			.nva_cd li a:hover,.nva_cd li .active{background: #EA4D0A;border-top: 5px solid #F7F5BF;color: #fff;}
+
+			.admin_user{position:absolute;top:0;right:0;width:auto;height:75px;}
+			.admin_user ul li{display: block;float: left;width: auto;height: 75px;line-height: 75px;margin-right:7px;}
+			.admin_user ul li a{color:#FFF;display:block;height: 75px;line-height: 75px;text-align:center; overflow:hidden;background:#FA580F;}
+			.admin_user ul li .account{max-width:100px; white-space: nowrap;overflow: hidden;text-overflow: ellipsis;}
+			/*侧边栏sidebar*/
+			.myContainer{overflow:hidden;}
+			.left_sidebar{min-height:650px;background:#f7f7f7;padding:0;float:left;width:250px;}
+			.left_sidebar ul li{font-size:16px;color:#000;display:block;width:100%;height:50px;line-height:50px;text-align:center;cursor:pointer;}
+			.left_sidebar ul li:hover,.left_sidebar ul .active{background:#ffeee5;color: #EA4D0A;color: #EA4D0A;}
+			.myContent{box-sizing:border-box;margin-left:250px;border-left:3px solid #eec1ab;}
+			iframe{overflow-x:hidden;border: none;}
+		</style>
+		
+		<script src="{$uri}__PUBLIC__/admin/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="{$uri}__PUBLIC__/admin/js/bootstrap.min.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/general.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/common.js" type="text/javascript"></script>
+		<script src="{$uri}__PUBLIC__/admin/js/jquery.validate.min.js" type="text/javascript"></script>
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+		<script src="http://apps.bdimg.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+		<script src="http://apps.bdimg.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+    <body>
+	<nav class="navbar navbar-default navbar-fixed-top nva" id="topmenu">
+		<div class="nvamain container">
+			<div class="logo"><a href="{:C('PROXY_URL')}/proxy/default/index"><img src="{$uri}__PUBLIC__/admin/img/logo.png" width="215" height="55"></a></div>
+			<ul class="nva_cd">
+				<li><a data-menuname="default" href="{:C('PROXY_URL')}/admin/default/index"><span class="icon-iconfont-home"></span>首页</a></li>
+				<li><a data-menuname="proxy" href="{:C('PROXY_URL')}/proxy/proxy/index"><span class="icon-iconfont-jiahao"></span>代理管理</a></li>
+				<li><a data-menuname="biz" href="{:C('PROXY_URL')}/proxy/biz/index"><span class="icon-iconfont-shop"></span>商家管理</a></li>
+				<li><a data-menuname="device" href="{:C('PROXY_URL')}/proxy/device/index"><span class="icon-iconfont-iconluyouqi"></span>设备管理</a></li>
+				<li><a data-menuname="city" href="{:C('PROXY_URL')}/proxy/city/index"><span class="icon-iconfont-shangjiaqun"></span>门户管理</a></li>
+				<li><a data-menuname="ad" href="{:C('PROXY_URL')}/proxy/ad/index"><span class="icon-iconfont-album"></span>广告管理</a></li>
+				<li><a data-menuname="proxyadvert" href="{:C('PROXY_URL')}/proxy/proxyAdvert/index"><span class="icon-iconfont-recharge"></span>财务管理</a></li>
+				<li><a data-menuname="bd" href="{:C('PROXY_URL')}/proxy/bd/index"><span class="icon-iconfont-friendadd"></span>人员管理</a></li>
+				<li><a data-menuname="bizmap" href="{:C('PROXY_URL')}/proxy/bizmap/index"><span class="icon-iconfont-cascades"></span>商家分布图</a></li>
+				<li><a data-menuname="help" href="{:C('PROXY_URL')}/proxy/help/index"><span class="icon-iconfont-question"></span>系统公告</a></li>
+				<li><a data-menuname="shop_shop" href="{:C('PROXY_URL')}/proxy/default/shop?addr=shop"><span class="icon-iconfont-dianpu"></span>商城管理</a></li>
+				<li><a data-menuname="shop_extend" href="{:C('PROXY_URL')}/proxy/default/shop?addr=extend"><span class="icon-iconfont-dianpu"></span>渠道管理</a></li>
+			</ul>
+			<div data-operation="account" class="admin_user">
+				<ul>
+					<li class="account"><a class="account" href="{:C('PROXY_URL')}/proxy/default/repassword" title="{:session('proxyName')}">欢迎，{:session('proxyName')}</a></li>
+					<li><a href="{:C('PROXY_URL')}/proxy/default/clearcache"><span class="icon-iconfont-touxiang"></span>&nbsp;清除缓存</a></li>
+					<li><a href="{:C('PROXY_URL')}/proxy/default/logout"><span class="icon-iconfont-tuichudenglu"></span>&nbsp;退出</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<div class="myContainer">
+		<div class="left_sidebar" id="left_sidebar">
+			<ul>
+				<!--<li data-url = "__APP__/admin/index/statistics" class="active">数据统计</li>-->
+				<li data-url = "__APP__/admin/goods/index">商品管理</li>
+				<li data-url = "__APP__/admin/class/index">分类管理</li>
+				<li data-url = "__APP__/admin/order/index">订单管理</li>
+				<li data-url = "__APP__/admin/pinglun/index">评价管理</li>
+				<!--<li data-url = "__APP__/admin/index">积分/活动</li>-->
+				<li data-url = "__APP__/admin/temp/index">模版/广告</li>
+				<li data-url = "__APP__/admin/shop/shop_set">设置中心</li>
+			</ul>
+		</div>
+		<div class="myContent">
+			<iframe id="myContent" width="100%" height="100%" allowTransparency="true"></iframe>
+		</div>
+	</div>
+	<script>
+		/*左侧菜单的点击事件*/
+		document.getElementById("left_sidebar").addEventListener("click",function(event){
+			var target = event.target;
+			if(target.tagName == "LI"){
+				var url = $(target).attr("data-url");
+				$("#left_sidebar ul li.active").removeClass("active");
+				$(target).addClass("active");
+				$("#myContent").attr("src",url);
+				return false;
+			}
+		},true);
+		/*每次刷新页面时首次加载*/
+		$("#myContent").attr("src",$("#left_sidebar ul li:first-child").attr("data-url"));
+
+		function iFrameHeight() {
+			window.scrollTo(0,0);
+			var ifm= document.getElementById("myContent");
+			var subWeb = document.frames ? document.frames["myContent"].document :
+					ifm.contentDocument;
+			if(ifm != null && subWeb != null) {
+				ifm.height = subWeb.body.scrollHeight;
+			}
+		}
+
+		if(window.attachEvent){
+			document.getElementById("myContent").attachEvent('onload', iFrameHeight);
+		}
+		else{
+			document.getElementById("myContent").addEventListener('load', iFrameHeight, false);
+		}
+	</script>
+    </body>
+</html>

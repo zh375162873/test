@@ -1,0 +1,128 @@
+<?php
+/*
+ * 订单支付模型
+ */
+namespace Home\model;
+use Think\Model;
+class RefundReturnModel extends Model {
+    public $orderdb,$_userid,$dhm;
+    public function __construct(){
+        parent::__construct();
+        $this->orderdb=D("Orders");
+        $this->dhm=D("DhmManage");
+        $this->_userid = I("session.userId",1);
+    }
+    
+    protected $fields=array(
+        "id",
+        "order_id",
+        "order_sn",
+        "refund_sn",
+        "shop_id",  //商城id
+        "store_id", //商家id
+        "store_name",
+        "buyer_id",  //买家id
+        "buyer_name",
+        "goods_id",
+        "goods_name",
+        "goods_image",
+        "dhm_id",
+        "refund_amount",
+        "refund_type",
+        "refund_method", //退款方式
+        "refund_zh", //退款账户
+        "refund_telephone", //退款人联系方式
+        "seller_state", //卖家处理状态 1为待审核,2为同意,3为不同意,默认为1
+        "refund_state", //申请状态  1为处理中,2为待管理员处理,3为已完成,默认为1
+        "add_time",    //添加时间
+        "seller_time", //卖家处理时间 
+        "admin_time",  //管理员处理时间
+        "buyer_message",  //申请原因
+        "seller_message", //商家备注
+        "admin_message",  //管理员备注  
+        "_pk" => "id",
+    );
+    protected $_auto=array(
+        array("add_time","time",1,"function"),
+        array("seller_time","time",1,"function"),
+        array("admin_time","time",1,"function"),
+    );
+    
+    //添加支付订单
+    public function sh_reason($orderid,$reason){
+        //订单详情
+        $info = $this->orderdb->getinfo($orderid);
+        $data = array(
+             "order_id" => $info['order_id'],
+             "order_sn" => $info['order_sn'],
+             "refund_sn" => $this->create_tkm(),
+             "shop_id" => $info['shop_id'],
+             "store_id" => $info['store_id'],
+             "store_name" => $info['store_name'],
+             "buyer_id" => $this->_userid,
+             "buyer_name" => $info['buyer_name'],
+             "dhm_id" => $reason['dhm_id'],
+             "goods_id" => $info['goods']['goods_id'],
+             "goods_name" => $info['goods']['goods_name'],
+             "goods_image" => $info['goods']['goods_image'],
+             "refund_amount" => $info['goods']['goods_price'],
+             "refund_type" => 1,
+             "refund_method" => $reason['method'],
+             "refund_zh" => $reason['zh'],
+             "refund_telephone" => $reason['telephone'],
+             "seller_state" => 1,
+             "refund_state" => 1,
+             "add_time" => time(),
+             "buyer_message" => $reason['info'],
+        );
+       //判断订单状态是否已经进行了退款了
+        
+        if(($this->orderdb->where(array("order_id"=>$info['order_id']))->data(array("refund_state"=>1))->save())||($info['refund_state']==1)){
+            if($this->data($data)->add()){
+                if($this->dhm->where(array("id"=>$reason['dhm_id']))->data(array("refund_status"=>1))->save()){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+    
+    //生成申请退款编码
+    public function create_tkm(){
+        $tkm = date('Ymd').substr(implode(NULL,array_map('ord',str_split(substr(uniqid(),7,13),1))),0,8);
+        if($this->where(array("refund_sn"=>$tkm))->find()){
+            $this->create_tkm();
+        }else{
+            return $tkm;
+        }
+    }
+    
+    //生成退款原因
+    public function refund_quxiao($order_id,$dhm_id){
+        //更新核销码状态
+        if($this->dhm->where(array("id"=>$dhm_id,"order_id"=>$order_id))->data(array("refund_status"=>0))->save()){
+            $arr = $this->dhm->where(array("id"=>$dhm_id,"order_id"=>$order_id,"refund_status"=>array("gt",0)))->find();
+            if(empty($arr)){
+                $this->orderdb->where(array("order_id"=>$order_id))->data(array("refund_state"=>0))->save();
+            }
+            if($this->where(array("dhm_id"=>$dhm_id,"order_id"=>$order_id))->delete()){
+                
+            }else{
+                return false;
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    
+
+}
+
+?>

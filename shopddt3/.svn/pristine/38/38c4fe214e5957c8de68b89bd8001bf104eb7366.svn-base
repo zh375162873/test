@@ -1,0 +1,167 @@
+<?php
+namespace Admin\Controller;
+use Think\Controller;
+use BizService\UserService;
+use Org\Util\Date;
+use BizService\OrderService;
+
+class OrderController extends BaseController {
+    public $shop_id,$users,$orders,$refundreturn_db,$orderservice;
+    public function _initialize(){
+        parent::_initialize();
+        $shop_info=get_shop_proxy();
+        $this->shop_id = $shop_info['shop_id']?$shop_info['shop_id']:1;
+        $this->users = new UserService();
+        $this->orderservice = new OrderService();
+        $this->orders = D("Orders");
+        $this->refundreturn_db = D("RefundReturn");
+    }
+    
+    public function index(){
+		$this->order_list();
+    }
+	
+	//订单列表
+	public function order_list(){
+	   
+	    /**
+	     * 处理订单搜索数据
+	     */
+	   if($_POST){
+    	    $orderstatus = empty($_POST['orderstatus'])?0:intval($_POST['orderstatus']);//订单状态
+    	    $class = empty($_POST['class'])?0:intval($_POST['class']);//商品分类
+    	    $begin_time = empty($_POST['begin_time'])?'':trim($_POST['begin_time']);
+    	    $end_time = empty($_POST['end_time'])?'':trim($_POST['end_time']);
+    	    $order_sn =empty($_POST['order_sn'])?'':trim($_POST['order_sn']);
+    	    
+    	    $data=array();
+    	    if($orderstatus==1){
+    	        $data['order_status'] = 1;
+    	        $data['refund_state'] = 0;
+    	        $data['evaluation_state'] = 0;
+    	    }
+    	    elseif($orderstatus==2){
+    	        $data['order_status'] = 2;
+    	        $data['refund_state'] = 0;
+    	        $data['evaluation_state'] = 0;
+    	    }
+    	    elseif($orderstatus==3){
+    	        $data['order_status'] = 2;
+    	        $data['refund_state'] = 0;
+    	        $data['evaluation_state'] = 1;
+    	    }
+    	    elseif($orderstatus==4){
+    	        $data['order_status'] = 1;
+    	        $data['refund_state'] = 1;
+    	        $data['evaluation_state'] = 0;
+    	    }
+    	    
+    	    if($begin_time&&$end_time){
+    	        $data['add_time'] = array(array('gt',strtotime($begin_time)),array('lt',strtotime($end_time)),'and');
+    	    }
+    	    elseif($begin_time){
+    	        $data['add_time'] = array('gt',strtotime($begin_time));
+    	    }
+    	    elseif ($end_time){
+    	        $data['add_time'] = array('lt',strtotime($end_time));
+    	    }
+    	    
+    	    if($order_sn){
+    	        $data['order_sn'] = $order_sn;
+    	    }
+    	    $this->assign("orderstatus",$orderstatus);
+    	    $this->assign("begin_time",$begin_time);
+    	    $this->assign("end_time",$end_time);
+    	    $this->assign("order_sn",$order_sn);
+	    }
+	   
+	    
+	    
+	    //商品分类
+	    $goodsclass=D("goodsclass")->where('shop_id='.$this->shop_id)->select();
+	    
+	    //订单列表
+	    $orderlist = $this->orders->order_list($this->shop_id,$data);
+	    
+	    $this->assign("goodsclass",$goodsclass);
+	    $this->assign("orderlist",$orderlist['list']);
+	    $this->assign("page",$orderlist['page']);
+	    $this->display("list");
+	}
+
+   //订单详情
+     public function orderinfo(){
+         $order_id = empty($_GET['id'])?0:trim($_GET['id']);
+       
+         if(!$order_id){
+             $this->error("参数不全");
+         }
+         
+         $info = $this->orders->getinfo($order_id);
+         
+         $this->assign("info",$info);
+         $this->assign("dhm",$info['dhm']);
+         $this->display("info");
+     }
+     
+   //查看退款信息
+     public function refund_info(){
+         $dhm_id = empty($_GET['dhm_id'])?0:intval($_GET['dhm_id']);
+         $order_id = empty($_GET['order_id'])?0:intval($_GET['order_id']);
+         $info = $this->refundreturn_db->where(array("dhm_id"=>$dhm_id,"order_id"=>$order_id))->find();
+         $info['add_time'] = empty($info['add_time'])?0:Date("Y-m-d H:i:s",$info['add_time']);
+         $info['seller_time'] = empty($info['seller_time'])?0:Date("Y-m-d H:i:s",$info['seller_time']);
+         $this->assign("info",$info);
+         $this->assign("order_id",$order_id);
+         $this->display("refund_info");
+     }
+     
+   //处理退款申请
+    public function refund_chuli(){
+        $refund_id = empty($_POST['refund_id'])?0:intval($_POST['refund_id']);
+        $refundcontent = empty($_POST['refund_content'])?0:trim($_POST['refund_content']);
+        $seller_status = empty($_POST['seller_status'])?0:intval($_POST['seller_status']);
+        if(empty($refund_id)){
+            $this->error("缺少参数！！！");
+        }
+        
+        $data =array(
+            "seller_state" => $seller_status,
+            "refund_state" => $seller_status==2?2:1,
+            "seller_message" => $refundcontent,
+            "seller_time" => time(),
+        );
+      
+        if($this->refundreturn_db->seller_chuli($refund_id,$data)){
+            $this->success("操作成功！");
+        }else{
+            $this->error("操作失败！");
+        }
+    }
+   
+    //置为已消费
+    public function zhi_yxf(){
+        $id = empty($_POST['id'])?0:trim($_POST['id']);
+     
+        if($this->orders->zhi_yxf($id)){
+            $data['error']=0;//操作成功
+            $data['message']="操作成功";
+            $data['id']=$id;
+            $this->ajaxReturn($data);
+        }else{
+            $data['error']=2;//操作失败
+            $data['message']="操作失败";
+            $data['id']=$id;
+            $this->ajaxReturn($data);
+        }
+    }
+    
+    public function test(){
+       $userid = 8;
+       $arr = $this->orderservice->user_order_list($userid);
+
+       echo "asdfasdf--<pre>";print_r($arr);exit();
+    }
+    
+}
+

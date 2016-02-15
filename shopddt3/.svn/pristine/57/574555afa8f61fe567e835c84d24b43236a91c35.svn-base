@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>我的订单-点点通闪购平台</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+</head>
+<body>
+<header class="order_list_nav">
+    <ul>
+        <li <if condition='$rule eq 0'>class="active"</if>><a href="<?php echo U('order/orderlist'); ?>">全部</a><if condition="$info['total_num'] neq 0"><span>{$info.total_num}</span></if></li>
+        <li <if condition='$rule eq 1'>class="active"</if>><a href="<?php echo U('order/orderlist',array('rule'=>1)); ?>">未消费</a><if condition="$info['wxf_num'] neq 0"><span>{$info.wxf_num}</span></if></li>
+        <li <if condition='$rule eq 2'>class="active"</if>><a href="<?php echo U('order/orderlist',array('rule'=>2)); ?>">待评价</a><if condition="$info['yxf_num'] neq 0"><span>{$info.yxf_num}</span></if></li>
+        <li <if condition='$rule eq 3'>class="active"</if>><a href="<?php echo U('order/orderlist',array('rule'=>3)); ?>">退款中</a><if condition="$info['ytk_num'] neq 0"><span>{$info.ytk_num}</span></if></li>
+    </ul>
+</header>
+<div class="home_list content_marginBottom">
+    <volist name="arr" id="vo">
+       <section>
+         <div class="goods_content">
+            <a href="<?php echo U('order/orderinfo',array('id'=>$vo['order_id'])) ?>">
+                <div class="goodImg">
+                    <img src="{$vo.goods.goods_image}">
+                </div>
+            </a>
+            <div class="goodInfo">
+                <div class="title_line">
+                    <a href="<?php echo U('order/orderinfo',array('id'=>$vo['order_id'])) ?>">
+                        <div class="title">
+                            <h3 class="item_name color35 iconRight">{$vo.goods.goods_name}</h3>
+                        </div>
+                    </a>
+                </div>
+                <div class="item_desc">
+                    <div>数量：<span>{$vo.goods_num}</span></div>
+                    <div>总价：<span>{$vo.order_amount}元</span></div>
+                    <if condition="$vo['order_status'] eq 2" >
+                    <div class="colorFf">已消费
+                    <if condition="$vo['evaluation_state'] eq 0">
+                    <a href="<?php echo U('order/pinglun',array('id'=>$vo['order_id'])); ?>" class="pingJia">评价</a></div>
+                    <else />
+                    <a href="#" class="pingJia">已评价</a></div>
+                    </if>
+                    <else />
+                    <?php 
+                        $string = "";
+                         for($i=0;$i<count($vo['dhm']);$i++){
+                             if($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==0){
+                                 $string .= "<div class='colorC4'>未消费";
+                               }
+                             elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==1){
+                                 $string .= "<div class='colorFf'>正在退款中";
+                              }
+                             elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==2){
+                                 $string .= "<div class='colorFf'>退款完成";
+                              }
+                             elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==3){
+                                 $string .= "<div class='colorFf'>退款驳回";
+                              }
+                                 $string .= "<span class='dhm'>".$vo['dhm'][$i]['dhm_code']."</span></div>";
+                         }
+                        echo $string;
+                    ?>
+                   </if>
+                </div>
+            </div>
+          </div>
+       </section>
+    </volist>
+</div>
+<script type="text/javascript">
+	$(function(){
+	    var isLoading = true;//是否正处于请求数据状态
+	    var isMaxCount = true;//数据是否已达最大
+	    var totalHeight = 1000;//页面总高度
+	    var pageNum = 10;//每次请求数量
+	    var curPage = 10;//当前位置
+	    var $content = $(document.getElementById("content"));//需要将数据追加到的节点
+	    var $win = $(window);
+	    $win.scroll(function(){
+	        var scrollY = $win.scrollTop();
+	        totalHeight = parseFloat($win.height()) + parseFloat(scrollY);
+	        if($(document).height()-110 <= totalHeight && !isMaxCount &&!isLoading) {
+	            isLoading = true;//锁住瀑布流
+	            $.post("<?php echo U('order/orderlist') ?>",{curPage:curPage,pageNum:pageNum,rule:{$rule}},function(goods_list){
+	                if(goods_list>0){
+	                    alert("加载数据");
+	                    curPage += pageNum;//更新当前位置
+	                }else{
+	                    isMaxCount = true;//数据已经结束
+	                    alert("已经结束");
+	                }
+	                isLoading = false;//放开瀑布流
+	            }, "json");
+	        }
+	    });
+	});
+</script>
+<include file="Index/footer"/>
+</body>
+</html>

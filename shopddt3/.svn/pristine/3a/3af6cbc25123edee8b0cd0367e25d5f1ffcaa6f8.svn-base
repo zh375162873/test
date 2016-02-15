@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>最近订单统计</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/tuiguang.css">
+    <script src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/home/js/common.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="tg_content">
+    <div class="tggl_com dd">
+        <ul class="ul3">
+            <li>
+                <h4>今日</h4>
+                <div style="line-height:1.5;"><span style="display:block;height:14px;"></span>{$days.day1.order_count}单<br>¥{$days.day1.shouyi_total}</div>
+            </li>
+            <li>
+                <h4>7日</h4>
+                <div style="line-height:1.5;"><span style="display:block;height:14px;"></span>{$days.day7.order_count}单<br>¥{$days.day7.shouyi_total}</div>
+            </li>
+            <li>
+                <h4>30日</h4>
+                <div style="line-height:1.5;"><span style="display:block;height:14px;"></span>{$days.day30.order_count}单<br>¥{$days.day30.shouyi_total}</div>
+            </li>
+        </ul>
+        <table id="dingdanList">
+            <tr><th>用户</th><th>订单金额</th><th>我的收益</th></tr>
+            <volist name="list" id="vo">
+             <tr><td>{$vo.username}</td><td>¥{$vo.order_fee}</td><td>¥{$vo.referee_money}</td></tr>
+            </volist>
+        </table>
+    </div>
+    <div style="height:50px;"></div>
+</div>
+<script type="text/javascript">
+	$(function(){
+	    var isLoading = true;//是否正处于请求数据状态
+	    var isMaxCount = true;//数据是否已达最大
+	    var totalHeight = 1000;//页面总高度
+	    var pageNum = 15;//每次请求数量
+	    var curPage = 2;//当前位置
+	    var $win = $(window);
+
+
+      	var url = "{:U('Commissionorder/ajax_tgrorderlist',array('userid'=>$userid))}";
+	    $win.scroll(function(){
+	        var scrollY = $win.scrollTop();
+	        totalHeight = parseFloat($win.height()) + parseFloat(scrollY);
+	        if($(document).height()-1<= totalHeight && isMaxCount &&isLoading) {
+	            isLoading = true;//锁住瀑布流
+	            $.post(url,{curPage:curPage,pageNum:pageNum},function(data){
+	            	 var _string = '';
+	            	 if(data.length!=0){
+	            		 for(var i=0;i<data.length;i++){
+		            		  _string = _string+"<tr><td>"+data[i]['username']+"</td><td>"+data[i]['order_fee']+"</td><td>"+data[i]['referee_money']+"</td></tr>"
+		            	 }
+	            		 curPage = curPage+1;
+	            		
+	            	 }else{
+	            		 isLoading = false;
+	            	 }
+	            	 $("#dingdanList").append(_string);
+	            	     
+	            }, "json");
+	        }
+	    });
+	});
+</script>
+</body>
+</html>

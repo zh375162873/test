@@ -1,0 +1,172 @@
+<include file="Index/header"/>
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<style>
+li{display:inline;margin-left:20px;}
+</style>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('order/order_list')}" onclick="jumpTo(this);" class="active">所有订单</li>
+    </ul>
+</div>
+
+<form class="form-inline" id="" action="<?php echo U('order/order_list'); ?>" style="margin-bottom:20px;" method="get">
+		<div class="form-group">
+
+			<select class="form-control" name="goodsclass">
+				<option value="0">所有分类</option>
+				<option value="1">现金购买</option>
+				<option value="2">积分订单</option>
+				<option value="3">抽奖订单</option>
+			</select>
+			<select class="form-control" name="orderstatus">
+				<option  value="0" >所有状态</option>
+				<option  value="1" <if condition="$orderstatus eq 1">selected = "selected"</if>>已付款,未消费</option>
+				<option  value="2" <if condition="$orderstatus eq 2">selected = "selected"</if>>已消费,待评价</option>
+				<option  value="3" <if condition="$orderstatus eq 3">selected = "selected"</if>>已评价</option>
+				<option  value="4" <if condition="$orderstatus eq 4">selected = "selected"</if>>有退款</option>
+			</select>
+			<!-- <select class="form-control" name="class">
+				<option value="0">所有商品</option>
+				<volist name="goodsclass" id="class">
+				<option value="{$class.gc_id}">{$class.gc_name}</option>
+				</volist>
+			</select>
+			<select class="form-control">
+				<option>搜索来源</option>
+				
+			</select> -->
+		</div>
+		<div class="form-group" style="padding-top:5px;">
+			<label>开始日期:</label>
+			<input id="begin_time" name="begin_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$begin_time}">
+			<label>结束日期:</label>
+			<input id="end_time" name="end_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$end_time}">
+			<label>关键字:</label>  <input type="text" class="form-control" style="width:250px" name="order_sn" value="{$order_sn}" placeholder="输入订单号,账号,昵称,商品名称,编号">
+		</div>
+		<button class="btn btn-default" type="submit">筛选</button>
+		<a href="{:U('Order/orderlist_exe')}">导出报表</a>  
+	</form>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+               <if condition="$order eq 2">
+                  <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>1))}">订单编号</a></th>
+               <else />
+                   <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>2))}">订单编号</a></th>
+               </if>
+                <th style="border-right:1px solid #CCCCCC">商品名称</th>
+                <th style="border-right:1px solid #CCCCCC">用户账号</th>
+                <th style="border-right:1px solid #CCCCCC">用户昵称</th>
+                <th style="border-right:1px solid #CCCCCC">单价</th>
+                
+               <if condition="$order eq 4">
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;" href="{:U('/admin/order/order_list',array('order'=>3))}">数量</a></th>
+               <else />
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>4))}">数量</a></th>
+               </if>
+               
+               <if condition="$order eq 6">
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>5))}">总价</a></th>
+               <else />
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>6))}">总价</a></th>
+               </if>
+               
+               <if condition="$order eq 8">
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>7))}" >下单时间</a></th>
+               <else />
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>8))}" >下单时间</a></th>
+               </if>
+                
+                <if condition="$order eq 10">
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>9))}">消费时间</a></th>
+                <else />
+                 <th style="border-right:1px solid #CCCCCC"><a style="color:#fff;"  href="{:U('/admin/order/order_list',array('order'=>10))}">消费时间</a></th>
+                </if>
+                <th style="border-right:1px solid #CCCCCC">订单状态</th>
+                <th style="border-right:1px solid #CCCCCC">操作</th>
+            </tr>
+            <volist name="orderlist" id="vo">
+             <tr class="trbor">
+                <td>{$vo.order_sn}</td>
+                <td>{$vo.goods_name}</td>
+                <td>{$vo.buyer_name}</td>
+                <td>{$vo.buyer_nickname}</td>
+                <td style="text-align:right">{$vo.goods_price}</td>
+                <td style="text-align:right">{$vo.goods_num}</td>
+                <td style="text-align:right">{$vo.order_amount}</td>
+                <td>{$vo.payment_time}</td>
+                <td>{$vo.finnshed_time}</td>
+                <td>
+				   <if condition="$vo.is_entity eq 0">未消费&nbsp;&nbsp;
+                     <if condition="$vo.order_status eq 1">未消费&nbsp;&nbsp;
+                     <elseif condition="$vo.order_status eq 2" />已消费&nbsp;&nbsp;
+                     <elseif condition="$vo.order_status eq 3" />已取消&nbsp;&nbsp;
+                     </if>
+                     <if condition="$vo.refund_state gt 0">有退款&nbsp;&nbsp;
+                     </if>
+                     <if condition="$vo.evaluation_state eq 0">待评价
+                     <elseif condition="$vo.evaluation_state eq 1" />已评价
+                     </if>
+				   <else/>
+				     <if condition="$vo.send_type eq 1">
+					   <if condition="$vo.delivery_status eq 0">未发货
+                       <elseif condition="$vo.delivery_status eq 1" />已发货
+					   <elseif condition="$vo.delivery_status eq 2" />已收货
+                       </if>
+					 <else/>
+					   <if condition="$vo.order_status eq 1">未提货
+                       <elseif condition="$vo.order_status eq 2" />已提货
+                       </if>
+					 </if>
+				   </if>
+					 
+                     
+                    <!--  
+	                 <if condition="($vo.order_status eq 1) AND ($vo.refund_state eq 0)">已付款
+		                 <elseif condition="($vo.order_status eq 1) AND ($vo.refund_state eq 1)" />退款中
+		                 <elseif condition="($vo.order_status eq 1) AND ($vo.refund_state eq 3)" />已退款
+		                 <elseif condition="($vo.order_status eq 2) AND ($vo.evaluation_state eq 0)"/>已消费,待评价
+		                 <elseif condition="($vo.order_status eq 2) AND ($vo.evaluation_state eq 1)" />已评价
+		                 <else />已取消
+	                 </if>
+	                 -->
+                </td>
+                <td><a href="<?php echo U('order/orderinfo',array('id'=>$vo['order_id'])); ?>">查看详情</a></td>
+             </tr>
+            </volist>
+
+             <tr>
+               <td colspan="11" align="right"><span>{$page}</span></td>
+             </tr>
+        </table>
+    </div>
+</div>
+
+<include file="Index/footer"/>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+    });
+
+</script>
+

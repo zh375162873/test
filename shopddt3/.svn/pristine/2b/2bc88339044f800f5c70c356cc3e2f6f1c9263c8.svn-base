@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+<title>商品搜索-{$shop_base_info.shop_title}</title>
+<meta name="keywords" content="商品搜索-点点通-闪购平台"/>
+<meta name="description" content="商品搜索-点点通-闪购平台"/>
+
+<link rel="stylesheet" type="text/css" href="{$uri}__PUBLIC__/home/css/main.css">  
+<link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+   
+</head>
+
+<body >
+<div id="viewport" class="viewport">
+<form action="" method="post">
+<div class="location_search" style="padding:10px;">
+<li class="location_search_1"><input class="input_location" type="text" placeholder="输入商品、商家、地点搜索" name="keywords" value="{$keywords}">
+<button class="btn_location" type="submit">搜索</button>
+</li>
+</div>
+</form>
+
+
+<div class="home_list" style="height:100%; overflow:hidden; padding-bottom:50px;">
+
+<if condition="$goodslist">	
+  <foreach name="goodslist" item="val">
+    <section>
+        <a class="goods_content" href="/goodsview/{$val['goods_id']}.html">
+			<php>
+			 $t=time();
+			</php>
+			<if condition="isset($val['end_date']) and ($val['end_date'] gt 0) and ($val['end_date'] lt $t)">
+		      <div class="status_mask"><img src="{$uri}__PUBLIC__/home/images/pic_list_expired.png"  ></div>
+			</if>
+			
+			<if condition="$val['goods_storage'] glt 0">
+			  <div class="status_mask"><img src="{$uri}__PUBLIC__/home/images/pic_list_soldout.png"></div>
+			</if>
+
+			<if condition="isset($val['Period']) and ($val['Period']['shut'] eq 1)">
+			  <div class="status_mask"><img src="{$uri}__PUBLIC__/home/images/pic_list_start.png"></div>
+			</if>
+		
+		
+            <div class="goodImg">
+                <img src="{$uri}{$val['goods_image']}">
+            </div>
+            <div class="goodInfo">
+                <div class="title_line">
+                    <div class="title">
+                        <h3 class="item_name color35">{$val['goods_name']}</h3>
+                    </div>
+                    <span class="wz color7d">{$val['position_tags']}</span>
+                </div>
+                <p class="desc color7d">[{$val['position_tags']}]{$val['subtitle']}</p>
+                <div class="price_line color7d">
+                    <ins class="colorD5">{$val['goods_price']}元</ins>
+                    <del>{$val['goods_marketprice']}元</del>
+					<if condition="$type eq 1">
+                     <span class="colorAf">{$val['distance']}m</span>
+                    </if>
+					<if condition="$type eq 2">
+                     <span class="colorFf">{$val['evaluation_good_star']}分</span>
+					</if>
+					<if condition="$type eq 3">
+                     <span class="color7d">剩余{$val['goods_storage']}</span>
+					</if>
+                </div>
+            </div>
+        </a>
+    </section>
+	<div id="loadgoods"></div>
+
+<else/>
+	<div class="noData">
+    <p>没有找到相关的商品~</p>
+    <a href="{:U('/home/index/index')}">去逛逛</a>
+</div>
+</if>
+
+	
+</div>
+
+
+
+</div>
+
+
+
+ <include file="Index/footer"/>	  
+ 
+
+	<script type="text/javascript">
+	   
+	  
+
+	
+	
+        var counting = 2;
+        var winHeight = $(window).height();
+        var over = 0;
+        var oncenum = 6;
+		var isLoading = false;//瀑布流锁
+		var flagAuto = false;
+		
+//
+//	$(document).ready(function(){
+//
+//		  $.post("{:U('home/search/ajax_goodslist')}", {counting:counting,oncenum:oncenum,keywords:'<?php echo $keywords;?>'},function(data){
+//		    var d= eval('(' + data + ')');
+//		       if(d.length>0){
+//
+//			   }else{
+//				   $("#more").text('已经木有商品了哦~!');
+//			   }
+//		  });
+//	});
+		
+		
+		
+		
+        $(function () {
+		   
+		
+          $(window).scroll(function () {
+            var docTop = $(document).scrollTop();
+			if(window.sessionStorage){
+		        sessionStorage.setItem("home_sc",docTop);
+            }
+            var contentHeight = $("body").height();//获取body加载高度
+            if (docTop + winHeight >= contentHeight-110 && over==0 &&!isLoading){
+				if(flagAuto){
+					flagAuto = false;
+					return;
+				}
+				isLoading = true;
+                $.post("{:U('home/search/ajax_goodslist')}", {counting:counting,oncenum:oncenum,keywords:'{$keywords}'},function(goods_list){ 
+                    isLoading = false;
+				    if(goods_list.length>0){
+					    var doms = getDoms(goods_list);
+                        $("#loadgoods").append(doms); 
+					    counting = counting+1;
+
+                    }else{	  
+                        //$("#more").text('已经木有商品了哦~!');
+                        over = 1;
+                    }     
+                },'json');
+            }
+          });
+			
+			
+			function getDoms(goods_list){
+				var _html = "";
+				for (var i = 0; i<goods_list.length; i++) {
+                    if(goods_list[i]){
+						_html += '<section>';
+						_html += '<a class="goods_content" href="/goodsview/'+goods_list[i]['goods_id']+'.html">';
+						_html += '<div class="goodImg">'
+								_html += '<img src="__ROOT__'+goods_list[i]['goods_image']+'">'
+							_html += '</div>'
+							_html += '<div class="goodInfo">'
+								_html += '<div class="title_line">'
+									_html += '<div class="title">'
+										_html += '<h3 class="item_name color35">'+goods_list[i]['goods_name']+'</h3>'
+									_html += '</div>'
+									_html += '<span class="home_wz color7d">'+goods_list[i]['distance']+' km</span>'
+									_html += '<span class="wz color7d">'+goods_list[i]['position_tags']+'</span>'
+								_html += '</div>'
+								if(goods_list[i]['position_tags']){
+									_html += '<p class="desc color7d">['+goods_list[i]['position_tags']+']'+goods_list[i]['subtitle']+'</p>';                                   }else{
+									_html += '<p class="desc color7d">'+goods_list[i]['subtitle']+'</p>';    
+									}
+								_html += '<div class="price_line color7d">'
+									_html += '<ins class="colorD5">'+goods_list[i]['goods_price']+'</ins>'
+									_html += '<del>'+goods_list[i]['goods_marketprice']+'</del>'
+									_html += '<span>剩余'+goods_list[i]['goods_storage']+'</span>'
+								_html += '</div>'
+							_html += '</div>'
+						_html += '</a>'
+						_html += '</section>';
+                    }else{break;};
+                }
+				return _html;
+			}
+        });
+    </script>
+ 
+ 
+ 
+</body>
+</html>	
+	

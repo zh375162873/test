@@ -1,0 +1,26 @@
+<include file="Index/header"/>
+<style>
+.title1:link,.title1:visited{
+color:#FFFFFF}
+.title1:hover{
+text-decoration:underline;}
+/*按钮和排序*/
+.sortAbility:hover,.sortAbility:hover a,th.active,th.active a{color:#353535!important;}
+.btn_important{min-width:100px;background:rgb(208, 53, 53)!important;border-color:rgb(208, 53, 53)!important;}
+.btn_important:hover{background:rgb(197, 0, 0)!important;border-color:rgb(197, 0, 0)!important;}
+</style>
+<!--日期选择-->
+<link rel="stylesheet" href="__PUBLIC__/admin/css/datepicker.css">
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<!--整体-->
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('goods/goods_common_list')}" onclick="jumpTo(this);">所有商品</li>
+        <li data-url="{:U('goods/goods_list')}" onclick="jumpTo(this);" class="active">现金商品</a></li>
+        <li data-url="{:U('goods/goods_integral_list')}" onclick="jumpTo(this);">积分商品</li>
+        <li data-url="{:U('goods/goods_prize_list')}" onclick="jumpTo(this);">活动商品</li>
+        <li data-url="{:U('goods/goods_common_add')}" onclick="jumpTo(this);">添加商品</li>
+    </ul>
+</div>
+ 

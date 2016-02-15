@@ -1,0 +1,114 @@
+<include file="Index/header" />
+<!--日期选择-->
+<link rel="stylesheet" href="__PUBLIC__/admin/css/datepicker.css">
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<!--文件上传-->
+<link rel="stylesheet" href="__PUBLIC__/static/uploadify/uploadify.css">
+<script src="__PUBLIC__/static/uploadify/jquery.uploadify.min.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="__PUBLIC__/admin/css/normalize.css">
+<!--[if lte IE 6]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+<!--[if lte IE 7]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+
+<style>
+
+.breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited{
+color:#000000}
+.row-fluid a, .row-fluid a:link, .row-fluid a:visited{
+color:#000000}
+
+</style>
+
+  <!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="<?php echo U('goods/goods_common_list') ;?>">商品管理</a> 
+  </li>
+  <li class="active">商品修改</li>
+</ul>
+  
+  <!--子菜单-->
+  <div class="row-fluid" style=" margin-top:10px;">
+	<ul class="nav nav-tabs">
+	    <li><a href="<?php echo U('goods/goods_common_edit_base?goods_id='.$goods_id) ;?>">基本信息</a></li>
+		<li  ><a href="<?php echo U('goods/goods_common_state?goods_id='.$goods_id) ;?>">商品上架</a></li>
+		<li  class="active"  ><a href="javascript:void(0);">现金商品</a></li>
+        <!--<li ><a href="<?php echo U('goods/goods_common_images?goods_id='.$goods_id) ;?>">图片管理</a></li>-->
+        <!--<li  ><a href="<?php echo U('goods/goods_common_state1?goods_id='.$goods_id) ;?>">现金购买商品上架</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state2?goods_id='.$goods_id) ;?>">积分商品上架</a></li>
+        <li ><a href="javascript:void(0);">活动商品上架</a></li>-->
+	</ul>
+  </div>
+  
+  <div class="row"  style="padding-top:10px; padding-left:20px;">
+   <form id="form1" action="" method="post" enctype="multipart/form-data"  class="form-horizontal" data-toggle="validator" role="form">
+ <hr>
+   <h4>设置抢购：</h4>
+   <hr>  
+<script>
+var i=1;
+</script>   
+ <div class="form-group">
+	         <label for="select11" class="col-md-1 control-label">设置时间</label>
+		     <div class="col-md-11">
+				 <div id="rules">
+					 <?php
+					 if(is_array($goods_data['rules'])){
+					 foreach($goods_data['rules'] as $val){
+					   if($val){
+					 ?>
+					 <div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+					    <div class="col-md-9" style="padding-left:0px;" >
+					     <input class="form-control"  name="rules[]"     type="text"   value="{$val}" placeholder="每条1-60个汉字"  />
+					    </div>
+					    <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+					 </div>
+					 <?php
+					   }
+					 }
+					 }
+					 ?>
+				 </div> 
+				 <div class="col-md-7" >
+			      <button type="button"  name="sub" class="btn btn-primary" onclick="add_rules(i)">添加时间段</button>
+			     </div>
+              </div>
+		  </div>
+
+<script>
+function add_rules(key){ 
+	     $.get("<?php echo U('goods/ajax_add_goods_period') ;?>",{key:key} ,function(result){
+	       $("#rules").append(result);
+		   i=i+1;
+          // $("div").html(result);
+          });
+	   }
+	
+	function del_content(objdom){
+		$(objdom).parent().remove();
+	}   
+	    
+</script>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>我的收藏</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+</head>
+<body>
+
+<div class="home_list content_marginBottom">
+    <volist name="fav_list" id="vo">
+        <section>
+            <a class="goods_content" href="{:U('home/goods/goodsview/id/'.$vo['goods_id'])}">
+                <div class="goodImg">
+                    <img src="{$uri}{$vo['goods_image']}">
+                </div>
+                <div class="goodInfo">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35">{$vo['goods_name']}</h3>
+                        </div>
+                        <span class="wz color7d">{$vo['position_tags']}</span>
+                    </div>
+                    <p class="desc color7d">[{$vo['position_tags']}]{$vo['subtitle']}</p>
+
+                    <div class="price_line color7d">
+                        <ins class="colorD5">{$vo['goods_price']}元</ins>
+                        <del>{$vo['goods_marketprice']}元</del>
+                    </div>
+                </div>
+            </a>
+        </section>
+    </volist>
+</div>
+<include file="Index/footer"/>
+</body>
+</html>

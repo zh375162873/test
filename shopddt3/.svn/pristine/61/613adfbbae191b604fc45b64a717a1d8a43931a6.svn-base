@@ -1,0 +1,88 @@
+<include file="Index/header" />
+    <!--日期选择-->
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+    <script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+    <!--文件上传-->
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/static/uploadify/uploadify.css">
+    <script src="{$uri}__PUBLIC__/static/uploadify/jquery.uploadify.min.js" type="text/javascript"></script>
+    <div class="row headerNav" id="headerNav">
+  
+    </div>
+    <h4><strong>订单统计</strong> &nbsp;&nbsp;&nbsp;&nbsp; <small>成交订单总数（{$order_count.order_total_num}）</small> &nbsp;&nbsp;&nbsp;&nbsp;<small>成交订单总额（{$order_count.order_total_money}）</small></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+	<ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>今日新单</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>{$order_count.order_today_time}</small></h4>
+	  </li>
+	  <li style="margin-left:250px">
+	     <h4><small>本月新单</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>{$order_count.order_month_time}</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>未消费总额</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	  <li style="margin-left:250px">
+	     <h4><small>已消费总额</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>退款申请</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	  <li style="margin-left:250px">
+	     <h4><small>已退款</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+	
+	
+    <h4><strong>商品统计</strong></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>上架中的商品</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	  <li style="margin-left:250px">
+	     <h4><small>已售罄的商品</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>未上架的商品</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+	
+	
+	<h4><strong>访问统计</strong></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>当前在线人数</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	  <li style="margin-left:250px">
+	     <h4><small>今日访问</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+	
+    <h4><strong>评论统计</strong>&nbsp;&nbsp;&nbsp;&nbsp;<small>评论总数（7554）</small></h4>
+	<hr style="height:1px;border:none;border-top:1px solid #555555;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>未审核评论</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	  <li style="margin-left:250px">
+	     <h4><small>以显示评价</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+    <hr style="height:1px;border:none;border-top:1px solid #ddd8ce;"/>
+    <ul class="list-inline">
+	  <li style="margin-left:150px">
+	     <h4><small>已隐藏评价</small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<small>67</small></h4>
+	  </li>
+	</ul>
+    <include file="Index/footer" />
+

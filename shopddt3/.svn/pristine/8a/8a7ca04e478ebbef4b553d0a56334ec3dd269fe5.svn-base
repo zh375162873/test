@@ -1,0 +1,59 @@
+<?php
+/**
+ * 售后服务
+ * @author 梁健
+ */
+namespace BizService;
+class OrderDisputeService extends BaseService
+{
+	/**
+	 * 所有售后列表
+	 * @return array
+	 */
+	public function dispute_list(){
+		$query = "SELECT * FROM `ddt_orders_dispute` ORDER BY id DESC";
+		return M()->query($query);
+	}
+	
+	/**
+	 * 售后详情
+	 * @return array
+	 */
+	public function dispute_info($order_id = 0){
+		if(!$order_id){
+			return false;
+		}
+		$query = "SELECT * FROM `ddt_orders_dispute` WHERE `order_id` = $order_id";
+		return M()->query($query);
+	}
+	
+	/**
+	 * 添加售后信息
+	 * @param $data 售后信息
+	 * @return boolen|int
+	 */
+	public function add_dispute($data){
+		if($data){
+			$count = M()->table('ddt_orders_dispute')->where("order_id = {$data['order_id']}")->count();
+			if($count > 0){
+				return false;
+			}else{
+				$query = "INSERT INTO `ddt_orders_dispute` (`user_id`,`order_id`,`status`,`type`,`content`,`tel`,`add_time`,`update_time`) ";
+				$query .= "VALUES (%d, %d, %d, %d, '%s', '%s', %d, %d)";
+				$dispute_data = array(
+					session('userId'),
+					$data['order_id'],
+					0,
+					$data['type'],
+					$data['content'],
+					$data['tel'],
+					time(),
+					time()
+				);
+				return M()->execute($query, $dispute_data);
+			}
+		}else{
+			return false;
+		}
+	}
+}

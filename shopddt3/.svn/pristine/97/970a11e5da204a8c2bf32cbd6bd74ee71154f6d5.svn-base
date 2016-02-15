@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>{$goods['title']}-点点通-闪购平台</title>
+    <meta name="keywords" content="{$goods['keywords']}"/>
+    <meta name="description" content="{$goods['description']}"/>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/home/js/TouchSlide.1.1.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var $$ = function (obj) {
+            if (obj != null && obj != undefined && obj.toString().length > 0) {
+                if (obj[0] == '#') {
+                    return document.getElementById(obj.substr(1, obj.length - 1));
+                }
+            }
+        }
+        function chgNum(a) {
+            var number = $$("#number");
+            var storenum = $("#msg").html();
+            var p = parseInt(number.value);
+<?php
+if($goods['virtual_limit']>0){
+?>			
+			var virtual_limit = $("#virtual_limit").val();
+<?php
+}
+?>	
+            if (a == 1) {
+                //alert("此商品只能购买一个~！");return false;
+                if (p < storenum) {
+<?php
+if($goods['virtual_limit']>0){
+?>
+				    if(p >= virtual_limit){
+					  alert("此商品为限购商品，已达到最大数量~！");
+					  return false;
+					}
+<?php
+}
+?>					
+                     number.value = ++p;
+				 
+                } else {
+				
+				    if(storenum==0) {
+                    alert("亲，已经没有库存了~！");
+					$("#number").val(storenum)
+                    return false;
+                    }
+				   
+                    alert("已达到最大数量~！");
+                    return false;
+                }
+            }
+            else {
+                if (p > 1) number.value = --p;
+            }
+        }
+		
+		//提交立即购买前验证函数
+         function check(form) { 
+              /*例子如下
+			  if(form.userId.value=='') {
+                alert("请输入用户帐号!");
+                form.userId.focus();
+                return false;
+              }*/
+			  
+			  //验证限购
+			  var number = $$("#number");
+              var storenum = $("#msg").html();
+              var p = parseInt(number.value);
+<?php
+if($goods['virtual_limit']>0){
+?>			  
+			  var virtual_limit = $("#virtual_limit").val();
+<?php
+}
+?>				  
+			  //验证库存和限购
+			    if (p < storenum) {
+<?php
+if($goods['virtual_limit']>0){
+?>
+				    if(p > virtual_limit){
+					  alert("此商品只能购买"+virtual_limit+"个!");
+					  $("#number").val(1)
+					  return false;
+					}
+<?php
+}
+?>					
+                }
+				
+				if(p > storenum&&storenum>0) {
+                    alert("已达到最大数量~！");
+					$("#number").val(storenum)
+                    return false;
+                }
+				
+				if(storenum==0) {
+                    alert("亲，已经没有库存了~！");
+					$("#number").val(storenum)
+                    return false;
+                }
+			  
+			  
+			 
+             return true;
+         }
+</script>
+	
+
+</head>
+<body >
+<?php
+if($goods['virtual_limit']>0){
+?>
+<input type="hidden" id="virtual_limit" name="virtual_limit" value="{$goods['virtual_limit']}">
+<?php
+}
+?>
+<header></header>
+<section>
+    <div class="goods_img">
+		<div id="focus" class="focus">
+            <div class="Vertical_hd" >
+                <ul>
+                </ul>
+            </div>
+            <div class="bd">
+                <ul>
+				   <?php
+				   foreach($goods['lunbo'] as $val){
+				   ?>
+                    <li><img src="{$val['goods_image']}"></li>
+				   <?php
+				   }
+				   ?>	
+                </ul>
+            </div>
+        </div>
+        <script type="text/javascript">
+            TouchSlide({
+                slideCell:"#focus",
+                titCell:".Vertical_hd ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+                mainCell:".bd ul",
+                delayTime:600,
+                interTime:4000,
+                effect:"leftLoop",
+                autoPlay:true,//自动播放
+                autoPage:true, //自动分页
+                switchLoad:"_src" //切换加载，真实图片路径为"_src"
+            });
+        </script>
+        <div class="img_mask">
+            <div class="summary">
+                <h2>{$goods['store_name']}</h2>
+
+                <p>{$goods['goods_name']},{$goods['subtitle']}</p>
+            </div>
+            <!--<div class="share_right">分享</div>-->
+        </div>
+    </div>
+</section>
+<section class="goods_form">
+    <div class="goods_price"> 
+        <span class="price colorB4">{$goods['goods_price']}<span class="yuan colorB4">元</span></span>
+        <span class="yishou color7d">已售{$goods['goods_salenum']}份</span>
+    </div>
+	<div class="kucun_shoucang">
+        <span>库存：</span><!--库存数量-->
+        <span id="msg">{$goods['goods_storage']}</span><!--库存数量-->
+       <if condition="session('userName')">
+        <span id="shoucang1" <if condition="$is_fav eq true">style="display:block;"<else/>style="display:none;"</if> class="shoucang" onclick="del_fav_good('{$goods.goods_id}');"><span class="yishoucang"></span>已收藏</span>
+        <span id="shoucang2" <if condition="$is_fav eq true">style="display:none;"<else/>style="display:block;"</if> class="shoucang" onclick="add_fav_good('{$goods.goods_id}');"><span></span>加入收藏</span>
+	   <else />  
+         <span style="display:block;" class="shoucang" onClick="check_f()"><span></span>加入收藏</span>
+		 
+<script language='javascript'>
+
+    function check_f(){
+	 alert('请先登录！');
+    var currentUrl = encodeURIComponent(this.location.href);
+  //  $("#login_tag").attr("href","__APP__/index/userLogin?before_url="+currentUrl);
+	window.location.href="__APP__/index/userLogin?before_url="+currentUrl;
+    // window.location.href = "__APP__/index/userLogin?before_url="+currentUrl;
+    }
+
+    
+ 
+</script>
+		 
+       </if>
+    </div>
+	<?php
+	if($channel > 0){
+	?>
+	<form action="#" method="get" id="goods_youhui" class="goods_youhui">
+	    <?php
+		if(!$goods_code){
+		?>
+        <input type="text" name="goods_code" id="goods_code" placeholder="请输入优惠口令">
+		<input type="hidden"  name="id" value="{$goods.goods_id}">
+		<input type="hidden"  name="goods_price" id="goods_price" value="{$goods['goods_price']}">
+        <button type="button" onClick="ajax_check_channel_code()">查看优惠价格</button>
+		<?php
+		}else{
+		?>
+        <span>优惠口令：{$goods_code}  &nbsp;  &nbsp; &nbsp; &nbsp;优惠价格:{$channel_price}元</span>
+		<?php
+		}
+		?>
+    </form>
+	<?php
+	}
+	?>
+    <form id="addGoodsqy" action="<?php echo U('home/order/create'); ?>" method="post">
+        <input type="button" value="-" class="minus" onClick="chgNum(-1)"/>
+        <input type="text" id='number' name="number" value="1" class="goods_qy"/>
+        <input type="button" value="+" class="add" onClick="chgNum(1)"/>
+        <input type="hidden" name="goods_id" value="{$goods.goods_id}">
+<?php
+if($channel > 0&&$goods_code){
+?>
+<input type="hidden" name="goods_code" value="{$goods_code}">
+<?php
+}
+?>
+		
+		
+        <button class="subBtn" type="submit"  onclick="return check(this.form)">立即抢购</button>
+    </form>
+</section>
+<section class="goods_reviews">
+    <a href="<?php echo U('pinglun/pl_list',array('goods_id'=>$goods['goods_id'])); ?>">
+        <div class="reviews">
+            <div class="star_gray">
+               <?php
+			   $n=$goods['evaluation_good_star']/5*100;
+			   if($n==0){
+			   $n=100;
+			   $goods['evaluation_good_star']=5;
+			   $goods['evaluation_count']=0;
+			   }
+			   ?>
+                <div class="star" style="width:{$n}%">★★★★★</div>
+            </div>
+            <span class="colorFf">{$goods['evaluation_good_star']}分</span>
+        </div>
+		<?php
+		if($goods['evaluation_count']>0){
+		?>
+        <span class="reviews_right">{$goods['evaluation_count']}人评价</span>
+		<?php
+		}else{
+		?>
+		<span class="reviews_right">查看评论</span>
+		<?php
+		}
+		?>
+    </a>
+</section>
+<section class="goods_shopDesc">
+    <div class="title">商家信息</div>
+    <div class="loc_tel">
+        <div class="name color35">{$goods['store']['merchant_name']}</div>
+        <div class="loc">
+		<a href="<?php echo U('goods/storemap',array('goods_id'=>$goods['goods_id'],'store_id'=>$goods['store_id'])); ?>">
+            <p>{$goods['store']['address']}</p>
+
+            <div><img src="{$uri}__PUBLIC__/home/images/btn_location.png" width="12px" height="15px">
+                <?php
+			if(session('lat')){
+			$n_latitude = session('lat')?session('lat'):"34.26567";
+            $n_longitude = session('lng')?session('lng'):"108.953435";
+			$distance = getDistance($n_latitude, $n_longitude, $goods['latitude'], $goods['longitude']);
+			echo number_format($distance/1000, 2, '.', '');;
+			?>
+                km
+                <?php
+			}
+			?>
+            </div>
+		</a>
+        </div>
+        <div class="tel"><a href="tel:{$goods['store']['merchant_tel']}"></a></div>
+    </div>
+</section>
+<section class="goods_info">
+    <div class="gName">商品介绍</div>
+    <div class="info">
+        {$goods['mobile_body']}
+    </div>
+</section>
+<section class="note">
+    <div class="title">购买须知</div>
+    <div class="note_list">
+        <dl>
+            <dt>有效期</dt>
+            <dd><?php echo date('Y:m:d',$goods['start_date']);?> 至 <?php echo date('Y:m:d',$goods['end_date']);?>
+                （周末、法定节假日通用）
+            </dd>
+            <dt>使用时间</dt>
+            <dd>
+			<?php if($goods['usetime'][5]==1){?>
+			<?php echo $goods['usetime'][0];?>:<?php echo $goods['usetime'][1];?>-<?php echo $goods['usetime'][2];?>
+                :<?php echo $goods['usetime'][3];?>
+			<?php
+			}else{
+			?>	
+			24小时营业
+			<?php
+			}
+			?>
+				</dd>
+            <dt>使用规则</dt>
+            <?php
+			foreach($goods['rules'] as $val){
+			?>
+            <dd>{$val}</dd>
+            <?php
+			}
+			?>
+        </dl>
+    </div>
+</section>
+<div style=" margin-bottom:50px;">
+<?php
+foreach($goods['addcontent']['title'] as $key=>$val){
+?>
+<section class="goods_info">
+    <div class="gName">{$val}</div>
+    <div class="info">
+        {$goods['addcontent']['content'][$key]}
+    </div>
+</section>
+<?php
+}
+?>
+</div>
+
+<include file="Index/footer"/>
+<script>
+    function add_fav_good(good_id){
+        $.ajax({
+            type: "POST",
+            url: "__APP__/home/Favorite/addfav_goods",
+            data: "goods_id="+good_id,
+            success: function(data){
+                if(data.status==1){
+                    $("#shoucang1").show();
+                    $("#shoucang2").hide();
+                }
+                alert(data.info);
+            }
+        });
+    }
+    function del_fav_good(good_id){
+        $.ajax({
+            type: "POST",
+            url: "__APP__/home/Favorite/delfavorite",
+            data: "fav_id="+good_id,
+            success: function(data){
+                if(data.status==1){
+                    $("#shoucang2").show();
+                    $("#shoucang1").hide();
+                }
+                alert(data.info);
+            }
+        });
+    }
+	
+	function ajax_check_channel_code(){
+	    goods_code=$('#goods_code').val();
+		goods_price=$('#goods_price').val();
+        $.ajax({
+            type: "POST",
+            url: "__APP__/home/goods/ajax_check_channel_code",
+            data: {goods_code:goods_code,id:{$goods_id},goods_price:goods_price},
+			dataType:'json',
+            success: function(data){
+                if(data.status==1){
+                  $("#goods_youhui").html("<span>优惠口令："+data.goods_code+" &nbsp;  &nbsp; &nbsp; &nbsp;优惠价格："+data.price+"元</span>");
+                }else{
+				  alert(data.message);
+				}
+                
+            }
+        });
+    }
+	
+	
+	//浏览记录
+	$(document).ready(function(){
+	  $.get("<?php echo U('goods/ajax_browse') ;?>", { goods_id:{$goods_id},goods_type:1,gc_id:<?php echo $gc_id?$gc_id:0;?>}, function(result){
+			  });	
+	});
+</script>
+
+<?php
+
+//S('a',array('1','2','3'),30);
+
+print_r(S('a'));
+
+/*require_once(ROOT_PATH . "WeixinJssdk.php");
+$jssdk = new WeixinJssdk();
+$signPackage = $jssdk->GetSignPackage();
+*/
+?>
+
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script>
+wx.config({
+    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+    appId: 'wx7e11eb4434f686e8', // 必填，企业号的唯一标识，此处填写企业号corpid
+    timestamp: 1447730855, // 必填，生成签名的时间戳
+    nonceStr: 'NufaLuAtykILdLCL', // 必填，生成签名的随机串
+    signature: '0018bdc17c11d316168a344bbadedf9628150044',// 必填，签名，见附录1
+    jsApiList: [
+	  'getLocation'
+	] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+});
+
+wx.ready(function(){
+
+    // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+	
+	wx.getLocation({
+    type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+    success: function (res) {
+       var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+       var longitude = res.longitude ; // 经度，浮点数，范围为180 ~ -180。
+        var speed = res.speed; // 速度，以米/每秒计
+        var accuracy = res.accuracy; // 位置精度
+		
+		 $.ajax({  
+           type:"POST", 
+		   data:{lat:latitude,lng:longitude},
+           url:"{:U('home/goods/setpostion')}", 
+           dataType:"html"
+		   });
+		
+        },
+	  fail: function (res) {
+	     alert(res);
+	  }	
+   });
+   
+
+	
+	
+});
+
+wx.error(function(res){
+
+    // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+
+
+
+});
+</script>
+</body>
+</html>

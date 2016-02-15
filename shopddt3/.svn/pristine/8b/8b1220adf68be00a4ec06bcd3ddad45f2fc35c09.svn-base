@@ -1,0 +1,32 @@
+<div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+             <div class="col-md-9 form-inline"  style="padding-left:0px; ">
+			 日期范围： <input id="start_date5" class="form-control "   name="start_date"  type="text"  value="<?php echo date('Y-m-d', $goods_data['start_date'])?>"  style="width:100px;" placeholder="开始时间"    />
+					-
+					<input id="end_date6" class="form-control required"   name="end_date"  type="text"  value="<?php echo date('Y-m-d', $goods_data['end_date'])?>"  data-msg="请输入有效期"  style="width:100px;" placeholder="结束时间"  />
+					
+			  时间范围： <input type="text" size="5" class="form-control" style="width:30px;display:inline">时 <input type="text" size="5" class="form-control" style="width:30px;display:inline">分-
+			   <input type="text" size="5" class="form-control" style="width:30px;display:inline">时 <input type="text" size="5" class="form-control" style="width:30px;display:inline">分
+			 </div>
+			  <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+</div>  
+
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time5').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+		$('#begin_time5').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+      
+    });
+</script>

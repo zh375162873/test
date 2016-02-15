@@ -1,0 +1,10 @@
+<?php
+/*
+ * 订单商品模型
+ */
+namespace Home\model;
+use Think\Model;
+class OrdersGoodsModel extends Model {
+   protected $fields=array("id","order_id","goods_id","goods_name","goods_plun","goods_price","goods_num","goods_image","store_id","buyer_id","shop_id","goods_type","_pk"=>"id");
+   
+}

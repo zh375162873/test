@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta content="telephone=no" name="format-detection">
+	<title>摇一摇-点点通闪购平台</title>
+	<link rel="stylesheet" type="text/css" href="{$uri}__PUBLIC__/home/yiy/yiy_css.css">
+</head>
+<script>
+
+	function checkMobile(sMobile){
+		var telReg = !!sMobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+		//如果手机号码不能通过验证
+		if(telReg == false){
+			return false;
+		}
+	}
+
+	function check(theForm,type){
+		var username=password=url=null;
+		username = theForm.username.value;
+		password = theForm.password.value;
+		if(username == ""){
+			alert("请输入手机号码!");theForm.username.focus();return false;
+		}
+		if(password == "" || password.replace(/[ ]/g,"").length < 6){
+			alert("请输入不低于6位的密码!");theForm.password.focus();return false;
+		}
+		if(checkMobile(username) == false){
+			alert("请输入正确的手机号码!");theForm.username.focus();return false;
+		}
+		if(type == 'zhuce'){
+			url = "__APP__/shake/userActReg";
+		}else if(type == 'login'){
+			url = "__APP__/shake/userActLogin";
+		}
+		//$("#formUser").submit();
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: "username="+username+"&password="+password,
+			success: function(msg){
+				if(msg.status==1){
+					location.reload();
+				}else{
+					alert(msg.info);
+				}
+			}
+		});
+	}
+</script>
+</head>
+<body>
+<div style="display:none;">
+	<audio id="audio" src="{$uri}__PUBLIC__/home/yiy/mp3/4.mp3" preload="auto"></audio>
+</div>
+<header class="hand-animate"><img src="{$uri}__PUBLIC__/home/yiy/images/yaoyiyao_yiy.png"></header>
+<if condition="$user_id eq 0">
+<form name="formUser" id="formUser" action="" method="post">
+	<input type="hidden" name="gourl"  value="wifi" />
+	<div id="yiy" class="yiy_zc">
+		<ul>
+			<li>
+				<input class="yiy_input" type="text" name="username" placeholder="请输入11位手机号" autofocus required />
+			</li>
+			<li>
+				<input class="yiy_password" type="password" name="password" placeholder="请输入密码">
+			</li>
+			<button class="yiy_button" type="text" onclick="javascript:return check(formUser,'login');">登录</button></li>
+		</ul>
+
+	</div>
+</form>
+<else />
+<form name="formUserGet" id="formUserGet" action="__APP__/Shake/generate" method="post">
+	<div id="yiy" class="yiy_zc">
+		<ul>
+			<li>
+				<p class="yiy_dl">您好，{$username}</p>
+			</li>
+
+			</li>
+		</ul>
+
+	</div>
+</form>
+</if>
+</div>
+
+<script type="text/javascript" src="{$uri}__PUBLIC__/home/yiy/jquery-1.11.1.min.js"></script>
+<script>
+
+	var SHAKE_THRESHOLD = 800;
+	var last_update = 0;
+	var x = y = z = last_x = last_y = last_z = 0;
+	if (window.DeviceMotionEvent) {
+		window.addEventListener('devicemotion', deviceMotionHandler, false);
+	} else {
+		alert('本设备不支持devicemotion事件');
+	}
+	function deviceMotionHandler(eventData) {
+		var acceleration = eventData.accelerationIncludingGravity;
+		var curTime = new Date().getTime();
+		if ((curTime - last_update) > 200) {
+			var diffTime = curTime - last_update;
+			last_update = curTime;
+			x = acceleration.x;
+			y = acceleration.y;
+			z = acceleration.z;
+			var speed = Math.abs(x + y + z - last_x - last_y - last_z) / diffTime * 8000;
+			if (speed > SHAKE_THRESHOLD) {
+				<if condition="$user_id neq 0">
+				document.getElementById("audio").play();
+				setTimeout(function(){doResult();},1000);
+				</if>
+				}
+				last_x = x;
+				last_y = y;
+				last_z = z;
+			}
+		}
+		function doResult() {
+			$("#formUserGet").submit();
+		}
+</script>
+
+</body>
+</html>

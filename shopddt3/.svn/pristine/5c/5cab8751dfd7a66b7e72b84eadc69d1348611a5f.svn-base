@@ -1,0 +1,167 @@
+<?php
+
+namespace BizService;
+
+use Think\Upload;
+/**
+ *  execl文件操作
+ *  @功 能：Exel格式文件下载模型。
+ *  @备 注：[单字段导出]和[多字段导出]方法
+ *  @author 张辉
+ */
+class ExeclService extends BaseService {
+
+	/* @功 能：导出数据到exel文件
+	 * @参 数：1,$data:				- 二维数组
+	 * 		   2,$fileName			- 下载后的文件名称。
+	 *		   3,$fields			- 导出数据对应的数组中的下标的字段。
+	 * 		   4,columnNameArr		- 多列首列的名称
+	 *		   5,columnAvgWidth		- 各列的宽度
+	 * 		   6,$columnBgColor		- 首列的默认背景色
+	 * @返 回：无（下载到exel文件）
+	 * @说 明：当前最多是A-Z列（26列），在数组$columnLetter按Exel列格式添加即可扩展。
+	 * @示 例：PublicModel::downMoreColumnDateToExel($userInfo,'活动参与者信息',array('id','real_name','pmi','email'),array('用户ID号','真实姓名','用户PMI号','用户邮箱'),150);
+	 */
+	static public function downMoreColumnDateToExel($data,$fileName,$fields,$columnNameArr,$columnAvgWidth='',$columnBgColor='#88aa22'){
+		error_reporting(E_ALL);
+		ini_set('display_errors', TRUE);
+		ini_set('display_startup_errors', TRUE);
+		date_default_timezone_set('PRC');
+
+		if (PHP_SAPI == 'cli')
+			die('This example should only be run from a Web Browser');
+			
+	     //Vendor('PHPExcel.PHPExcel');
+		//Vendor("PHPExcel.PHPExcel");
+		//include("./ThinkPHP/Library/Vendor/PHPExcel/PHPExcel.php");
+		//import('Vendor.PHPExcel.PHPExcel');
+		
+		require_once dirname(__FILE__) . '/../../ThinkPHP/Library/Vendor/PHPExcel/PHPExcel.php';
+        require_once dirname(__FILE__) . '/../../ThinkPHP/Library/Vendor/PHPExcel/PHPExcel/IOFactory.php';
+		
+		$objPHPExcel = new \PHPExcel();
+
+		//设置exel文件属性
+		$objPHPExcel->getProperties()->setCreator("fmi.com.cn")
+							 ->setLastModifiedBy("fmi.com.cn")
+							 ->setTitle("Data of fmi.com.cn")
+							 ->setSubject("Data of fmi.com.cn")
+							 ->setDescription("Data of fmi.com.cn")
+							 ->setKeywords("Data of fmi.com.cn")
+							 ->setCategory("Data of fmi.com.cn");
+
+		//设置exel列（真接在后面即可扩展）
+		$columnLetter=array('A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z');
+		$Acount=count($columnNameArr);
+		
+		//填入表头主标题
+         $objPHPExcel->getActiveSheet()->setCellValue('A1', "【".$fileName."】");
+		//合并表头单元格
+        $objPHPExcel->getActiveSheet()->mergeCells('A1:'.$columnLetter[$Acount].'1');
+		
+		for($i=0;$i<$Acount;$i++){
+			$columnWord=$columnLetter[$i];
+			$columnName=$columnNameArr[$i];
+			$objPHPExcel->setActiveSheetIndex(0)->setCellValue($columnWord.'2', $columnName);
+			
+			//设置指定列的宽度
+			if(!empty($columnAvgWidth)){
+				$objPHPExcel->getActiveSheet()->getColumnDimension($columnWord.'2')->setWidth($columnAvgWidth);			//列为设定宽度。
+			}else{
+				$objPHPExcel->getActiveSheet()->getColumnDimension($columnWord.'2')->setAutoSize(true); 				//列自动
+			}
+			//设置列的背景色
+			//$objPHPExcel->getActiveSheet()->getStyle($columnWord.'1')->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID);  
+			$objPHPExcel->getActiveSheet()->getStyle($columnWord.'1')->getFill()->getStartColor()->setARGB($columnBgColor);
+		}
+
+		// 写入exel数据。
+		$fcount=count($fields);
+		foreach($data as $key=>$val){
+			for($i=0;$i<$fcount;$i++){
+				$word=$columnLetter[$i];
+				$obj=$objPHPExcel->setActiveSheetIndex(0)->setCellValue(($word.($key+2)), $data[$key][$fields[$i]]);
+			}
+		}
+		// 重命名文件名
+		$objPHPExcel->getActiveSheet()->setTitle('用户有效邮箱');
+		//设置打开exel后第一个显示的文件。
+		$objPHPExcel->setActiveSheetIndex(0);
+		
+		//设置发送头信息
+		header('Content-Type: application/vnd.ms-excel');
+		header('Content-Disposition: attachment;filename="'.$fileName.'.xls"');
+		header('Cache-Control: max-age=0');
+
+		$objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+		$objWriter->save('php://output');
+		
+		return true; 
+	}
+	/**
+	 * @功  能：Ajax检测操作证码是否正确
+	 * @参  数：无
+	 * @返回值：true/false
+	 * @备  注：公共方法
+	 */
+	static public function checkOperateCode($opcode){
+		$uid		=	$_SESSION['admin']['uid'];
+		$admRes		=	M('Admin');
+		$admInfo	=	$admRes->where(array('id'=>$uid))->find();
+		$ucode		=	cpwd_md5($opcode,$admInfo['opt_salt']);
+		if($ucode==$admInfo['opt_verify']){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	/**
+	 * @功能：获取前N天的时间起止时间
+	 * @参数：$nday:天数。
+	 * @返回：返回每天的起止时间数组。
+	 * @说明：包含当天。
+	 */
+	static public function getLastNdayTime($nday){
+		//当天时间
+		date_default_timezone_set('PRC');
+		$ctime		=	$_SERVER['REQUEST_TIME'];
+		$TodayTime	=	mktime(0,0,0,date("m",$ctime),date("d",$ctime),date("Y",$ctime));
+		//获取前N天起止时间
+		for($i=0;$i<$nday;$i++){
+			$dateTime['last_s'][]=$TodayTime-86400*$i;
+			$dateTime['last_n'][]=$TodayTime-86400*($i-1);
+		}
+		return $dateTime;
+	}
+	/**
+	 * @功能：获取本季度的起始Unix时间值
+	 * @参数：$ym:获取年月。date('Y-m',$time);
+	 * @返回：返回季度的起止时间数组。
+	 * @说明：无。
+	 */
+	static public function getQuarterUTime($ym){
+		//接收时间变量处理。
+		if(!empty($ym)){
+			$ymTime	=	explode('-',$ym);
+			$ytime	=	$ymTime[0];
+			$mtime	=	$ymTime[1];
+		}
+		$y=($ytime)?$ytime:date('Y');				//年
+		$m=($mtime)?$mtime:date('m');				//月
+		$m+=0;						//转换为整数
+		$e=floor(($m-1)/3+1)*3;		//计算出本季度终止月份
+		$s=$e-3;					//计算本季度开始月份
+		$n=(3==$e || 13==$e)?31:30;						//计算终止日
+		$s=sprintf("$y-%02d-01",$s);					//开始日期串
+		$e=sprintf("$y-%02d-%02d 23:59:59",$e,$n);		//终止日期串
+		//echo "$s ～ $e\n";//输出结果// echo '<br />';
+		$quartersArr					=	explode('-',$s);
+		$quarter['qtrStart']	=	mktime(0,0,0,$quartersArr[1],$quartersArr[2],$quartersArr[0]);
+		$quartereArr					=	explode('-',$e);
+		$quarter['qtrEnd']	=	mktime(0,0,0,$quartereArr[1],$quartereArr[2],$quartereArr[0]);
+		
+		return $quarter;
+	 }
+
+
+}

@@ -1,0 +1,45 @@
+<?php
+namespace Home\Model;
+use Think\Model;
+class GoodsbrowseModel extends Model 
+{ 
+  protected $tableName = 'goods_browse'; 
+  protected $fields = array(
+  'id', //id
+  'goods_id', //	int(11)	否		商品ID
+  'member_id', //	int(11)	否		会员ID
+  'browsetime',//int(11)	否		浏览时间
+  'gc_id',// int(11)	否		商品分类，从哪个分类过来浏览的
+  'gc_id_1',// 	int(11)	否		商品一级分类
+  'gc_id_2',// 	int(11)	否		商品二级分类
+  'gc_id_3',//	int(11)	否		商品三级分类
+  '_pk'=>'id'//主键
+  );
+ 
+   //新增浏览信息
+  public  function  addBrowse($data,$types=1){
+     $array=array();
+     $array['goods_id']=$data['goods_id'];
+     $data['member_id']=$data['userid'];
+	 $data['browsetime']=$data['browsetime'];
+	 $data['gc_id']=$data['gc_id'];
+	 switch($types){  
+	   case 1:
+	      M('goods')->where('goods_id-'.$data['goods_id'])->data($array)->save();
+		  M('goods')->where("goods_id = ".$data['goods_id'])->setInc('goods_click',1); // 增加浏览数量
+	      break;
+	 
+	 } 
+  }
+  
+  //查询单个商品浏览信息
+  public function  getBrowse($id){
+  
+  
+  }
+  
+ 
+ 
+ 
+}
+?>

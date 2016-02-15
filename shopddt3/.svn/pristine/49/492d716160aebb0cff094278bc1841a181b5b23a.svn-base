@@ -1,0 +1,66 @@
+<?php
+
+namespace BizService;
+
+/**
+ * 商品收藏、商城收藏
+ *
+ * @author 谢林
+ */
+class FavoriteService extends BaseService {
+
+	/**
+	 * @param $uid 收藏用户ID
+	 * @param $fav_id 收藏ID
+	 * @param int $type 收藏类型 默认0（0商品1商城）
+	 * @return array
+	 */
+	public function addFavorite($uid,$fav_id,$type=0){
+		if(empty($uid) || empty($fav_id)){
+			return false;
+		}
+		$time = time();
+		$sql = "INSERT INTO ddt_favorites (user_id,fav_id,fav_type,fav_time) VALUES (%d,%d,%d,%d)";
+		return M()->execute($sql,$uid,$fav_id,$type,$time);
+	}
+
+	public function getFavorite($uid,$fav_id,$type=0){
+		$query = "SELECT 1 FROM ddt_favorites WHERE user_id=%d AND fav_id=%d AND fav_type=%d";
+		return M()->query($query,$uid,$fav_id,$type);
+	}
+	/**
+	 * @param $uid 收藏用户ID
+	 * @param $fav_id 收藏ID
+	 * @param int $type 收藏类型 默认0（0商品1商城）
+	 * @return array
+	 */
+	public function delFavorite($uid,$fav_id,$type=0){
+		if(empty($uid) || empty($fav_id)){
+			return false;
+		}
+		$sql = "DELETE FROM ddt_favorites WHERE user_id = %d AND fav_id = %d AND fav_type = %d";
+		return M()->execute($sql,$uid,$fav_id,$type);
+	}
+	/**
+	 * @param $uid 收藏ID
+	 * @param int $type 收藏类型 默认0（0商品1商城）
+	 * @param bool|true $ispagenation 是否分页
+	 * @return mixed|\multitype
+	 */
+	public function getFavorites($uid,$type=0,$ispagenation=true){
+		//根据收藏类型不同组装查询SQL
+		if($type==1){
+			//@todo 收藏商家暂不实现
+		}else{
+			$query_count = "SELECT count(*) as cnt FROM ddt_favorites AS a INNER JOIN ddt_goods AS b ON a.fav_id = b.goods_id WHERE a.fav_type=0 AND a.user_id={$uid} ORDER BY a.fav_time DESC";
+			//@todo 需要用具体字段替换*
+			$query = "SELECT * FROM ddt_favorites AS a INNER JOIN ddt_goods AS b ON a.fav_id = b.goods_id WHERE a.fav_type=0 AND a.user_id={$uid} ORDER BY a.fav_time DESC";
+		}
+		if($ispagenation){
+			$count = M()->query($query_count);
+			return mypage($count[0]['cnt'],$query);
+		}else{
+			return M()->query($query);
+		}
+	}
+}

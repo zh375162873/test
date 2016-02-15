@@ -1,0 +1,51 @@
+<footer class="home_footer">
+    <ul>
+        <li><a id="nav_home_link" href="__APP__/index/index"><b class="color54">首页</b><img src="__PUBLIC__/home/images/index/nav_fixed_sy_after.png"></a></li>
+        <li><a href="__APP__/cart/index"><img class="home_footer_hd" src="__PUBLIC__/home/images/nav_fixed_gwck.png"><sup style="display:none;" class="home_footer_num"></sup></a></li>
+        <li>
+	        <if condition="session('userName')">
+	        <a  id="nav_user_link" href="__APP__/user/mine"><img src="__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">我的</b></a>
+	        <else />
+	        	<a class="loginOut" id="login_tag" href="javascript:void(0)"><img src="__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">登录</b></a>
+	        </if>
+        </li>
+    </ul>
+</footer>
+<script language='javascript'>
+    var SITE_URL = "http://{$Think.server.HTTP_HOST}";
+    $(document).ready(function(){
+        get_cart_info();
+        changeFooterCss();
+        var currentUrl = encodeURIComponent(this.location.href);
+        $("#login_tag").attr("href","__APP__/index/userLogin?before_url="+currentUrl);
+    });
+    /**
+     * 获取购物车数量
+     */
+    function get_cart_info(){
+        var url = SITE_URL+'/index.php/home/cart/ajax_load';
+        $.getJSON(url, '', function(data) {
+            if (data.cart_nums != 0) {
+                $(".home_footer_num").text(data.cart_nums).css("display","block");
+                $(".home_footer_hd").attr("src","__PUBLIC__/home/images/nav_fixed_gwcm.png").parent("a").addClass("shopCartAnimate");
+            } else {
+                $(".home_footer_num").text(data.cart_nums).css("display","none");
+                $(".home_footer_hd").attr("src","__PUBLIC__/home/images/nav_fixed_gwck.png").parent("a").removeClass("shopCartAnimate");
+            }
+        });
+    }
+    /*对页面底部导航的样式进行美化*/
+    function changeFooterCss(){
+        var url = window.location.pathname;
+        var search = window.location.search;
+        var home = document.getElementById("nav_home_link");
+        var user = document.getElementById("nav_user_link");
+        if(url.indexOf("/index/index")>=0||search.indexOf("?location_lat=")>=0){
+            home.children[0].className = "colorD5";
+            home.children[1].src = "__PUBLIC__/home/images/index/nav_fixed_sy.png";
+        }else if(url.indexOf("/user/mine")>=0&&user){
+            user.children[1].className = "colorD5";
+            user.children[0].src = "__PUBLIC__/home/images/index/nav_fixed_wd_after.png";
+        }
+    }
+</script>

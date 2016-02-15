@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>购物车-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/temp.css">
+    <script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="shopping_cart div_box">
+    <volist name="cart" id="vo" empty="$empty">
+    <div class="shopping_cart_item" id="good_{$vo.cart_id}">
+        <div class="operation">
+            <span>x {$vo['goods_num']}</span>
+            <a href="javascript:del_cart('{$vo.cart_id}');"><img src="{$uri}__PUBLIC__/home/images/btn_dustbin.png"></a>
+        </div>
+        <section>
+            <a class="goods_content" href="{:U('home/goods/goodsview/id/'.$vo['goods_id'])}">
+                <div class="goodImg">
+                    <img src="{$uri}{$vo['goods_image']}">
+                </div>
+                <div class="goodInfo">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35">{$vo['goods_name']}</h3>
+                        </div>
+                        <span class="wz color7d">高新区</span>
+                    </div>
+                    <p class="desc color7d">
+					   <if condition="$vo['qd_code']">
+					     <span class="colorD5" style="display:block;height:32px;overflow:hidden;line-height:32px">
+                            {$vo['qd_code']}优惠价:<span style="font-size:16px;">¥{$vo['goods_price']}</span>
+                         </span>
+					   </if>	
+					</p>
+                    <div class="price_line color7d">
+					<if condition="$vo['qd_code']">
+                        <ins class="colorD5" style="text-decoration:line-through;">¥{$vo['goods_price']}</ins>
+					<else/>
+					    <ins class="colorD5">¥{$vo['goods_price']}</ins>
+					</if>	
+                        <del>¥{$vo['goods_marketprice']}</del>
+                    </div>
+                </div>
+            </a>
+        </section>
+    </div>
+    </volist>
+</div>
+<footer class="submit_sc">
+   <form action="{:U('home/order/create')}" onSubmit="return validate_cart(this);" method="post">
+    &nbsp;合计：¥<span id="cart_money">{$cart_money}</span>
+   <!-- <a href="#">结算</a>-->
+	<button type="submit">结算</button>
+   </form>
+</footer>
+</body>
+</html>
+<script>
+    function validate_cart(){
+        var cart_money = $("#cart_money").text();
+        if(''==cart_money ||0==cart_money){
+            alert('您还未添加任何商品~');
+            return false;
+        }else{
+            return true;
+        }
+    }
+    function del_cart(cart_id){
+        $.ajax({
+            type: "POST",
+            url: "__APP__/home/cart/delCart",
+            data: "cart_id="+cart_id,
+            success: function(data){
+                if(data.status==1){
+                    get_cart_info();
+                    $("#good_"+cart_id).hide();
+                }else{
+                    alert(data.msg);
+                }
+            }
+        });
+    }
+    /**
+     * 获取购物车数量
+     */
+    function get_cart_info(){
+        var SITE_URL = "http://{$Think.server.HTTP_HOST}";
+        var url = SITE_URL+'/index.php/home/cart/ajax_load';
+        $.getJSON(url, '', function(data) {
+            if (data.cart_price != 0) {
+                $("#cart_money").text(data.cart_price);
+            } else {
+                $("#cart_money").text(0);
+                $(".shopping_cart").html('<div class="noData"><p>您还未添加任何商品~</p><a href="__APP__/home/index/index">去逛逛</a></div>');
+            }
+        });
+    }
+</script>

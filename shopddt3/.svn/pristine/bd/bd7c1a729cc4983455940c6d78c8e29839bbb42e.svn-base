@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>最近收益统计</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <header class="tggl_header">推广收益额统计</header>
+    <div class="tggl_com sy">
+        <ul class="ul3">
+            <li>
+                <h4>今日</h4>
+                <div>¥{$count_data.today}</div>
+            </li>
+            <li>
+                <h4>7日</h4>
+                <div>¥{$count_data.week}</div>
+            </li>
+            <li>
+                <h4>30日</h4>
+                <div>¥{$count_data.month}</div>
+            </li>
+        </ul>
+        <table>
+            <tr><th>日期</th><th></th><th>我的分成</th></tr>         
+            <foreach name="recent_data" item="data">
+            <tr><td>{$data.date}</td><td></td><td>¥{$data.shouyi}</td></tr>
+            </foreach>
+        </table>
+    </div>
+    <div style="height:50px;"></div>
+</div>
+</body>
+</html>

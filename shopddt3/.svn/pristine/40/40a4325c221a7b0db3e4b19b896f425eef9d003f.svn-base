@@ -1,0 +1,79 @@
+<?php
+namespace Admin\Controller;
+use BizService\UserService;
+use Think\Controller;
+use Think\Model;
+use Think\Upload; 
+
+class TempController extends BaseController {
+	
+	public function _initialize() {
+      
+    }
+	
+	/**
+	 * 默认首页
+	 * @author zhanghui
+	 */
+    public function index(){
+		$this->redirect('/admin/tempitem/index');
+    }
+
+	/**
+	 * 模板列表
+	 * @author zhanghui
+	 */
+    public function templist(){
+	    $data=D("temp")->getlist();
+		$this->assign('data',$data);
+		$this->display("temp_list");
+    }
+	
+	/**
+	 * 模板添加
+	 * @author zhanghui
+	 */
+    public function tempadd(){
+		$this->display("temp_add");
+    }
+    
+	/**
+	 * 模板修改
+	 * @author zhanghui
+	 */
+    public function tempedit(){
+	    //获取商城信息
+		$shop_proxy=get_shop_proxy();
+		if (IS_POST) { // 提交表单
+		    $id=I('temp_id');
+		    $data['temp_title'] = I('temp_title');
+		    $data['content'] = I('content');
+			//保存数据
+			if (false !== D('temp')->where('temp_id='.$id." AND shop_id=".$shop_proxy['shop_id'])->data($data)->save()) {
+				$this->success ( '编辑成功！', U ( '/admin/temp/templist' ) );
+			} else {
+				$error = $this->class_db->getError ();
+				$this->error ( empty ( $error ) ? '未知错误！' : $error );
+			}
+		} else {
+		    $temp_id = I ( 'temp_id' );
+			/* 获取分类信息 */
+			$info = $temp_id ?D('temp')->info ( $temp_id ) : '';
+			$this->assign ( 'info', $info );
+			$this->assign ( 'temp_id', $temp_id );
+			$this->display("temp_edit");
+		}
+		
+    }
+	
+	/**
+	 * 模板删除
+	 * @author zhanghui
+	 */
+    public function tempdel(){
+	   
+    }
+
+	
+	
+}

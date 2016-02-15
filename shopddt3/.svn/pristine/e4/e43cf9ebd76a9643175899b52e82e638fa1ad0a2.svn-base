@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>支付账号</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content payment_content">
+    <form class="addPsForm" action="__APP__/home/extend/updatePaymentInfo" method="post">
+        <h4>设置向您支付收益的账号:</h4>
+        <ul>
+            <li class="radioGroup">
+				<label for="mode1" onclick="changePayMode(this)" {$info['pay_type']=='支付宝'?'class="payModeSelected"':''}><img src="{$uri}__PUBLIC__/home/images/spread_zhifubao.png">支付宝</label>
+                <label for="mode2" onclick="changePayMode(this)" {$info['pay_type']=='微信支付'?'class="payModeSelected"':''}><img src="{$uri}__PUBLIC__/home/images/spread_weixin.png">微信支付</label>
+                <label for="mode3" onclick="changePayMode(this)" {$info['pay_type']=='银行卡'?'class="payModeSelected"':''}><img style="width:35px;" src="{$uri}__PUBLIC__/home/images/spread_yinlian.jpg">银行卡</label>
+            </li>
+            <li><input name="true_name" type="text" value="{$info.true_name}" placeholder="姓名/户名"></li>
+            <li><input name="user_name" type="text" value="{$info.user_name}" placeholder="账号/卡号"></li>
+            <li><input name="remark" type="text" value="{$info.remark}" placeholder="备注/开户行"></li>
+        </ul>
+		<div style="height:1px;overflow:hidden;visibility:hidden;">
+			<input id="mode1" type="radio" name="pay_type" value="支付宝" {$info['pay_type']=='支付宝'?'checked="checked"':''}>
+			<input id="mode2" type="radio" name="pay_type" value="微信支付" {$info['pay_type']=='微信支付'?'checked="checked"':''}>
+			<input id="mode3" type="radio" name="pay_type" value="银行卡" {$info['pay_type']=='银行卡'?'checked="checked"':''}>
+        </div>
+        <button type="submit">保存</button>
+    </form>
+</div>
+<script>
+    function changePayMode(t){
+        if(t.className=="payModeSelected"){
+            return;
+        }
+        document.getElementsByClassName("payModeSelected")[0].className = "";
+        t.className = "payModeSelected";
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<layout name="Extend/layout"/>
+
+
+<div class="container">
+	<div class="secondaryMenu" style="border-bottom:1px solid #d6e1ee;">
+    	<ul class="nav nav-tabs">
+		   <li><a href="__APP__/admin/extend/index" style="color:black">所有渠道</a></li>
+		   <li  class="active"><a href="__APP__/admin/extend/memberList" style="color:red">所有人员</a></li>
+			<li>
+		    	<!-- 按钮触发增加渠道模态框 -->
+				<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addchannel">增加渠道</button>
+				<!-- 增加渠道模态框（Modal） -->
+				<div class="modal fade" id="addchannel" tabindex="-1" role="dialog" 
+				   aria-labelledby="myModalLabel" aria-hidden="true">
+				   	<div class="modal-dialog">
+				      	<div class="modal-content">
+				         	<div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					            <h4 class="modal-title" id="myModalLabel">增加渠道</h4>
+				         	</div>
+
+				         	<div class="modal-body">
+			         	      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">渠道名称：</span>
+						         	<input name="channelname" type="text" class="form-control" placeholder="请输入渠道名称">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">用户名：</span>
+						         	<input name="c_username" type="text" class="form-control" placeholder="请输入用户名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">负责人姓名：</span>
+						         	<input name="c_membername" type="text" class="form-control" placeholder="请输入负责人姓名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">佣金分成比例：</span>
+						         	<input name="c_distribute" type="text" class="form-control" style="width:60px"><span class="input-group-addon" style="width:20px">%|(默认为10%)</span>
+						      	</div>
+				         	</div>
+				         	<div class="modal-footer">
+					            <button type="button" onclick="addChannel()" class="btn btn-primary">增加渠道</button>
+					            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				         	</div>
+				      	</div><!-- /.modal-content -->
+					</div><!-- /.modal -->
+				</div>
+				
+				<!-- 按钮触发增加推广人员模态框 -->
+				<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addmember">增加推广人员</button>
+				<!-- 增加推广人员模态框（Modal） -->
+				<div class="modal fade" id="addmember" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				   	<div class="modal-dialog">
+				      	<div class="modal-content">
+				         	<div class="modal-header">
+					            <button type="button" class="close" 
+					               data-dismiss="modal" aria-hidden="true">&times;</button>
+					            <h4 class="modal-title" id="myModalLabel">增加推广人员</h4>
+				         	</div>
+
+				         	<div class="modal-body">
+			         	      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">人员姓名：</span>
+						         	<input name="m_membername" type="text" class="form-control" placeholder="请输入人员姓名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">关联账号：</span>
+						         	<input name="m_username" type="text" class="form-control" placeholder="请输入用户名">
+						      	</div>						      	
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">优惠口令：</span>
+						         	<input name="m_goodscode" type="text" class="form-control" placeholder="请输入推广标签">
+						      	</div>
+						      	<div class="input-group">
+		      						<span class="input-group-addon" style="width:125px">渠道列表：</span>
+						         	<select name="channeldrop" class="form-control">
+										<foreach name="channel_list" item="channel" >
+											<option value="{$channel.id}">{$channel.name}</option>
+										</foreach>
+									</select>
+						      	</div>
+				         	</div>
+				         	<div class="modal-footer">
+					            <button type="button" onclick="addExtendMember()" class="btn btn-primary">增加推广人员</button>
+					            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				         	</div>
+				      	</div><!-- /.modal-content -->
+					</div><!-- /.modal -->
+				</div>
+			</li>
+			<li style="float:right"><span>共{$count}个推广人员</span></li>
+		</ul>
+    </div>
+
+	<form class="input-group" name="searchForm" style="width:500px" method="get" action="__APP__/admin/extend/memberList">
+		<span class="input-group-btn" style="width:150px">
+			<select name="channelid" class="form-control">
+			<option {$search_form['channelid'] == -1?'selected="selected"':''} value="-1">所有人员</option>
+			<foreach name="channel_list" item="channel" >
+				<option {$search_form['channelid'] == $channel['id']?'selected="selected"':''} value="{$channel.id}">{$channel.name}</option>
+			</foreach>
+		</select>
+       	</span>
+		<span class="input-group-btn" style="width:300px">
+			<input class="form-control" type="text" maxlength="11" value="{$search_form['username']}" placeholder="输入姓名或手机号码查询人员" name="username"/>
+       	</span>
+       		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+       		<input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+		<span class="input-group-btn">
+			<button class="btn btn-info btn-sm" onclick="submit()">查询</button>
+       	</span>
+	</form>
+
+    <div class="biaoge">
+        <table class="table table-hover">
+            <thead class="biaoti">
+         		<th name="user_name" onclick="changeOrder(this)">姓名</th>
+         		<th name="username" onclick="changeOrder(this)">账号</th>
+         		<th name="parent">所在渠道</th>
+         		<th name="goods_code">优惠口令</th>
+         		<th name="identity" onclick="changeOrder(this)">推广链接</th>
+         		<th>待支付佣金</th>
+         		<th>待结算佣金</th>
+                <th name="goodscount" onclick="changeOrder(this)">商品数</th>
+                <th name="extend" onclick="changeOrder(this)">推广注册数</th>
+                <th name="orderscount" onclick="changeOrder(this)">订单数</th>
+                <th name="dealcount" onclick="changeOrder(this)">交易额</th>
+                <th name="add_time" onclick="changeOrder(this)">创建时间</th>
+                <th name="extend_goods" onclick="changeOrder(this)">推广优惠</th>
+                <th>操作</th>
+            </thead>
+            <tbody>
+            	<foreach name="member_list" item="member" >
+		           	<tr class="trbor" style="background: rgb(237, 244, 253);">
+		                <td>{$member.user_name}</td>
+		                <td>{$member.username}</td>
+		                <td>{$member.parent}</td>
+		                <td>{$member.goods_code}</td>
+		                <td><a href="javascript:void(0)" onclick="convertQRcode({$member.id},'{$member.identity}')">{$member.identity}<div id="qrcode{$member.id}" style="display:none;"></div></a></td>
+		                <td>{$member.channelmember_list_first.pay_total}</td>
+		                <td>{$member.channelmember_list_second.0.total}</td>
+		                <td>{$member.goodscount}</td>
+		                <td><a href="__APP__/admin/extend/extendUserList?extenduserid={$member.user_id}"><u>{$member.extend}</u></td>
+		                <td><a href="__APP__/admin/extend/OrderList?extenduserid={$member.user_id}"><u>{$member.orderscount}</u></a></td>
+		                <td>{$member.dealcount}</td>
+		                <td>{$member.add_time|date="Y-m-d H:i:s",###}</td>
+		                <td><a href="__APP__/admin/extend/extendGoodsList?extendId={$member.id}"><u>{$member['extend_goods']?$member['extend_goods']:'无'}</u></a>
+		                	</td>
+		                <td>
+		                	<a href="{:U('admin/Commission/ChannelmemberList',array('user_id'=>$member['user_id'],'channelid'=>$_GET['channelid']))}"><u>佣金结算</u></a>
+		                	<if condition="$member.is_channel eq 1"> 
+		                	<a  data-toggle="modal" data-target="#editMember{$member.id}"><u>编辑</u></a>&nbsp;
+		                	<a href="javascript:void(0)" onclick="deleteMember({$member.id},'{$member.user_name}')"><u>删除</u></a>
+		                	<else />
+		                	<a  data-toggle="modal" data-target="#editGoodsCode{$member.id}"><u>编辑</u></a>
+			                	<!-- 负责人不可删除 -->
+		                	</if>
+
+	                	</td>
+	                	<div class="modal fade" id="editMember{$member.id}" tabindex="-1" role="dialog" 
+	                		aria-labelledby="myModalLabel" aria-hidden="true">
+						   	<div class="modal-dialog">
+						      	<div class="modal-content">
+						         	<div class="modal-header">
+							            <button type="button" class="close" 
+							               data-dismiss="modal" aria-hidden="true">&times;</button>
+							            <h4 class="modal-title" id="myModalLabel">修改推广人员</h4>
+						         	</div>
+
+						         	<div class="modal-body">
+					         	      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">人员姓名：</span>
+								         	<input name="m_membername{$member.id}" type="text" class="form-control" value="{$member.user_name}">
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">关联账号：</span>
+								         	<p name="m_username{$member.id}" class="form-control" >{$member.username}(不可修改)</p>
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">优惠口令：</span>
+								         	<input name="m_goodscode{$member.id}" type="text" class="form-control" value="{$member.goods_code}">
+								      	</div>
+								      	<div class="input-group">
+				      						<span class="input-group-addon" style="width:125px">渠道列表：</span>
+								         	<select name="channeldrop{$member.id}" class="form-control">
+												<foreach name="channel_list" item="channel" >
+													<option {$member['parent_id'] == $channel['id']?'selected="selected"':''}value="{$channel.id}">{$channel.name}</option>
+												</foreach>
+											</select>
+								      	</div>
+						         	</div>
+						         	<div class="modal-footer">
+							            <button type="button" onclick="editMember({$member.id})" class="btn btn-primary">修改推广人员</button>
+							            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						         	</div>
+						      	</div><!-- /.modal-content -->
+							</div><!-- /.modal -->
+						</div>
+
+						<div class="modal fade" id="editGoodsCode{$member.id}" tabindex="-1" role="dialog" 
+	                		aria-labelledby="myModalLabel" aria-hidden="true">
+						   	<div class="modal-dialog">
+						      	<div class="modal-content">
+						         	<div class="modal-header">
+							            <button type="button" class="close" 
+							               data-dismiss="modal" aria-hidden="true">&times;</button>
+							            <h4 class="modal-title" id="myModalLabel">修改推广优惠码</h4>
+						         	</div>
+
+						         	<div class="modal-body">
+						         		<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">关联账号：</span>
+								         	<p name="m_username{$member.id}" class="form-control" >{$member.username}(不可修改)</p>
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">推广标签：</span>
+								         	<input name="g_goodscode{$member.id}" type="text" class="form-control" value="{$member.goods_code}">
+								      	</div>
+						         	</div>
+						         	<div class="modal-footer">
+							            <button type="button" onclick="editGoodsCode({$member.id})" class="btn btn-primary">修改推广优惠码</button>
+							            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						         	</div>
+						      	</div><!-- /.modal-content -->
+							</div><!-- /.modal -->
+						</div>
+
+		            </tr>
+	            </foreach>
+            </tbody>
+        </table>
+    </div>
+    <div style="float:right">
+    	{$page}
+    </div>
+</div>
+
+<script type="text/javascript">
+	//页面加载时执行函数
+    // $(function(){
+    //     /*初始化时间控件*/
+    //     $('#begin_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    //     $('#end_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    // });
+	function convertQRcode(_id,_url){
+		var options = {  
+	        render: 'canvas',//设置渲染方式canvas/table  
+	        ecLevel: 'L',  
+	        background: '#FFF',  
+	        text: _url,//设置二维码内容
+	        size: parseInt($("#qrcode"+_id).width(), 10)*0.7,  
+	        mSize: 0.1,  
+	        mPosX: 0.5,  
+	        mPosY: 0.5,  
+	        label: 'no label',  
+	        fontname: 'sans',  
+	        fontcolor: '#FFF'  
+	    };  
+	    $("#qrcode"+_id).empty().qrcode(options).toggle();  
+	}
+	
+
+    function addChannel(){
+    	var _url='__APP__/admin/extend/addChannel';
+    	var _channelname = $("input[name='channelname']").val();
+    	var _username = $("input[name='c_username']").val();
+    	var _membername = $("input[name='c_membername']").val();
+    	var _distribute = $("input[name='c_distribute']").val();
+    	if(_distribute<0||_distribute>100){
+    		alert('佣金分成比例必须为数字0-100之间的整数!');
+    		return false;
+    	}
+	    var confirm_alert = window.confirm('确认增加渠道吗？');
+	    if(confirm_alert){
+	        $.post(_url,{channelname:_channelname,username:_username,membername:_membername,distribute:_distribute},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+
+	function addExtendMember(){
+    	var _url='__APP__/admin/extend/addExtendMember';
+    	var _channelid = $("select[name='channeldrop']").val();
+    	var _username = $("input[name='m_username']").val();
+    	var _goodscode = $("input[name='m_goodscode']").val();
+    	var _membername = $("input[name='m_membername']").val();
+	    var confirm_alert = window.confirm('确认增加推广人员吗？');
+	    if(confirm_alert){
+	        $.post(_url,{channelid:_channelid,username:_username,goodscode:_goodscode,membername:_membername},
+	        function(data){
+	        	if(data.error)
+	            	alert('操作失败:'+data.msg);
+	        	else
+	        		alert(data.msg);
+	            location.reload();
+	        },'json');
+	    }
+	}
+	function editMember(_id){
+    	var _url='__APP__/admin/extend/editMember';
+    	var _channelid = $('select[name="channeldrop'+_id+'"]').val();
+    	var _goodscode = $('input[name="m_goodscode'+_id+'"]').val();
+    	var _membername = $('input[name="m_membername'+_id+'"]').val();
+	    var confirm_alert = window.confirm('确认修改推广人员吗？');
+	    if(confirm_alert){
+	        $.post(_url,{extendid:_id,channelid:_channelid,goodscode:_goodscode,membername:_membername},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+	function deleteMember(_id,_user_name){
+    	var _url='__APP__/admin/extend/deleteMember';
+	    var confirm_alert = window.confirm('确认删除推广人员'+_user_name+'账号吗？');
+	    if(confirm_alert){
+	        $.post(_url,{id:_id},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+	function changeOrder(obj){
+		var data = $(obj).attr('name');
+		var ordername = $('input[name="ordername"]').val();
+		var ordertype = $('input[name="ordertype"]').val();
+		if(data==ordername){
+			if(ordertype!='DESC')
+			$('input[name="ordertype"]').val('DESC');
+			else
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}else{
+			$('input[name="ordername"]').val(data);
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}
+		// alert(data);
+	}
+	function editGoodsCode(_id){
+    	var _url='__APP__/admin/extend/editGoodsCode';
+    	var _goodscode = $('input[name="g_goodscode'+_id+'"]').val();
+	    var confirm_alert = window.confirm('确认修改推广优惠标签吗？');
+	    if(confirm_alert){
+	        $.post(_url,{extendid:_id,goodscode:_goodscode},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+</script>
+	
+	

@@ -1,0 +1,95 @@
+<style>
+.breadcrumb a:link, .breadcrumb a:visited{
+color:#000000;
+}
+.box a:link, .box a:visited{
+color:#000000;
+}
+</style>
+<ul class="breadcrumb">
+  <li>
+    <a href="{:U('admin/tempitem/index/temp_id/'.$temp_id)}">样式管理</a> 
+  </li>
+  <li class="active">编辑内容</li>
+</ul>
+<div> 
+<div style="width:auto">
+   <?php
+//调取代理信息
+$shop_info = get_shop_proxy();   
+//数据调取
+$item=D('tempitem')->findbyid($item_id);
+$info=json_decode($item['item_data'],true);
+//调取分类信息  
+$class_data=D('goodsclass')->getTree(0,true,$shop_info['shop_id']);
+$info_title=isset($info['info_title'])?$info['info_title']:"";
+$keyword=isset($info['info_data'][1]['goods_name'])?$info['info_data'][1]['goods_name']:"";
+$gc_id=isset($info['info_data'][0]['gc_id'])?$info['info_data'][0]['gc_id']:0;
+$ispage=isset($info['info_page'])?$info['info_page']:0;
+$num=isset($info['info_num'])?$info['info_num']:0;
+$info_type=isset($info['info_type'])?$info['info_type']:2;
+?>
+   </div>
+     <form action="{:U('admin/tempitem/editupdate')}" method="post" class="form-horizontal" >
+	     <input type="hidden" name="style_id" value="<?=$style_id?>">
+		 <input type="hidden" name="temp_id" value="<?=$temp_id?>">
+		 <input type="hidden" name="item_id" value="<?=$item_id?>"> 
+	 <div class="form-group" style="clear:both">
+                <label for="info_title" class="col-md-2 control-label">标题<span>*</span></label>
+                <div class="col-xs-7">
+				<input type="text" name="info_title" value="<?=$info_title?>">
+                </div>
+      </div>
+	  <div class="form-group" style="clear:both;display:none" >
+                <label for="info_title" class="col-md-2 control-label">选择数据类型<span>*</span></label>
+                <div class="col-xs-7">
+				<select name="info_type">
+		  <option value="2" selected="selected" >商品</option>
+	   </select>
+                </div>
+      </div> 
+	   <div class="form-group" style="clear:both">
+                <label for="info_title" class="col-md-2 control-label">选择信息分类<span>*</span></label>
+                <div class="col-xs-7">
+	   <select name="searchkey[gc_id]" id="cat_id">
+		  <option value="1" <?php if($gc_id==1){?> selected="selected"<?php }?>  >全部商品</option>
+		  <?php
+		  foreach($class_data as $val){
+		  ?>
+	      <option value="{$val['gc_id']}" <?php if($gc_id==$val['gc_id']){?> selected="selected"<?php }?>  >{$val['gc_name']}</option>
+		  <?php
+		  }
+		  ?>
+	   </select>
+                </div>
+      </div>
+	  <div class="form-group" style="clear:both">
+                <label for="info_title" class="col-md-2 control-label">是否分页显示<span>*</span></label>
+                <div class="col-xs-7">
+				  <input type="radio" name="ispage"  <?php if($ispage==1){?> checked="checked"<?php }?> value="1" >是
+	              <input type="radio" name="ispage" <?php if($ispage==0){?> checked="checked"<?php }?>   value="0" >否
+                </div>
+      </div>
+	  <div class="form-group" style="clear:both">
+                <label for="info_title" class="col-md-2 control-label">显示数量<span>*</span></label>
+                <div class="col-xs-7">
+			      <input type="text" name="num" id="num" value="<?=$num?>">
+                </div>
+      </div>	  
+	   <div class="form-group" style="clear:both">
+                <label for="info_title" class="col-md-2 control-label">搜索关键词<span>*</span></label>
+                <div class="col-xs-7">
+			      <input type="text" name="keyword[goods_name]" id="keyword" value="<?=$keyword?>">
+                </div>
+      </div>
+	 <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button type="submit" value="1" name="sub" class="btn btn-primary">保存</button>
+            </div>
+      </div>
+	  </form>
+   <div id="info">           
+   </div>
+</div>
+
+

@@ -1,0 +1,38 @@
+
+		<section class="og_desc order_dhm order_shxx">
+			<h3>收货信息
+			<?php if($orderinfo['delivery_status']==1){ ?>
+			   <span>已发货</span>
+			<?php }elseif($orderinfo['delivery_status']==2){ ?>
+		       <span>已收货</span>
+			<?php }?>
+			</h3>
+			
+			<section>
+				<p>{$orderinfo['name']}<span>{$orderinfo['tel']}</span></p>
+				<p>{$orderinfo['address']}</p>
+			</section>
+			<if condition="$orderinfo['delivery_status'] eq 1">
+			<section>
+				<p>发货时间：{$deliverinfo['add_time']}<a href="{:U('order/deliverinfo',array('id'=>$deliverinfo['delivery_id']))}">查看物流</a></p>
+				<p>快递类型：{$deliverinfo['shipping_name']}</p>
+				
+				<p>快递单号：{$deliverinfo['delivery_sn']}
+				
+			<?php if($orderinfo['delivery_status'] == 2){?>	
+			<if condition="$orderinfo['delivery_status'] eq 2">
+				 <?php if($orderinfo['evaluation_state'] == 0){?>
+				 <a  href="<?php echo U('order/pinglun',array('id'=>$orderinfo['order_id']));?>">评价</a>
+				 <?php }else{?>
+				  <a href="<?php echo U('order/pinglun',array('id'=>$orderinfo['order_id']));?>">已评价</a>
+				 <?php }?>
+			<?php }elseif($orderinfo['delivery_status'] == 1){?>
+			     <a href="<?php echo U('order/confirmDelivery',array('order_id'=>$orderinfo['order_id'],'delivery_id'=>$orderinfo['delivery_id']));?>" onClick="confirm('是否确认收货？')">确认收货</a>
+			<?php }?>	
+				</p>
+			</section>
+			</if>
+			<if condition="($orderinfo['delivery_status'] eq 0) and ($orderinfo['send_type'] eq 1)">
+		    将尽快为亲发货，请稍等！
+			</if>
+		</section>

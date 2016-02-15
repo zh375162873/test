@@ -1,0 +1,129 @@
+<?php
+/*
+ * 核销码管理模型
+ * 对核销码的管理核销操作
+ */
+namespace Home\model;
+use Think\Model;
+use BizService\OrderService;
+
+class DhmManageModel extends Model {
+    public $orderservice,$order,$inte_order,$price_order;
+    public function __construct(){
+        parent::__construct();
+        $this->orderservice=new OrderService();
+    }
+	protected $fields=array("id","goods_id","order_id","shop_id","store_id","buyer_id","dhm_code","add_time","dh_time","status","refund_status","zs_status","type","_pk"=>"id");
+	protected $auto=array(
+		array("add_time","time",1,"function"),
+		array("dh_time","time",1,"function"),
+	);
+	
+	
+	//生成核销码
+	public function create_dhm($orderinfo,$type){
+		//初始化数据
+		$num=$orderinfo['goods_num'];
+		$info=array(
+		    "goods_id"=>$orderinfo['goods']['goods_id'],
+		    "order_id"=>$orderinfo['order_id'],
+		    "shop_id"=>$orderinfo['shop_id'],
+		    "store_id"=>$orderinfo['store_id'],
+		    "buyer_id"=>$orderinfo['buyer_id'],
+		    "status"=>0,
+		    "type"=>$type,
+		);
+		
+	    for($i=0;$i<$num;$i++){
+	       $dhm_code=$this->recreatedhm();
+	       $info['dhm_code']=$dhm_code;
+	       $info['add_time']=time();
+	       $this->data($info)->add();
+	    }
+         return true;		
+	}
+	
+	//验证核销码
+	/*
+	 * $type 1:普通商品兑换码；2：积分商城兑换码；3：兑奖活动商品兑换码
+	 * return data['error']=1(数据为空)，2(操作失败)，3(核销码不能使用了)，0(核销成功)
+	 */
+	public function yanzheng_dhm($dhm_code,$store_id,$shop_id){
+	    //验证验证码
+	    $dhm_code=trim($dhm_code);
+	    $arr=$this->where(array("dhm_code"=>$dhm_code,"store_id"=>$store_id,"shop_id"=>$shop_id))->find();
+	    $data = array();
+	    if($arr){
+	        $goods = D("OrdersGoods")->where(array("order_id"=>$arr['order_id'],"goods_id"=>$arr['goods_id']))->field("goods_name,goods_image")->find();
+	        $arr['goods_name']=$goods['goods_name'];
+	        //判断核销码状态
+	        if($arr['status']==1){
+	            $data['error']=3;
+	            $data['msg']="核销码已经核销";
+	        }
+	        elseif ($arr['refund_status']>0){
+	            $data['error']=4;
+	            $data['msg']="该核销码存在退款";
+	        }else{
+    	        if($this->where(array("dhm_code"=>$dhm_code,"store_id"=>$store_id,"shop_id"=>$shop_id))->data(array("status"=>1,"dh_time"=>time()))->save()){
+    	           //判断相关订单的核销码还有吗
+    	            if($this->where(array("order_id"=>$arr['order_id'],"type"=>$arr['type'],"status"=>0))->find()){
+    	                 
+    	            }else{
+    	               
+    	                 if($arr['type']==1){
+    	                     D("Home/Orders")->changestatus($arr['order_id'],2);
+    	                 }elseif ($arr['type']==2){
+    	                     D("Home/IntegralOrders")->changestatus($arr['order_id'],2);
+    	                 }elseif ($arr['type']==3){
+    	                     D("Home/PriceOrders")->changestatus($arr['order_id'],2);
+    	                 }
+    	            }
+    	            $data['error'] = 0;
+    	            $data['msg'] ="核销成功";
+    	        }else{
+    	            $data['error'] = 2; //操作失败
+    	            $data['msg'] ="核销操作失败";
+    	        }
+	        }
+	        $data['data']=$arr;
+	    }else{
+	        $data['error'] = 1;//数据为空
+	        $data['msg'] ="数据为空";
+	    }
+	    return $data;
+	}
+	
+	//核销码列表
+	public function list_dhm($store_id,$shop_id,$status){
+		$map = array();
+		$map['store_id']=$store_id;
+		$map['shop_id']=$shop_id;
+        if($status===''){
+            
+        }else{
+            $map['status'] = $status;
+        }
+	    
+       $infolist = $this->where($map)->field("id,goods_id,order_id,buyer_id,dhm_code,add_time,dh_time,status,refund_status,type")->select();
+       for($i=0;$i<count($infolist);$i++){
+          $arr = D("OrdersGoods")->where(array("order_id"=>$infolist[$i]['order_id'],"goods_id"=>$infolist[$i]['goods_id']))->field("goods_name")->find();
+          $infolist[$i]['goods_name']=$arr['goods_name'];
+       }
+       return $infolist;
+	}
+	
+	//判断生成码是否重复
+	public function recreatedhm(){
+	    $dhm_code=$this->orderservice->CreateExchangeCode();
+	    $arr=$this->where(array("dhm_code"=>$dhm_code))->find();
+	    if(!$arr){
+	        return $dhm_code;
+	    }else{
+	        $this->recreatedhm();
+	    }
+	}
+	
+	
+	
+}

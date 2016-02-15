@@ -1,0 +1,50 @@
+
+<section class="og_desc order_dhm">    
+		<h3>提货码:</h3>
+      <volist name="dhm" id="vo">
+	   <section>
+			<div class="dhm"><span class="format_code">{$vo.dhm_code}</span>
+			  <strong class="order_status colorC4">
+			   <if condition="($vo['status'] eq 0) AND ($vo['refund_status'] eq 0)">未提货
+			   <elseif condition="($vo['status'] eq 0) AND ($vo['refund_status'] eq 1)" />退款中
+			   <elseif condition="($vo['status'] eq 0) AND ($vo['refund_status'] eq 2)" />退款完成
+			   <elseif condition="($vo['status'] eq 0) AND ($vo['refund_status'] eq 3)" />退款申请驳回
+			   <elseif condition="($vo['status'] eq 1)" />已提货
+			   </if>
+			  </strong>
+			</div>
+		</section>
+       </volist>
+         <section>
+            <div>有效期：</div>
+            <div>{$start_time}至{$end_time}(周末，法定节假日通用)</div>
+			<if condition="$orderinfo['order_status'] eq 2">
+            <div class="btn_div">
+			 <if condition="$orderinfo['evaluation_state'] eq 0">
+             <a class="tk" href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">评价</a>
+			 </if>
+			 <if condition="$orderinfo['evaluation_state'] eq 1">
+              <a class="tk" href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">已评价</a>
+             </if>
+            </div>
+            </if>
+        </section>
+</section>
+		<section class="goods_shopDesc ztdz">
+			<div class="title">自提地址</div>
+			<div class="loc_tel">
+				<div class="dz">
+					<a href="{:U('order/storemap',array('store_id'=>$orderinfo['goods']['store_id']))}">
+						<p>地址：{$orderinfo['store']['address']}</p>
+						<div><img src="__PUBLIC__/home/images/btn_location.png" width="12px" height="15px">   
+					    <if condition="$dis gt 0">
+							  {$dis}  km
+					    </if>
+			            </div>
+					</a>
+				</div>
+				<a class="tel" href="tel:">12345678911<img src="__PUBLIC__/home/images/btn_telephone.png"></a>
+			</div>
+		</section>
+
+

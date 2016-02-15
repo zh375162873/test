@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>物流信息</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/temp.css">
+</head>
+<body>
+    <div class="goods_wuliu">
+        <section class="order_goods">
+            <a href="#">
+                <img src="{$goods['goods_image']}">
+                <div class="og_info wuliu_info">
+                    <div>类型：{$deliverinfo['shipping_name']}</div>
+                    <div>单号：{$deliverinfo['delivery_sn']}</div>
+                </div>
+            </a>
+        </section>
+        <section>
+            <ul class="wuliu">
+			   <?php foreach($deliverlist as $key=>$val){ ?>
+			    <?php 
+				$c=0;
+				if($key==$c){ 
+				?>
+                  <li class="active"><div>{$val['log_text']} {$val['add_time']}  </div></li>
+				<?php }else{ ?>
+				  <li ><div>{$val['log_text']} {$val['add_time']}  </div></li>
+				<?php }?>
+			   <?php } ?>
+               
+            </ul>
+        </section>
+        <div class="noData">
+            <a href="{:U('index/index')}">去逛逛</a>
+        </div>
+    </div>
+	<include file="Index/footer"/>
+</body>
+</html>

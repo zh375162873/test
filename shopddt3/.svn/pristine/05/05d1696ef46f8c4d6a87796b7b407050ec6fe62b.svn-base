@@ -1,0 +1,7 @@
+<php>
+//调取数据
+$item_data=D("tempitem")->where("item_id=$item_id")->find();
+$info=json_decode($item_data['item_data'],true);
+$info_data=$info['info_data'];
+$used="禁用";
+</php>

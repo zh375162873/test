@@ -1,0 +1,76 @@
+<?php
+namespace Admin\Controller;
+use BizService\ShopService;
+class PinglunController extends BaseController {
+    public $pinglun,$shop_id,$users;
+    public function __construct(){
+        parent::__construct();
+        $this->pinglun = D("PinglunManage");
+        $shop_info=get_shop_proxy();
+        $this->shop_id = $shop_info['shop_id']?$shop_info['shop_id']:1;
+    }
+    
+    /**
+     * 获取商城评论列表
+     */
+    public function index(){
+        //处理提交数据
+        if($_POST){
+            $pltype = empty($_POST['pltype'])?0:intval($_POST['pltype']);//订单状态
+            $class = empty($_POST['class'])?0:intval($_POST['class']);//商品分类
+            $begin_time = empty($_POST['begin_time'])?'':trim($_POST['begin_time']);
+            $end_time = empty($_POST['end_time'])?'':trim($_POST['end_time']);
+            //$keywords = empty($_POST['keywords'])?'':trim($_POST['keywords']);
+            
+            $data=array();
+            if($pltype){
+                $data['pl_points'] = $pltype;
+            }
+            if($begin_time&&$end_time){
+    	        $data['pl_addtime'] = array(array('gt',strtotime($begin_time)),array('lt',strtotime($end_time)),'and');
+    	    }
+    	    elseif($begin_time){
+    	        $data['pl_addtime'] = array('gt',strtotime($begin_time));
+    	    }
+    	    elseif ($end_time){
+    	        $data['pl_addtime'] = array('lt',strtotime($end_time));
+    	    }
+    	    $this->assign("pltype",$pltype);
+    	    $this->assign("begin_time",$begin_time);
+    	    $this->assign("end_time",$end_time);
+        }
+        
+        $arr = $this->pinglun->search_list($this->shop_id,$data);
+        
+        $this->assign("arr",$arr['list']);
+        $this->assign("page",$arr['page']);
+        $this->display("list");
+    }
+    
+    /**
+     * 更改评论状态
+     */
+    public function change_status(){
+        $id = $_POST['id'];
+        $status = empty($_POST['status'])?0:$_POST['status'];
+        $arr = $this->pinglun->where(array("id"=>$id))->field("goods_id")->find();
+        $goods_id = $arr['goods_id'];
+        if($this->pinglun->where(array("id"=>$id))->data(array("pl_status"=>$status))->save()){
+            //统计数据
+            $this->pinglun->chanage_state($goods_id,$status);
+            $data['error']=0;//操作成功
+            $data['message']="操作成功";
+            $data['content']=$status;
+            $data['id']=$id;
+            $this->ajaxReturn($data);
+        }else{
+            $data['error']=2;//操作失败
+            $data['message']="操作失败";
+            $data['id']=$id;
+            $this->ajaxReturn($data);
+        }
+        
+    }
+    
+    
+}

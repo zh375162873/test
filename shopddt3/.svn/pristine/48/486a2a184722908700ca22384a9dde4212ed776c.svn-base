@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>{$title}-点点通-闪购平台</title>
+	<meta name="keywords" content="{$keywords}"/>
+    <meta name="description" content="{$description}"/>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+	<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<?php
+	$lat=session('lat')?session('lat'):0;
+	$lng=session('lng')?session('lng'):0;
+	if(empty($lat)&&empty($lng)){
+	?>
+	<script>  
+	  var getLocation = function(){
+            if (window.navigator.geolocation){
+                window.navigator.geolocation.getCurrentPosition(showPosition,function(){main.alert_warning("位置信息获取失败，请前往地图设置！");},{timeout:2000});
+           //获取不稳定，可以设置超时时间
+            }else{
+                main.alert_warning("Geolocation is not supported by this browser.");
+            }
+        }
+        var showPosition = function(position){
+            //$('#juli').html('纬度:'+position.coords.latitude+','+'经度:'+position.coords.longitude);
+			
+			$("#juli").attr("href",'home/goods/goodslist/gc_id/{$gc_id}/type/1/lat/'+position.coords.latitude+'/long/'+position.coords.longitude); 
+	
+	    $.ajax({  
+           type:"POST", 
+		   data:{lat:position.coords.latitude,lng:position.coords.longitude},
+           url:"{:U('home/goods/setpostion')}", 
+           dataType:"html"
+		   });
+
+			
+			
+        }
+	</script>
+	<?php
+	}
+	
+	
+	?>
+	
+	<script>
+	 
+	</script>
+	
+
+</head>
+<body onLoad="getLocation()">
+
+<header class="goods_list_nav">
+    <ul>
+        <li>
+		   <?php
+		if($type==1){
+		?>
+		<a id="juli" href="{:U('home/goods/goodslist/gc_id/'.$gc_id)}">离我最近</a>
+		<?php
+		}else{
+		?>
+		<a id="juli" href="{:U('home/goods/goodslist/gc_id/'.$gc_id.'/type/1')}">离我最近</a>
+		<?php
+		}
+		?>
+		</li>
+        <li class="active">
+		<?php
+		if($type==2){
+		?>
+		<a href="{:U('home/goods/goodslist/gc_id/'.$gc_id.'')}">好评最高</a>
+		<?php
+		}else{
+		?>
+		<a href="{:U('home/goods/goodslist/gc_id/'.$gc_id.'/type/2')}">好评最高</a>
+		<?php
+		}
+		?>
+		</li>
+        <li>
+		<?php
+		if($type==3){
+		?>
+		<a href="{:U('home/goods/goodslist/gc_id/'.$gc_id.'')}">价格最低</a>
+		<?php
+		}else{
+		?>
+		<a href="{:U('home/goods/goodslist/gc_id/'.$gc_id.'/type/3')}">价格最低</a>
+		<?php
+		}
+		?>
+		</li>
+    </ul>
+</header>
+<div class="home_list content_marginBottom">
+    <?php
+	foreach($goodslist as $val){
+	?>
+    <section>
+        <a class="goods_content" href="{:U('home/goods/goodsview/gc_id/$gc_id/id/'.$val['goods_id'])}">
+            <div class="goodImg">
+                <img src="{$uri}{$val['goods_image']}">
+            </div>
+            <div class="goodInfo">
+                <div class="title_line">
+                    <div class="title">
+                        <h3 class="item_name color35">{$val['store_name']}</h3>
+                    </div>
+                    <span class="wz color7d">{$val['position_tags']}</span>
+                </div>
+                <p class="desc color7d">[{$val['position_tags']}]{$val['goods_name']},{$val['subtitle']}</p>
+                <div class="price_line color7d">
+                    <ins class="colorD5"><?=$val['goods_price']?>元</ins>
+                    <del>{$val['goods_marketprice']}元</del>
+					<?php
+					if($type==1){
+					?>
+                    <span class="colorAf">{$val['distance']}m</span>
+					<?php
+					}
+					?>
+					<?php
+					if($type==2){
+					?>
+                    <span class="colorFf">{$val['evaluation_good_star']}分</span>
+					<?php
+					}
+					?>
+					<?php
+					if($type==3){
+					?>
+                    <span class="color7d">剩余{$val['goods_storage']}</span>
+					<?php
+					}
+					?>
+                </div>
+            </div>
+        </a>
+    </section>
+	<?php
+	}
+	?>
+    <div id="lazyLoad">
+       
+    </div>
+	<div id="more"  style="line-height:30px; font-size:30px; color:#000000; height:30px; clear:both">
+	   <a> <span> 往下滑，内容更精彩！&nbsp </span></a>
+    </div>
+</div>
+<include file="Index/footer"/>
+</body>
+</html>
+	<script type="text/javascript">
+        var counting = 2;
+        var winHeight = $(window).height();
+        var over = 0;
+        var oncenum = 5;
+        $(function () {
+          $(window).scroll(function () {
+            var docTop = $(document).scrollTop();
+            var contentHeight = $("#body").height();//获取body加载高度
+            if (docTop + winHeight >= contentHeight-110 && over==0) {
+				  
+              $.post("{:U('home/goods/ajax_goodslist/gc_id/'.$gc_id.'/type/'.$type)}", {counting:counting,oncenum:oncenum,lat:'<?php echo session('lat');?>',lng:'<?php echo session('lng');?>'},function(goods_list){ 
+                var _html = '';
+                if(goods_list.length>0){ 
+                  for (var i = 0; i<oncenum; i++) {
+                    if(goods_list[i]){
+						_html += '<section>';
+							_html += '<a class="goods_content" href="/index.php/home/goods/goodsview/id/'+goods_list[i]['goods_id']+'.html">'
+							   _html += ' <div class="goodImg">';
+									_html += '<img src="'+goods_list[i]['goods_image']+'">';
+								_html += '</div>';
+								_html += '<div class="goodInfo">';
+									_html += '<div class="title_line">';
+									   _html += '<div class="title">';
+											_html += '<h3 class="item_name color35">'+goods_list[i]['store_name']+'</h3>';
+										_html += '</div>';
+										_html += '<span class="wz color7d">'+goods_list[i]['position_tags']+'</span>';
+									_html += '</div>';
+									_html += '<p class="desc color7d">['+goods_list[i]['position_tags']+']'+goods_list[i]['goods_name']+','+goods_list[i]['subtitle']+'</p>';
+									_html += '<div class="price_line color7d">';
+										_html += '<ins class="colorD5">'+goods_list[i]['goods_price']+'元</ins>';
+										_html += '<del>'+goods_list[i]['goods_marketprice']+'元</del>';
+										
+					<?php
+					if($type==1){
+					?>
+                    _html += '<span class="colorAf">'+goods_list[i]['distance']+'m</span>';
+					<?php
+					}
+					?>
+					<?php
+					if($type==2){
+					?>
+					_html += '<span class="colorFf">'+goods_list[i]['evaluation_good_star']+'分</span>';
+					<?php
+					}
+					?>
+					<?php
+					if($type==3){
+					?>
+					_html += '<span class="color7d">剩余'+goods_list[i]['goods_storage']+'</span>';
+					<?php
+					}
+					?>
+										
+										
+										
+									_html += '</div>';
+								_html += '</div>';
+							_html += '</a>';
+						_html += '</section>';
+                    }else{break;};
+                  };
+                  $("#lazyLoad").append(_html); 
+                }else{
+				  
+                  $("#more").find('span:last').text('已经木有商品了哦~!');
+          
+                  over = 1;
+                }     
+              },'json');
+              counting = counting+1;
+            }
+          });
+        });
+       
+    </script>

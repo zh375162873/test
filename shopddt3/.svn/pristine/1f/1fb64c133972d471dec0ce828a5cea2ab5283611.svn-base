@@ -1,0 +1,183 @@
+<style>
+.breadcrumb a:link, .breadcrumb a:visited{
+color:#000000;
+}
+.box a:link, .box a:visited{
+color:#000000;
+}
+</style>
+<?php
+//调取代理信息
+$shop_info = get_shop_proxy();
+//数据调取
+$item=D('tempitem')->findbyid($item_id);
+$info=json_decode($item['item_data'],true);
+//删除原有的分类导航
+/*foreach($info['info_data'] as $key=>$val2){
+    if($val2['info_gcid']>0){
+     unset($info['info_data'][$key]);
+    } 
+}*/
+//检查分类是否被删除，如果被删除就删除掉
+foreach($info['info_data'] as $key=>$val2){
+    if($val2['info_gcid']>0){
+	 $class= D('goodsclass')->where('gc_id='.$val2['info_gcid'])->find();
+	 if($class){
+        
+	 }else{
+	   unset($info['info_data'][$key]);
+	 }  
+    }
+} 
+
+
+
+
+//调取分类信息
+$class_data=D('goodsclass')->getTree(0,true,$shop_info['shop_id']);
+//保存分类信息为导航
+foreach($class_data as $i=>$val){
+  $flag=0;
+  foreach($info['info_data'] as $key=>$val2){
+    if($val2['info_gcid']==$val['gc_id']){
+    $flag=1;
+	$i=$key;
+   } 
+  }
+  if($flag==0){
+     //将此分类添加到导航列表中
+	 $k=$key+1;
+	 $info_title=$val['gc_name'];
+	 $info_url=U("/home/goods/index/gc_id/".$val['gc_id']);
+	 $info_img=$val['gc_images'];
+	 $info_gcid=$val['gc_id'];
+	 $info_order=225;
+	 $info['info_data'][$k]['info_title']=$info_title;
+	 $info['info_data'][$k]['info_type']=3;
+	 $info['info_data'][$k]['url']=$info_url;
+	 $info['info_data'][$k]['info_img']=$info_img;
+	 $info['info_data'][$k]['info_gcid']=$info_gcid;
+	 $info['info_data'][$k]['info_order']=$info_order;
+	 $info['info_data'][$k]['info_isused']=0;
+   }else{
+     $info_title=$val['gc_name'];
+	 $info_url=U("/home/goods/index/gc_id/".$val['gc_id']);
+	 $info_img=$val['gc_images'];
+	 $info['info_data'][$i]['info_title']=$info_title;
+	 $info['info_data'][$i]['info_type']=3;
+	 $info['info_data'][$i]['url']=$info_url;
+	 $info['info_data'][$i]['info_img']=$info_img;
+   }  
+}
+$json_data=json_encode($info);
+//保存
+D("TempItem")->itemedit(array('item_data'=>$json_data),$item_id);
+?>
+<!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="{:U('admin/tempitem/index/temp_id/'.$temp_id)}">样式管理</a> 
+  </li>
+  <li class="active">编辑内容</li>
+</ul>
+<form id="form1" method="post" action="{:U('admin/tempitem/editupdate')}" enctype="multipart/form-data" class="form-horizontal" role="form" >
+   <div class="form-group" style="clear:both">
+      <label for="info_title" class="col-md-2 control-label">标题<span>*</span></label>
+		<div class="col-xs-7">
+		<input class="form-control required"  style="width:280px;" name="info_title"  type="text"  value="<?php  echo isset($data['info_title'])?$data['info_title']:"";?>"  id="title" />
+		</div>
+   </div>
+   <div class="form-group" style="clear:both; padding-top:10px;">
+		<label for="goods_serial" class="col-md-2 control-label">样式<span>*</span></label>
+		<div class="col-xs-7">
+		<input type="radio" value="1" name="class_type" <?php if($data['class_type']==1){?>checked="checked"<?php } ?>>一行
+		<input type="radio" value="2" name="class_type" <?php if($data['class_type']==2){?>checked="checked"<?php } ?>>两行
+		</div>
+    </div>
+	<div class="form-group" style="clear:both; padding-top:10px;">
+		<label for="goods_serial" class="col-md-2 control-label">导航列表<span>*</span></label>
+		<div class="col-xs-7">
+		<?php
+		foreach($info['data'] as $val){
+		 echo $val['gc_name'];
+		?>
+		<input type="radio" value="1" name="class_type{$val['gc_id']}" <?php if($data['class_type']==1){?>checked="checked"<?php } ?>>启用
+		<input type="radio" value="2" name="class_type{$val['gc_id']}" <?php if($data['class_type']==2){?>checked="checked"<?php } ?>>禁用
+		<input type="radio" value="2" name="class_type{$val['gc_id']}" <?php if($data['class_type']==2){?>checked="checked"<?php } ?>>删除
+		<br>
+		<br>
+		<?php
+		}
+		?>
+	<div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th>导航名称</th>
+                <th>图标</th>
+                <th>排序</th>
+				<th>状态</th>
+                <th>操作</th>
+            </tr>
+     <?php
+	 $kid=0;
+	 foreach($info['info_data'] as $key=>$val){
+	 ?>
+            <tr class="trbor">
+                <td>{$val['info_title']}</td>
+                <?php
+				if($val['info_gcid']>0){
+				?>
+                <td><img src="__UPLOAD__/{$val['info_img']}"/></td>
+				<?php
+				}else{
+				?>
+				 <td><img src="{$val['info_img']}"/></td>
+				<?php
+				}
+				?>
+                <td><a href="<?php echo U("admin/tempitem/itemsubclassup/id/$key/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" data-toggle="modal" title="向上">向上</a>
+                    <a href="<?php echo U("admin/tempitem/itemsubclassdown/id/$key/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" data-toggle="modal"
+                       title="向下">向下</a></td>
+				<td><?php if($val['info_isused']){?>启用中 <?php }else{?> 禁用中 <?php } ?></td>	   
+                <td>
+				    <?php if($val['info_isused']){?>
+					<a href="<?php echo U("admin/tempitem/subclassisused/id/$key/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" data-toggle="modal" title="禁用">禁用</a>
+					<?php }else{?> 
+					 <a href="<?php echo U("admin/tempitem/subclassisused/id/$key/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" data-toggle="modal" title="启用">启用</a>
+					<?php } ?>
+                    <?php
+		if($val['info_gcid']==0){
+		?>          <a href="<?php echo U("admin/tempitem/itemsubclassedit/id/$key/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" data-toggle="modal"
+                       title="编辑">编辑</a>
+                    <a href="<?php echo U("admin/tempitem/itemsubclassdel/id/$key/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" data-toggle="modal"
+                       title="删除">删除</a>
+                    <?php
+		}
+		?>
+                </td>
+            </tr>
+     <?php
+	 $kid=$key;
+	 }
+	 $kid=$kid+1;
+	 ?>
+        </table>
+    </div>
+				<br>
+				<br>
+				<a href="<?php echo U("admin/tempitem/itemsubclassadd/id/$kid/item_id/$item_id/style_id/$style_id/temp_id/$temp_id");?>" value="1" name="sub" class="btn btn-info">添加导航</a>
+				<br>
+				<br>
+				<br>
+				<br>
+                </div>
+      </div>
+	  <input type="hidden" name="style_id" value="{$style_id}">
+	  <input type="hidden" name="temp_id" value="{$temp_id}">
+	  <input type="hidden" name="item_id" value="{$item_id}">
+      <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button type="submit" value="1" name="sub" class="btn btn-primary">保存样式信息</button>
+            </div>
+      </div>
+</form>

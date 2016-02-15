@@ -1,0 +1,29 @@
+<?php
+namespace Admin\Controller;
+use BizService\UserService;
+class IndexController extends BaseController {
+    public function _initialize(){
+        parent::_initialize();
+    }
+    public function index(){
+        $this->display("layout");
+    }
+    public function statistics(){
+
+        
+        $this->display("index");
+    }
+    public function add(){
+        $user = new UserService();
+        dump($user->addUser());
+    }
+
+    public function update(){
+        $user = new UserService();
+        dump($user->updateUser());
+    }
+
+    public function login(){
+        $this->display();
+    }
+}

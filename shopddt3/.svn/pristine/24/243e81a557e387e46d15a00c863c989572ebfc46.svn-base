@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>推广人员</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <header class="tggl_header">
+        <a href="personList.html"><img src="__PUBLIC__/home/images/spread_tianjia.png"><span>推广人员&nbsp;{$countdata.membercount}</span></a>
+        <a href="addPerson.html">+</a>
+    </header>
+    <div class="tggl_ry_list">
+        <ul>
+            <foreach name="member_list" item="member">
+                <li>
+                    <a class="houjiantou" href="#">
+                        <span>{$member.user_name}{$member['is_channel']?'':'(本账号)'}</span>
+                        <span>{$member.username}</span>
+                        <span>{$member.add_time|date="Y年m月d日",###}</span>
+                    </a>
+                </li>
+            </foreach>
+            <li>
+                <a class="houjiantou" href="#">
+                    <span>赵钱孙李</span>
+                    <span>185****3557</span>
+                    <span>2015-11-20</span>
+                </a>
+            </li>
+            <li>
+                <a class="houjiantou" href="#">
+                    <span>赵钱孙李</span>
+                    <span>185****3557</span>
+                    <span>2015-11-20</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

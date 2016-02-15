@@ -1,0 +1,48 @@
+<?php
+
+namespace Home\Controller;
+use BizService\FavoriteService;
+class FavoriteController extends BaseController {
+    /**
+     * 收藏列表
+     */
+    public function index(){
+        $fav = new FavoriteService();
+        $fav_list = $fav->getFavorites(session('userId'));
+        $this->assign("fav_list",$fav_list['list']);
+        $this->display('index');
+    }
+
+    /**
+     * 收藏商品
+     */
+    public function addfav_goods(){
+        $goods_id = I('goods_id',0,'intval');
+        $fav = new FavoriteService();
+        $info = $fav->getFavorite(session('userId'),$goods_id);
+        if($info){
+            $this->error("您已收藏过了，去我的收藏看看吧！");
+        }
+        $row = $fav->addFavorite(session('userId'),$goods_id);
+        if(false!==$row){
+            $this->success("收藏成功!");
+        }else{
+            $this->error("收藏失败，再试一次！");
+        }
+    }
+    /**
+     * 删除收藏
+     */
+    public function delfavorite(){
+        if(IS_POST){
+            $fav_id = I('fav_id',0,'intval');
+            $fav = new FavoriteService();
+            $row = $fav->delFavorite(session('userId'),$fav_id);
+            if(false!==$row){
+                $this->success("已取消收藏!");
+            }else{
+                $this->error("取消失败，再试一次！");
+            }
+        }
+    }
+}

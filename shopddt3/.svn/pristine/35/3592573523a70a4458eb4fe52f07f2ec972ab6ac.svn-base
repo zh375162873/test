@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>我的收藏</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+</head>
+<body>
+
+<div class="home_list content_marginBottom">
+    <volist name="fav_list" id="vo">
+        <section>
+            <div class="goods_content">
+                <a href="<?php echo U('order/orderinfo',array('id'=>$vo['order_id'])) ?>">
+                    <div class="goodImg">
+                        <img src="{$vo.goods.goods_image}">
+                    </div>
+                </a>
+                <div class="goodInfo">
+                    <div class="title_line">
+                        <a href="<?php echo U('order/orderinfo',array('id'=>$vo['order_id'])) ?>">
+                            <div class="title">
+                                <h3 class="item_name color35 iconRight">{$vo.goods.goods_name}</h3>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="item_desc">
+                        <div>数量：<span>{$vo.goods_num}</span></div>
+                        <div>总价：<span>{$vo.order_amount}元</span></div>
+                        <?php
+                        $string = "";
+                         for($i=0;$i<count($vo['dhm']);$i++){
+                             if($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==0){
+                                 $string .= "<div class='colorC4'>未消费";
+                        }
+                        elseif($vo['dhm'][$i]['status']==1){
+                        $string .= "<div class='colorFf'>已经消费";
+                        }
+                        elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==1){
+                        $string .= "<div class='colorFf'>正在退款中";
+                            }
+                            elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==2){
+                            $string .= "<div class='colorFf'>退款完成";
+                                }
+                                elseif($vo['dhm'][$i]['status']==0&&$vo['dhm'][$i]['refund_status']==3){
+                                $string .= "<div class='colorFf'>退款驳回";
+                                    }
+                                    $string .= "<span class='dhm'>".$vo['dhm'][$i]['dhm_code']."</span></div>";
+                                }
+                                echo $string;
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+        </section>
+    </volist>
+</div>
+<include file="Index/footer"/>
+</body>
+</html>

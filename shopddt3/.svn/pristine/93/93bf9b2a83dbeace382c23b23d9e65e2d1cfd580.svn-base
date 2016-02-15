@@ -1,0 +1,9 @@
+<div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+	<div class="col-md-11 form-inline"  style="padding-left:0px; ">
+	 <input id="start_date{$key}" class="form-control required "   name="evaluate_time[]"  type="text"   style="width:160px;" placeholder="xxxx-xx-xx  xx:xx:xx"   onchange="CheckDateTime(this.value,this)"  />
+	 <input id="nick{$key}" class="form-control required"    name="evaluate_nick[]"  type="text"  data-msg="输入昵称"  style="width:100px;" placeholder="输入昵称"  />
+	 <input id="end_date{$key}" class="form-control required"   name="evaluate_name[]"  type="text"  data-msg="输入正确的手机号码"  style="width:160px;" placeholder="输入正确的手机号码" onchange="isphone2(this.value,this)"  />
+<input  id="content{$key}"  name="evaluate_content[]"  type="text"  class="form-control required" style="width:400px;"  placeholder="输入1-200子评论内容"> 
+	</div>
+    <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+</div>  

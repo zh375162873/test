@@ -1,0 +1,9 @@
+<div class="form-group"  >
+   <label for="select11" class="col-md-2 control-label">
+   <input type="text"   class="form-control"  name="addcontent_title[]" placeholder="栏目标题">
+   </label>   
+   <div class="col-md-7" style="text-align:right"  id="addcontent">
+	  <textarea id="texte" name="texte" class="form-control" name="addcontent[]"  placeholder="栏目内容" ></textarea>
+   </div>
+   <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)">删除栏目</button>
+</div>   

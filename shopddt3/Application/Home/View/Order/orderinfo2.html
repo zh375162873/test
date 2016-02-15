@@ -1,0 +1,47 @@
+<section class="og_desc order_dhm order_shxx">
+    <h3>收货信息
+        <if condition="$orderinfo['delivery_status'] eq 0">
+            <span class="colorC4">未发货</span>
+        </if>
+        <if condition="$orderinfo['delivery_status'] eq 1">
+            <span class="colorC4">已发货</span>
+        </if>
+        <if condition="$orderinfo['delivery_status'] eq 2">
+            <span class="colorC4">已收货</span>
+        </if>
+    </h3>
+
+    <section>
+        <p>{$orderinfo['name']}<span>{$orderinfo['tel']}</span></p>
+
+        <p>{$orderinfo['address_all']}</p>
+    </section>
+
+    <section>
+        <if condition="($orderinfo['delivery_status'] gt 0 && $orderinfo['send_type'] eq 1)">
+            <p>发货时间：{$deliverinfo['add_time']}
+                <a href="{:U('order/deliverinfo',array('id'=>$deliverinfo['delivery_id']))}">查看物流</a>
+            </p>
+
+            <p>快递类型：{$deliverinfo['shipping_name']}
+                <if condition="$orderinfo['delivery_status'] eq 1">
+                    <a href="{:U('order/confirmDelivery',array('order_id'=>$orderinfo['order_id'],'delivery_id'=>$orderinfo['delivery_id']))}" onClick="confirm('是否确认收货？')">确认收货</a>
+                </if>
+
+                <if condition="($orderinfo['delivery_status'] eq 2) and ($orderinfo['evaluation_state'] eq 0)">
+                    <a href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">评价</a>
+                </if>
+
+                <if condition="($orderinfo['delivery_status'] eq 2) and ($orderinfo['evaluation_state'] eq 1)">
+                    <a href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">已评价</a>
+                </if>
+            </p>
+            <if condition="$deliverinfo['delivery_sn']"><p>快递单号：{$deliverinfo['delivery_sn']}</p></if>
+        </if>
+    </section>
+
+    <if condition="($orderinfo['delivery_status'] eq 0) and ($orderinfo['send_type'] eq 1)">
+        将尽快为亲发货，请稍等！
+    </if>
+</section>
+

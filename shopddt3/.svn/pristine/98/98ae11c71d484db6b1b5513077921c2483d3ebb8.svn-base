@@ -1,0 +1,25 @@
+<?php
+namespace Admin\Controller;
+use BizService\OrderDisputeService;
+class AftersalesController extends BaseController
+{
+	public $disputeService;
+	public function _initialize()
+    {
+        parent::_initialize();
+		$this->disputeService = new OrderDisputeService();
+    }
+	
+	public function index(){
+		$data = array();
+		$data['type'] = I('get.dis_type', 99);
+		$data['status'] = I('get.dis_status', 99);
+		$data['begin_time'] = I('get.begin_time', '');
+		$data['end_time'] = I('get.end_time', '');
+		$data['key'] = I('get.dis_key', '');
+		$dispute_list = $this->disputeService->dispute_list($data, '', true);
+		$this->assign('dispute_list', $dispute_list['list']);
+		$this->assign('pages', $dispute_list['page']);
+		$this->display();
+	}
+}

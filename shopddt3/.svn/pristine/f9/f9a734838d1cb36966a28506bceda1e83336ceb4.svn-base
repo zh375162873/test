@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <title>添加推广人员</title>
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div id="viewport" class="viewport">
+    <div class="spread_logo"><img src="__PUBLIC__/home/images/spread_register.png"></div>
+    <div class="login">
+        <form>
+            <div class="item item-username">
+                <input class="txt-input txt-username" type="text" maxlength="11" placeholder="请输入推广人员姓名" name="username">
+            </div>
+            <div class="item item-username">
+                <input class="txt-input txt-username" type="text" maxlength="11" placeholder="请输入推广人员手机号" name="username">
+                <button type="button" class="btn-zc" maxlength="4">发送验证码</button>
+            </div>
+            <div class="item item-password">
+                <input class="txt-password" type="password" maxlength="8" placeholder="请输入对方收到的验证码" name="identifying code">
+            </div>
+            <div class="item item-btns">
+                <a class="btn-login btn-disabled" href="#">添加</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

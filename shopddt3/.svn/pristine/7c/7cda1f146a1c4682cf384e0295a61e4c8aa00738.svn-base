@@ -1,0 +1,106 @@
+<?php
+/**
+现金商品信息模型
+*/
+namespace Admin\Model;
+use Think\Model;
+use BizService\UserService;
+use Org\Util\Date;
+class OrdersModel extends Model 
+{    
+ public $users;
+
+ public function __construct(){
+     parent::__construct();
+     $this->users = new UserService();
+ }
+    
+  //定义自动填充
+ protected $_auto = array ( 
+   array('addtime','time',1,'function'),    
+   array('payment_time','time',2,'function'), 
+   array('finish_time','time',2,'function'),
+ );
+ 
+ //订单列表
+ public function order_list($shop_id,$data){
+    $data['shop_id']=$shop_id;
+    if($data['order_status']==0){
+        $data['order_status']=array('neq',0);
+    }
+    $count = $this->where($data)->count();
+    $page = new \Think\Page($count,PAGE_SIZE);
+    $show = $page->show();
+    
+    $arr = $this->where($data)->order("add_time DESC")->limit($page->firstRow.",".$page->listRows)->select();
+    for($i=0;$i<count($arr);$i++){
+        $arr[$i]['payment_time'] = Date("Y-m-d H:i:s",$arr[$i]['payment_time']);
+        $arr[$i]['finnshed_time'] = empty($arr[$i]['finnshed_time'])?'':Date("Y-m-d H:i:s",$arr[$i]['finnshed_time']);
+        $goods = D("OrdersGoods")->where(array("order_id"=>$arr[$i]['order_id']))->field("goods_name,goods_price,goods_num")->find();
+        $arr[$i]['goods_name']=$goods['goods_name'];
+        $arr[$i]['goods_price']=$goods['goods_price'];
+        $users = $this->users->userInfo($arr[$i]['buyer_id']);
+        $arr[$i]['user_name']=$users['user_name'];
+        $arr[$i]['nick_name']=$users['nick_name'];
+    }
+    $datas= array();  
+    $datas['list'] = $arr;
+    $datas['page'] = $show;
+    return $datas;
+ }
+ public function order_list_excel($shop_id,$data){
+    $data['shop_id']=$shop_id;
+    if($data['order_status']==0){
+        $data['order_status']=array('neq',0);
+    }
+    
+    $arr = $this->where($data)->order("add_time DESC")->select();
+    for($i=0;$i<count($arr);$i++){
+        $arr[$i]['payment_time'] = Date("Y-m-d H:i:s",$arr[$i]['payment_time']);
+        $arr[$i]['finnshed_time'] = empty($arr[$i]['finnshed_time'])?'':Date("Y-m-d H:i:s",$arr[$i]['finnshed_time']);
+        $goods = D("OrdersGoods")->where(array("order_id"=>$arr[$i]['order_id']))->field("goods_name,goods_price,goods_num")->find();
+        $arr[$i]['goods_name']=$goods['goods_name'];
+        $arr[$i]['goods_price']=$goods['goods_price'];
+        $users = $this->users->userInfo($arr[$i]['buyer_id']);
+        $arr[$i]['user_name']=$users['user_name'];
+        $arr[$i]['nick_name']=$users['nick_name'];
+    }
+
+    return $arr;
+ }
+ 
+ //订单详情
+  public function getinfo($orderid){
+      $info=$this->where(array("order_id"=>$orderid))->find();
+      $goods = D("OrdersGoods")->where(array("order_id"=>$info['order_id']))->find();
+      $dhm = D("DhmManage")->where(array("order_id"=>$info['order_id'],"type"=>1,"shop_id"=>$info['shop_id']))->select();
+      
+      $userinfo = $this->users->userInfo($info['buyer_id']);
+      $data=array();
+      $data['info']=$info;
+      $data['goods']=$goods;
+      $data['dhm']=$dhm;
+      $data['userinfo']=$userinfo;
+      
+      return $data;
+  }
+  //置为已消费
+  public function zhi_yxf($id){
+      //获取核销码信息
+      $dhm_info = D("DhmManage")->where(array("id"=>$id))->find();
+  
+      if(D("DhmManage")->where(array("id"=>$id))->data(array("status"=>1))->save()){
+          $result = D("DhmManage")->where(array("order_id"=>$dhm_info['order_id'],"status"=>0))->find();
+          if(empty($result)){
+             $this->where(array("order_id"=>$dhm_info['order_id']))->data(array("order_status"=>2))->save();
+          }
+          return true;
+      }else{
+          return false;
+      }
+  
+  }
+  
+}
+
+?>

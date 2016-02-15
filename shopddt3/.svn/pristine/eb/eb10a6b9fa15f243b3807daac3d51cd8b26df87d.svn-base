@@ -1,0 +1,159 @@
+<layout name="layout"/>
+<style> 
+.white_content { position: absolute;  top: 25%;  left: 25%;  width: 50%;  height: 50%;  padding: 16px;  border: 16px solid orange;  background-color: white;  z-index:1002;  overflow: auto; padding-right: 26px; }  </style> 
+<div class="myContainer_uc container">
+    <h3 style="border-bottom:1px solid #d6e1ee;">商城情况统计</h3>
+    <div class="list-div">
+  		<table width="100%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="5" align="left" style="padding-left:10px;">
+			    当日统计
+			    </th>
+		    </tr>
+			<tr align="center">
+				<td>当日会员数</td>
+				<td>当日订单数</td>
+				<td>当日购物总额</td>
+				<td>当日销售商品总数</td>
+				<td>当日完成核销数</td>
+		    </tr>
+		    <tr align="center">
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+		    </tr>
+	
+  		</table>
+	</div>
+    <div class="list-div">
+  		<table width="100%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="5" align="left" style="padding-left:10px;">
+			    当月统计
+			    </th>
+		    </tr>
+			<tr align="center">
+				<td>当月会员数</td>
+				<td>当月订单数</td>
+				<td>当月购物总额</td>
+				<td>当月销售商品总数</td>
+				<td>当月完成核销数</td>
+		    </tr>
+		    <tr align="center">
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+		    </tr>
+	
+  		</table>
+	</div>
+	<div class="list-div">
+  		<table width="100%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="5" align="left" style="padding-left:10px;">
+			    总量统计
+			    </th>
+		    </tr>
+			<tr align="center">
+				<td>会员总数</td>
+				<td>订单总数</td>
+				<td>购物总额</td>
+				<td>销售商品总数</td>
+				<td>完成核销总数</td>
+		    </tr>
+		    <tr align="center">
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+		    </tr>
+	
+  		</table>
+	</div>
+	<div class="list-div">
+		<table width="100%" cellspacing="1" cellpadding="3">
+			<tr>
+				<th colspan="5" align="left" style="padding-left:10px;">会员购买情况统计</th>
+			</tr>
+			<tr align="center">
+				<td>平均订单数</td>
+				<td>平均购物金额</td>
+				<td>有订单会员比(购买率)</td>
+				<td>二次订单会员比(二次购买率)</td>
+				<td>二次订单会员比(二次购买率)</td>
+			</tr>
+			<tr align="center">
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+			</tr>
+		</table>
+	</div>
+	<div class="list-div">
+		<table width="100%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="5" align="left" style="padding-left:10px;">每会员平均订单数及购物额</th>
+		    </tr>
+		    <tr align="center">
+				<td>会员购物总额</td>
+				<td>每会员订单数</td>
+				<td>每会员购物额</td>
+		    </tr>
+		    <tr align="center">
+				<td>?</td>
+				<td>?</td>
+				<td>?</td>
+		    </tr>
+		</table>
+	</div>
+	<div class="list-div">
+		<table width="100%" cellspacing="1" cellpadding="3">
+			<tr>
+				<th colspan="5" align="left" style="padding-left:10px;">商城当前状态</th>
+			</tr>
+			<tr align="center">
+				<td>上架商品总数</td>
+				<td>当前库存总和</td>
+			</tr>
+			<tr align="center">
+				<td>?</td>
+				<td>?</td>
+			</tr>
+		</table>
+	</div>
+
+</div>
+    
+
+<script type="text/javascript">
+    $(function(){
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+    });
+
+
+</script>
+	
+	

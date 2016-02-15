@@ -1,0 +1,11 @@
+	/*home1*/
+	.footer{
+		background:#eee;
+		height:32px;
+		line-height:32px;
+		padding:0 10px;
+	}
+	.footer span:last-child{
+		float:right;
+	}
+	/*---------end--------*/

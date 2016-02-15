@@ -1,0 +1,169 @@
+<include file="Index/header" />
+<!--日期选择-->
+<link rel="stylesheet" href="__PUBLIC__/admin/css/datepicker.css">
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<!--文件上传-->
+<link rel="stylesheet" href="__PUBLIC__/static/uploadify/uploadify.css">
+<script src="__PUBLIC__/static/uploadify/jquery.uploadify.min.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="__PUBLIC__/admin/css/normalize.css">
+<!--[if lte IE 6]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+<!--[if lte IE 7]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+
+<style>
+
+.breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited{
+color:#000000}
+.row-fluid a, .row-fluid a:link, .row-fluid a:visited{
+color:#000000}
+
+</style>
+
+  <!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="<?php echo U('goods/goods_common_list') ;?>">商品管理</a> 
+  </li>
+  <li class="active">现金商品</li>
+</ul>
+  
+  <!--子菜单-->
+  <div class="row-fluid" style=" margin-top:10px;">
+	<ul class="nav nav-tabs">
+	    <li><a href="<?php echo U('goods/goods_common_edit_base?goods_id='.$goods_id) ;?>">基本信息</a></li>
+        <!--<li ><a href="<?php echo U('goods/goods_common_images?goods_id='.$goods_id) ;?>">图片管理</a></li>-->
+		<li><a href="<?php echo U('goods/goods_common_state?goods_id='.$goods_id) ;?>">商品上架</a></li>
+	    <li ><a href="<?php echo U('goods/goods_period?goods_id='.$goods_id) ;?>">限时抢购</a></li>
+		<li ><a href="javascript:void(0);">多时段抢购</a></li>
+		<li class="active" ><a href="javascript:void(0);">预设数据</a></li>
+		<!--<li  class="active"  ><a href="javascript:void(0);">现金商品</a></li>-->
+        <!--<li ><a href="<?php echo U('goods/goods_common_images?goods_id='.$goods_id) ;?>">图片管理</a></li>-->
+        <!--<li  ><a href="<?php echo U('goods/goods_common_state1?goods_id='.$goods_id) ;?>">现金购买商品上架</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state2?goods_id='.$goods_id) ;?>">积分商品上架</a></li>
+        <li ><a href="javascript:void(0);">活动商品上架</a></li>-->
+	</ul>
+  </div> 
+  
+<div class="row"  style="padding-top:10px; padding-left:20px;">
+   <form id="form1" action="" method="post" enctype="multipart/form-data"  class="form-horizontal" data-toggle="validator" role="form">
+ <hr>
+   <h4>预设数据：</h4>
+   <hr>  
+<script>
+var i=<?php  echo  count($list); ?>;
+</script> 
+
+
+	<div class="form-group" style="clear:both">
+		<label for="inputName" class="col-md-2 control-label">默认销售数量</label>
+		<div class="col-md-7">
+		 <input class="form-control"    name="false_salenum"  type="text"  value="{$false_salenum}" placeholder="输入0-1000000" style=" width:150px;"  />
+		</div>
+		<span class="help-block with-errors"></span>
+	</div>
+	<div class="form-group">
+            <label for="select11" class="col-md-2 control-label">默认评价</label>
+            <div class="col-md-10" style="text-align:left;">
+                 <div id="rules">
+					 <?php
+					 if(is_array($data)){
+					 foreach($data as $key=>$val){
+					   if($val){
+					 ?>
+						<div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+							<div class="col-md-9 form-inline"  style="padding-left:0px; ">
+							 <input id="start_date5{$key}" class="form-control "   name="evaluate_time[]"  type="text"  value="{$val['evaluate_time']}"  style="width:150px;" placeholder="xxxx-xx-xx  xx:xx:xx"    />
+									<input id="end_date6{$key}" class="form-control required"   name="evaluate_name[]"  type="text"  value="{$val['evaluate_name']}"  data-msg="输入正确的手机号码"  style="width:160px;" placeholder="输入正确的手机号码"  />
+<input name="evaluate_content[]" value="{$val['evaluate_content']}"  type="text"  class="form-control" style="width:450px;"  placeholder="输入1-200子评论内容"> 
+									
+							</div>
+							<button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+						</div>  
+					 <?php
+					   }
+					 }
+					 }
+					 ?>
+					
+			 </div> 
+			 <div class="col-md-7" >
+		      <button type="button"  name="sub" class="btn btn-primary" onclick="add_rules(i)">添加评价</button>
+		     </div>
+          </div>
+            </div>
+        </div>
+		  <input type="hidden" name="goods_commonid" value="{$goods_commonid}">
+	 <div class="form-group">
+		<div class="col-sm-offset-2 col-sm-7"  style="padding-top:10px;">
+			<button type="submit" name="sub"   class="btn btn-primary btn_important">保存</button>
+		</div>
+     </div>
+</form>
+</div>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#start_date5{$key}').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+		$('#end_date6{$key}').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+       input_disable($("input[name='is_use']:checked"));
+    });
+    function input_disable(obj){
+      var node = $(obj);
+        if(node.val()==1){
+          node.parent().next().find("input").attr("disabled",false);
+          node.parent().next().next().find("button").attr("disabled",false);
+        }else{
+          node.parent().next().find("input").attr("disabled",true);
+          node.parent().next().next().find("button").attr("disabled",true);
+        }
+    }
+</script>
+<script>
+function add_rules(key){ 
+	     $.get("<?php echo U('goods/ajax_goods_default_data') ;?>",{key:key} ,function(result){
+	       $("#rules").append(result);
+		   i=i+1;
+          // $("div").html(result);
+          });
+	   }
+	
+	function del_content(objdom){
+		$(objdom).parent().remove();
+	}   
+	    
+</script>

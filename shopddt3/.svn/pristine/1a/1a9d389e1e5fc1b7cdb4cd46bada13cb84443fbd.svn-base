@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>订单支付-{$shop_base_info.shop_title}</title>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/shop.css">
+	<link rel="stylesheet" href="__PUBLIC__/home/css/temp.css">
+    <script src="__PUBLIC__/home/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<script>
+	  function myFunction(){
+	  }
+	</script>
+</head>
+<body onbeforeunload="return myFunction()">
+<div class="clean_shopping_cart">
+    <if condition = "$is_entity eq 1">
+    <div class="div_box">
+        <div class="operation_type">
+            <div id="express1"  <if condition = "$sendtype eq 2">class="otSelected" </if> data-value="0" onclick="change_express(2)"><i></i>上门自提</div>
+            <div id="express2" <if condition = "$sendtype eq 1">class="otSelected" </if> data-value="1" onClick="change_express(1)" ><i></i>快递配送</div>
+            <input type="hidden" name="operation_type" value="0">
+        </div>
+		<if condition = "$address eq ''">
+			<div class="address_div">
+				<a class="add_href" href="{:U('/Address/addressList',array('order_id'=>$order_id,'sendtype'=>$sendtype))}">暂无可用的收货地址，去添加</a>
+			</div>
+		<else/>
+			<div class="address_div">
+			<a href="{:U('/Address/addressList',array('order_id'=>$order_id,'sendtype'=>$sendtype))}">
+				<p>收货人：{$address['name']}<span>{$address['tel']}</span></p>
+				<p><i></i>{$address['addr']}</p>
+			</a>
+			</div>
+        </if>
+    </div>
+	</if>
+    <div class="shopping_cart_item div_box">
+        <foreach name="orderall" item="val" >
+        <section>
+            <a class="goods_content" href="{:U('/goods/goodsview',array('id'=>$val['goods']['goods_id']))}">
+                <div class="goodImg">
+                    <img src="{$val.goods.goods_image}">
+                </div>
+                <div class="goodInfo">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35">{$val.goods.goods_name}</h3>
+                        </div>
+                        <!--<span class="wz color7d">高新区</span>-->
+                    </div>
+                    <p class="desc color7d">{$val.goods.goods_plun}</p>
+                    <div class="price_line color7d">
+                        <ins class="colorD5">¥{$val.goods.goods_price}</ins>
+                        <del>¥{$val.goods.market_price}</del>
+                        <span>x {$val.goods_num}</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+        </foreach>       
+        <div class="submit_clean_sc">
+            <ul class="money_list">
+                <li>商品总价：<span class="r">¥{$goods_amount}</span></li>
+                <if condition="$sendtype eq 1">
+                <li>运费：<span class="r">+&nbsp;&nbsp;¥{$yunfei_amount}</span></li>
+                </if>
+                <if condition="$sendtype eq 2">
+                <li class="yh">自提优惠：<span class="r">-&nbsp;&nbsp;¥{$yunfei_amount}</span></li>
+                </if>
+                <if condition="$order_youhui neq 0">
+                <li class="yh">优惠口令：<span class="r">-&nbsp;&nbsp;¥{$order_youhui}</span></li>
+                </if>
+              <if condition="$pay">
+                <li class="hj">合计：<span class="r">=&nbsp;&nbsp;¥{$amount}</span></li>
+                <li class="ye">
+				<if condition="$is_balance eq 1">
+				  <input type="checkbox" name="is_balance" value="1" checked="checked"  onClick="change_balance(0)">
+				<else/>
+				  <input type="checkbox" name="is_balance" value="0" onClick="change_balance(1)">
+				</if>
+				钱包余额:<span class="r">-&nbsp;&nbsp;¥{$ye_paymoney}</span></li>
+              <else />
+                <li class="hj">合计：<span class="r">=&nbsp;&nbsp;¥{$amount}</span></li>
+              </if>
+                <if condition="$pay neq ''">
+                <li class="pay"><span class="r">还需支付：<span>¥{$online_paymoney}</span></span></li>
+                </if>
+            </ul>
+               
+            <p><small>*请勿离开，并在15分钟内完成支付，过期订单不会保留</small></p>
+			      
+					  <if condition="$ye_paymoney eq 0">
+					  <else />
+					     <if condition="$online_paymoney eq 0 ">
+							<form action="{:U('order/yezhifu')}" method="post" id="ye_form">
+							   <input type="hidden" name="order_id" value="{$order_id}" />
+							   <input type='hidden' name='address' value='{$address['id']}'/>
+							   <input type='hidden' name='sendtype'  value='{$sendtype}' id="sendtype"/>
+							   <input type='hidden' name='is_balance'  value='{$is_balance}' id="is_balance"/>
+							   <button class="ye_tn" type="submit">余额支付</button>
+							</form>
+						 </if>	
+						 
+					  </if>
+				 	  
+				  <if condition="$online_paymoney eq 0">
+                  <else />
+                   <if condition = "$http_agent eq 1">
+                        <form id='wxsubmit' name='alipaysubmit' action='{:U('order/pay_online')}' method='post'>
+                        <input type='hidden' name='order_id' value='{$order_id}'/>
+                        <input type='hidden' name='address' value='{$address['id']}'/>
+                        <input type='hidden' name='pay_type' value='2'/>
+                        <input type='hidden' name='sendtype' value='{$sendtype}' id="sendtype"/>
+						<input type='hidden' name='is_balance'  value='{$is_balance}' id="is_balance"/>
+                        <button class="wx_tn"  type='submit'>微信支付</button>
+                        </form> 
+                    <else />
+                        <form id='alipaysubmit' name='alipaysubmit' action='{:U('order/pay_online')}' method='post' >
+                        <input type='hidden' name='order_id' value='{$order_id}'/>
+                        <input type='hidden' name='address' value='{$address['id']}'/>
+                        <input type='hidden' name='pay_type' value='1'/>
+                        <input type='hidden' name='sendtype' value='{$sendtype}' id="sendtype"/>
+						<input type='hidden' name='is_balance'  value='{$is_balance}' id="is_balance"/>
+                        <button  class="zfb_tn"  type='submit'>支付宝支付</button>
+                        </form> 
+                    </if>
+				  </if>	
+				  
+        </div>
+    </div>
+</div>
+<script>
+//做异步处理时使用，暂时不使用
+/*    document.getElementsByClassName("operation_type")[0].addEventListener("click",function(e){
+        var tag = e.target;
+        if(tag.className=="operation_type")return;
+        var dom = tag;
+        if(tag.tagName=="I"){
+            dom = tag.parentElement;
+        }
+        if(dom.className=="otSelected"){
+            return;
+        }else{
+            document.getElementsByClassName("otSelected")[0].className = "";
+            dom.className="otSelected";
+            document.getElementsByName("operation_type")[0].value = dom.getAttribute("data-value");
+        }
+    });*/
+</script>
+
+<script>
+    //做刷新时使用
+    function change_balance(num){
+        if(num==1){
+            window.location.href='{:U('order/createpay',array('id'=>$order_id,'sendtype'=>$sendtype,'is_balance'=>1))}';
+        }else{
+            window.location.href='{:U('order/createpay',array('id'=>$order_id,'sendtype'=>$sendtype,'is_balance'=>0))}';
+        }
+    }
+	
+	//做刷新时使用
+    function change_express(num){
+        if(num==1){
+            window.location.href='{:U('order/createpay',array('id'=>$order_id,'sendtype'=>1,'is_balance'=>$is_balance))}';
+        }else{
+            window.location.href='{:U('order/createpay',array('id'=>$order_id,'sendtype'=>2,'is_balance'=>$is_balance))}';
+        }
+//        if(num==1){
+//            $("#express1").removeClass("otSelected");
+//            $("#express2").addClass("otSelected");
+//            $("#sendtype").val(1);
+//        }else{
+//            $("#express1").addClass("otSelected");
+//            $("#express2").removeClass("otSelected");
+//            $("#sendtype").val(2);
+//        }
+    }
+</script>
+
+<include file="Index/footer"/>
+</body>
+</html>

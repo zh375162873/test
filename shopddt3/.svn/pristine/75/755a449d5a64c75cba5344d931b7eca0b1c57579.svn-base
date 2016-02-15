@@ -1,0 +1,156 @@
+<?php
+namespace Home\Controller;
+
+use BizService\CartService;
+use BizService\GoodshomeService;
+use Think\Controller;
+
+header("Content-type:text/html;charset=utf-8");
+
+class CartController extends Controller
+{
+    private $goods;
+    public function _initialize()
+    {
+        $shop_info = shop_info();
+        $this->assign("shop_base_info", $shop_info);
+        $this->goods = new GoodshomeService();
+    }
+
+    /**
+     * 购物车首页
+     */
+    public function index()
+    {
+
+        $model_cart = new CartService();
+
+        //购物车列表
+        $cart_list = $model_cart->listCart('db', array('buyer_id' => session("userId")));
+
+        $this->assign("cart_list", $cart_list);
+        $this->display();
+    }
+
+    /**
+     * 加入购物车，登录后存入购物车表
+     * 存入COOKIE，由于COOKIE长度限制，最多保存5个商品
+     * 登录前保存的信息以goods_id为下标
+     *
+     */
+    public function add()
+    {
+        $model_cart = new CartService();
+        if (is_numeric($_GET['goods_id'])) {
+            //商品加入购物车(默认)
+            $goods_id = intval($_GET['goods_id']);
+            $quantity = intval($_GET['quantity']);
+            if ($goods_id <= 0) return;
+            $goods_info = $this->goods->get_online_goods_info($goods_id,'goods_id,goods_storage as goods_num,goods_name,goods_price,shop_id,goods_image,is_virtual,');
+            $msg = $this->_check_goods($goods_info, $_GET['quantity']);
+            if ($msg) {
+                exit(json_encode(array('state' => 'false', 'msg' => $msg)));
+            }
+        }
+
+        //已登录状态，存入数据库,未登录时，存入COOKIE
+        if (session('userId')) {
+            $save_type = 'db';
+            $goods_info['buyer_id'] = session('userId');
+        } else {
+            $save_type = 'cookie';
+        }
+        $insert = $model_cart->addCart($goods_info, $save_type, $quantity);
+        if ($insert) {
+            //购物车商品种数记入cookie
+            setddtCookie('cart_goods_num', $model_cart->get_cart_goods_num(), 2 * 3600);
+            $data = array('state' => 'true', 'num' => $model_cart->get_cart_goods_num(), 'amount' => price_format($model_cart->get_cart_all_price()));
+        } else {
+            $data = array('state' => 'false');
+        }
+        exit(json_encode($data));
+    }
+
+    /**
+     * 购物车更新商品数量
+     */
+    public function update()
+    {
+        $cart_id = intval(abs($_GET['cart_id']));
+        $quantity = intval(abs($_GET['quantity']));
+
+        if (empty($cart_id) || empty($quantity)) {
+            exit(json_encode(array('state' => 'false', 'msg' => "购物车更新失败！")));
+        }
+
+        $model_cart = new CartService();
+
+
+        //存放返回信息
+        $return = array();
+
+        $cart_info = $model_cart->getCartInfo(array('cart_id' => $cart_id, 'buyer_id' => session('userId')));
+
+        //普通商品
+        $goods_id = intval($cart_info['goods_id']);
+        $goods_info = $this->goods->get_online_goods_info($goods_id,'goods_storage,goods_price');
+        //$goods_info = $logic_buy_1->getGoodsOnlineInfo($goods_id, $quantity);
+        if (empty($goods_info)) {
+            $return['state'] = 'invalid';
+            $return['msg'] = '商品已被下架';
+            $return['subtotal'] = 0;
+            //todo  此处需要删除购物车中该条商品
+            //QueueClient::push('delCart', array('buyer_id' => session("userId"), 'cart_ids' => array($cart_id)));
+            exit(json_encode($return));
+        }
+
+        if (intval($goods_info['goods_storage']) < $quantity) {
+            $return['state'] = 'shortage';
+            $return['msg'] = '库存不足';
+            $return['subtotal'] = $goods_info['goods_price'] * $quantity;
+            $model_cart->editCart(array('goods_num' => $goods_info['goods_storage']), array('cart_id' => $cart_id, 'buyer_id' => session("userId")));
+            exit(json_encode($return));
+        }
+
+
+        $data = array();
+        $data['goods_num'] = $quantity;
+        $data['goods_price'] = $goods_info['goods_price'];
+        $update = $model_cart->editCart($data, array('cart_id' => $cart_id, 'buyer_id' => session("userId")));
+        if ($update) {
+            $return = array();
+            $return['state'] = 'true';
+            $return['subtotal'] = $goods_info['goods_price'] * $quantity;
+            $return['goods_price'] = $goods_info['goods_price'];
+            $return['goods_num'] = $quantity;
+        } else {
+            $return = array('state' => false,'msg' => "购物车更新失败");
+        }
+        exit(json_encode($return));
+    }
+
+    /**
+     * 检查商品是否符合加入购物车条件
+     * @param unknown $goods
+     * @param number $quantity
+     */
+    private function _check_goods($goods_info, $quantity)
+    {
+        if (empty($quantity)) {
+            return "商品数量不能为空";
+        }
+        if (empty($goods_info)) {
+            return "商品不存在";
+        }
+
+        if (intval($goods_info['goods_storage']) < 1) {
+            return "商品库存不足";
+        }
+        if (intval($goods_info['goods_storage']) < $quantity) {
+            return "商品库存不足";
+        }
+//        if ($goods_info['is_virtual']) {
+//            exit(json_encode(array('msg'=>'该商品不允许加入购物车，请直接购买')));
+//        }
+    }
+}

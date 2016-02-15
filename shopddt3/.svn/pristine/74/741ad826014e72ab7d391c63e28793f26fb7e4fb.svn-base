@@ -1,0 +1,112 @@
+<?php
+namespace Admin\Controller;
+use Think\Controller;
+use BizService\UserService;
+use Org\Util\Date;
+use BizService\OrderService;
+use BizService\ExeclService;
+use BizService\DeliveryService;
+
+class DeliveryController extends BaseController {
+    public $shop_id,$users,$orders,$refundreturn_db,$orderservice;
+    public function _initialize(){
+        parent::_initialize();
+        $shop_info=get_shop_proxy();
+        $this->shop_id = $shop_info['shop_id']?$shop_info['shop_id']:1;
+        $this->users = new UserService();
+        $this->orderservice = new OrderService();
+        $this->orders = D("Orders");
+        $this->refundreturn_db = D("RefundReturn");
+    }
+    
+    public function index(){
+        $order_list=$this->deliveryOrderList_Format();
+        // var_dump($order_list);exit;
+        $this->assign("orderlist",$order_list);
+        $this->assign("page",$orderlist['page']);
+        $this->display("list");
+    }
+	
+   //导出excel订单列表
+    public function orderlist_exe(){
+        $order_list=$this->deliveryOrderList_Format();
+        foreach ($order_list as $key => $value) {
+            $order_list[$key]['order_sn']= "'".$value['order_sn']."'";
+        }  
+        $ExeclService = new ExeclService();
+        $ExeclService->downMoreColumnDateToExel($order_list,"发货列表信息",array('order_sn','goods_name','buyer_name','buyer_nickname','goods_price','goods_num','shipping_fee','order_amount','delivery_status','payment_time','delivery_time'),array('订单编号','商品名称','用户账号','用户昵称','单价','数量','运费','总价','发货状态','下单时间','发货/收货时间'),array(20,25,20,10,10,10,10,10,10,25,25),175);
+    }  
+	public function addDelivery(){
+        $deliveryAdd = array();
+        $deliveryAdd['orderId'] = I('post.order_id',0,'intval');
+        $deliveryAdd['deliveryType'] = I('post.delivery_type','','strval');
+        $deliveryAdd['deliverySn'] = I('post.delivery_sn','','strval');
+        $deliveryAdd['deliveryRemark'] = I('post.delivery_remark','','strval');
+        $Delivery = new DeliveryService();
+        $deliveryRes = $Delivery->addDeliveryMission($deliveryAdd);
+    }
+    public function getDeliveryInfo(){
+
+        $Delivery = new DeliveryService();
+        $deliveryId = I('post.delivery_id',0,'intval');
+        $deliveryInfo = $Delivery->getDeliveryInfo($deliveryId);
+        $deliveryInfo['log'] = $Delivery->getDeliverylog($deliveryId);
+        echo json_encode($deliveryInfo);
+    }
+    public function updateDeliveryInfo(){
+
+        $Delivery = new DeliveryService();
+        $deliveryId = I('post.delivery_id',0,'intval');
+        $infoText = I('post.info_text','','strval');
+        $deliveryRes = $Delivery->updateDeliveryInfo($deliveryId,$infoText);
+    }
+    public function deliveryOrderList_Format(){
+        $order=new OrderService(); 
+        $goodsclass = I('get.goodsclass',0,'intval');
+        $keywords = trim(I('get.keywords','','strval'));
+        $delivery_status = trim(I('get.delivery_status',0,'intval'));
+        $begin_time = trim(I('get.begin_time','','strval'));
+        $end_time = trim(I('get.end_time','','strval'));
+        $ordername = trim(I('get.ordername','','strval'));
+        $orderby = trim(I('get.ordertype','asc','strval'));
+        $searchForm = array(
+            'goodsclass'=>$goodsclass,
+            'keywords'=>$keywords,
+            'delivery_status'=>$delivery_status,
+            'begin_time'=>$begin_time,
+            'end_time'=>$end_time,
+            'ordername'=>$ordername,
+            'orderby'=>$orderby,
+            );
+        $order =$order->get_delivery_order_list();
+        $orderlist = $order['list'];
+        // var_dump( $orderlist);exit;
+        $data=array();
+        for($i=0;$i<count($orderlist);$i++){
+            $data[$i]['order_sn']= $orderlist[$i]['order_sn'];
+            $data[$i]['goods_name']=$orderlist[$i]['goods_name'];
+            $data[$i]['buyer_name']= $orderlist[$i]['buyer_name'];
+            $data[$i]['buyer_nickname']=$orderlist[$i]['buyer_nickname'];
+            $data[$i]['goods_price']= $orderlist[$i]['goods_price'];
+            $data[$i]['goods_num']=$orderlist[$i]['goods_num'];
+            $data[$i]['shipping_fee']=$orderlist[$i]['shipping_fee'];
+            $data[$i]['order_amount']= $orderlist[$i]['order_amount'];
+            $data[$i]['delivery_id']= $orderlist[$i]['delivery_id'];
+            $data[$i]['order_id']= $orderlist[$i]['order_id'];
+            if ($orderlist[$i]['delivery_status'] == 1) {
+                $data[$i]['delivery_status']= '已发货';
+                $data[$i]['delivery_time'] = date("Y-m-d H:i",$orderlist[$i]['delivery_time']);
+            }else if($orderlist[$i]['delivery_status'] == 2){
+                $data[$i]['delivery_status']= '已收货';
+                $data[$i]['delivery_time'] = date("Y-m-d H:i",$orderlist[$i]['confirm_time']);
+            }else{
+                $data[$i]['delivery_status']= '未发货';
+                $data[$i]['delivery_time'] = '/';
+            }
+            $data[$i]['payment_time']=$orderlist[$i]['payment_time'];
+        }
+        return $data;    
+    }
+   
+}
+

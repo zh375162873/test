@@ -1,0 +1,123 @@
+<?php
+namespace Home\Controller;
+use BizService\UserService;
+use BizService\GoodsService;
+use BizService\GoodshomeService;
+use Think\Controller;
+header("Content-type:text/html;charset=utf-8");
+class SearchController extends Controller {
+	public function _initialize(){
+		$shop_info = shop_info();
+		$this->assign("shop_base_info",$shop_info);
+	}
+	//产品列表页面默认
+    public function index(){
+        $this->searchgoods();
+    }
+	
+	//搜索产品列表页面
+    public function searchgoods(){
+	    $keywords=I('keywords');
+		$data=array();
+		if(session('lat')&&session('lng')){
+		    $data['lat']=session('lat');
+			$data['lng']=session('lng');
+		}else{
+		    //百度定位
+		    /*$mapService=new \BizService\MapService();
+		    $map=$mapService->locationByIP();
+			$data['lat']=$map['lat'];
+			$data['lng']=$map['lng'];*/
+		}
+		$goodslist=array();
+		$GoodshomeService=new GoodshomeService();
+		if($keywords){
+		 $data['keywords']=$keywords;
+		 $data['limit'] = "0,6";
+		 $goodslist=$GoodshomeService->mgoods_list($data,0);
+		}
+		$this->assign('goodslist',$goodslist);
+		$this->assign('keywords',$keywords);
+        $this->display('goods_list'); 
+    }
+	
+	 //产品列表页面(分页)
+    public function ajax_goodslist()
+    {
+        $keywords = I("keywords") ? I("keywords") : "";
+        $counting = I("counting") ? I("counting") : 1;
+        $oncenum = I("oncenum") ? I("oncenum") : 6;
+        $lat = I("lat") ? I("lat") : 0;
+        $lng = I("lng") ? I("lng") : 0;
+        //定位坐标
+        if ($lat && $lng) {
+            $data['lat'] = $lat;
+            $data['lng'] = $lng;
+        } elseif (session('lat') && session('lng')) {
+            $data['lat'] = session('lat');
+            $data['lng'] = session('lng');
+        } else {
+            $data['lat'] = "34.26567";
+            $data['lng'] = "108.953435"; /*else {
+            //百度定位
+            $mapService = new \BizService\MapService();
+            $map = $mapService->locationByIP();
+            $data['lat'] = $map['lat'];
+            $data['lng'] = $map['lng'];*/
+        }
+
+        $GoodshomeService = new GoodshomeService();
+
+        //调取代理信息
+        $shop_info = get_shop_proxy();
+        $shop_id = $shop_info['shop_id'] ? $shop_info['shop_id'] : 1;
+        //获取传来的信息
+		$data['keywords']=$keywords;
+        $page = $counting;
+        $size = $oncenum;
+        $str = "";
+        $p_data = $GoodshomeService->mgoods_list($data, 0);
+		
+        $count = count($p_data);
+		echo $count;
+        $max_page = ($count > 0) ? ceil($count / $size) : 1;
+        if ($page > $max_page) {
+            $array = array();
+            echo json_encode($array);
+            exit;
+        }
+
+        $limit = "";
+        if ($page >= 1 && $size > 0) {
+            $num = $size;
+            $statnum = ($page - 1) * $num;
+            $limit = " $statnum,$num ";
+        }
+
+        //一次性请求全部数据，从第二页算起,
+        if (I('loadLength') == 1) {
+            $num = $size;
+            $statnum = $page * $num;
+            $limit = " $num, $statnum";
+        }
+
+
+        $data['limit'] = $limit;
+        $data['page'] = $page;
+        $data['size'] = $size;
+		
+		
+        $goodslist = $GoodshomeService->mgoods_list($data, 0);
+
+        if ($max_page < $page) {
+            $array = array();
+            echo json_encode($array);
+        } else {
+            echo json_encode($goodslist);
+        }
+
+    }
+
+	
+	
+}

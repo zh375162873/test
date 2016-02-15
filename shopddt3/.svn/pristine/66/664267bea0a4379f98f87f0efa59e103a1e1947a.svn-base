@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title></title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+</head>
+<body>
+<div class="pay_body">
+    <section class="pay_goods">
+        <div class="og_price"><del>{$orderinfo.goods.goods_price}元</del><ins>{$orderinfo.goods.goods_price}元</ins></div>
+        <div class="og_info">
+            <span>{$orderinfo.goods.goods_name}</span>
+            <p>{$orderinfo.goods.goods_plun}</p>
+        </div>
+    </section>
+    <section class="od_quantity">
+        <span class="oq_left">数量:</span><span class="oq_right">{$orderinfo.goods_num}</span>
+    </section>
+    <section class="od_total">
+        <span class="ot_left">在线支付金额:</span><span class="ot_right">{$orderinfo.online_paymoney}元</span>
+    </section>
+    <section class="od_total">
+        <span class="ot_left">账户支付金额:</span><span class="ot_right">{$orderinfo.ye_paymoney}元</span>
+    </section>
+    <section class="od_total">
+        <span class="ot_left">合计:</span><span class="ot_right">{$orderinfo.order_amount}元</span>
+    </section>
+    <section class="od_submit">
+        <div class="tip">*请勿离开此页,并在15分钟内完成支付，过期订单将不会保留</div>
+          <if condition="$pay neq ''">
+            <if condition = "$http_agent eq 1">
+	            <form>
+	            	<button class="sub_wx" type="submit">微信支付</button>
+		        </form>
+	        <else />
+	          {$pay.alipay} 
+	        <!-- {$pay.wapalipay}-->
+	        </if>
+	      <else />
+	        <form action="<?php echo U('order/yezhifu'); ?>" method="post">
+	            <input type="hidden" name="order_id" value="{$orderinfo.order_id}" />
+	            <button class="sub_ye" type="submit">余额支付</button>
+	        </form>
+          </if>
+        <div class="yue">钱包余额: &nbsp;<span>{$userinfo.user_money}元</span></div>
+    </section>
+</div>
+<include file="Order/footer"/>
+</body>
+</html>

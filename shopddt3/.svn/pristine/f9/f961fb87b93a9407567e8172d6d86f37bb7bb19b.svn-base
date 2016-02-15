@@ -1,0 +1,47 @@
+<?php
+/**
+ * Created by ddt.
+ * User: 张辉
+ * Description:后台产品管理类，提供后台产品管理所需的操作方法
+ */
+ 
+namespace Admin\Controller;
+use BizService\UserService;
+use Think\Controller;
+use Think\Model;
+use BizService\GoodsService;
+use BizService\GoodsstoreService;
+use BizService\ExtendService;
+use BizService\Geohash;
+use BizService\ShopService;
+use BizService\ExeclService;
+use BizService\OthershareService;
+class DhcodeController extends BaseController {
+	public function _initialize(){
+		parent::_initialize();
+	}
+    public function index(){
+    	$arr = session();
+    	// var_dump($arr);
+    	// exit;
+		$this->dhcode_list();
+    }
+	
+/**
+ *产品公共列表
+ */ 
+	public function dhcode_list(){
+	    //获取商城信息
+		$shop_info=get_shop_proxy();
+		$shop_id=$shop_info['shop_id']?$shop_info['shop_id']:0;
+		if($shop_id==0){
+		  exit('请先登录！');
+		}
+		$proxyId = session('proxyId');
+		$otherShare = new OthershareService();
+		$dhcodeList = json_decode($otherShare->dhm_store_list('',$proxyId));
+
+		var_dump($dhcodeList);exit;
+		$this->display("list");
+    }
+}

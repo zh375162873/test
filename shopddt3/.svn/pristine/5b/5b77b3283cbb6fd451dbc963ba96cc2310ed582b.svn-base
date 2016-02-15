@@ -1,0 +1,120 @@
+<include file="Index/header"/>
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+
+
+<!-- <div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('goods/goods_common_list')}" onclick="jumpTo(this);" class="active">所有商品</li>
+        <li data-url="{:U('goods/goods_list')}" onclick="jumpTo(this);">现金商品</a></li>
+        <li data-url="{:U('goods/goods_integral_list')}" onclick="jumpTo(this);">积分商品</li>
+        <li data-url="{:U('goods/goods_prize_list')}" onclick="jumpTo(this);">活动商品</li>
+        <li data-url="{:U('goods/goods_common_add')}" onclick="jumpTo(this);">添加商品</li>
+    </ul>
+</div> -->
+
+	<form  class="form-inline" id="" action="<?php echo U('dhcode/index'); ?>" style="margin-bottom:20px;" method="get">
+		<div class="form-group" style="padding-top:5px;">
+			<label>搜索类型:</label> 
+			<select class="form-control" name="string_type">
+				<option  value="order_sn" <?php if($search_form['string_type']=='order_sn'){?> selected="selected"<?php }?>>订单编号</option>
+				<option  value="goods_name" <?php if($search_form['string_type']=='goods_name'){?> selected="selected"<?php }?>>商品名称</option>
+				<option  value="goods_serial" <?php if($search_form['string_type']=='goods_serial'){?> selected="selected"<?php }?>>货号</option>
+				<option  value="user_name" <?php if($search_form['string_type']=='user_name'){?> selected="selected"<?php }?>>用户名</option>
+				<option  value="dhm_code" <?php if($search_form['string_type']=='dhm_code'){?> selected="selected"<?php }?>>兑换码</option>
+			</select>
+			<label>关键词:</label>  <input type="text" class="form-control" name="keywords" value="{$search_form['keywords']}" style="width: 350px;" placeholder="输入订单编号,商品名称,货号,用户名">
+			<p></p>
+			<label>日期类型:</label> 
+			<label style="cursor:pointer" for="time_buy">
+				<input style="cursor:pointer" name="time_type" type="radio" id="time_buy" value="add_time"<?php if($search_form['time_type']=='add_time'){?> checked="checked"<?php }?>>购买
+            </label>
+            <label style="cursor:pointer" for="time_use">
+				<input style="cursor:pointer" name="time_type" type="radio" id="time_use" value="dh_time"<?php if($search_form['time_type']=='dh_time'){?> checked="checked"<?php }?>>使用
+            </label>
+
+
+			
+			
+
+			<input id="begin_time" name="begin_time" type="text" class="form-control datepicker" style="width: 90px;" value="{$search_form['begin_time']}">
+			-
+			<input id="end_time" name="end_time" type="text" class="form-control datepicker" style="width: 90px;" value="{$search_form['end_time']}">
+			<div class="form-group">
+			<select class="form-control" name="codestatus">
+				<option  value="" <?php if($search_form['codestatus']==''){?> selected="selected"<?php }?>>全部状态</option>
+				<option  value="unused" <?php if($search_form['codestatus']=="unused"){?> selected="selected"<?php }?>>未消费</option>
+				<option  value="used" <?php if($search_form['codestatus']=="used"){?> selected="selected"<?php }?>>已消费</option>
+			</select>
+		</div>
+		</div>
+		
+		<button class="btn btn-default btn-large" type="submit">筛选</button>
+		
+		<a href="{:U('dhcode/index?act=get_excel')}" style="float:right">导出报表</a>  
+	</form>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th style="border-right:1px solid #CCCCCC">订单号</th>
+                <th style="border-right:1px solid #CCCCCC">商品名称</th>
+                <th style="border-right:1px solid #CCCCCC">货号</th>
+                <th style="border-right:1px solid #CCCCCC">成交价格</th>
+                <th style="border-right:1px solid #CCCCCC">核销码</th>
+                <th style="border-right:1px solid #CCCCCC">购买时间</th>
+                <th style="border-right:1px solid #CCCCCC">状态</th>
+                <th style="border-right:1px solid #CCCCCC">使用时间</th>
+                <th style="border-right:1px solid #CCCCCC">用户名</th>
+            </tr>
+            <foreach name="order_list" item="val" >
+	            <tr class="trbor" <if condition="$val['status']">style="color:#FF0000"</if>>
+	                <td>{$val['order_sn']}</td>
+	                <td style="text-align:left">{$val['goods_name']}</td>
+	                <td>{$val['goods_serial']}</td>
+	                <td>{$val['goods_price']}</td>
+	                <td>{$val['dhm_code']}</td>
+	                <td>{$val['add_time']}</td>
+	                <td>{$val['status_text']}</td>
+	                <td>{$val['dh_time']}</td>
+	                <td>{$val['user_name']}</td>	
+	            </tr>
+          	</foreach>
+        </table>
+    </div>
+</div>
+<div style="float:right">
+	{$page}
+</div>
+
+<include file="Index/footer"/>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+    });
+
+</script>
+
+<script type="text/javascript">
+        
+       
+</script>
+
+

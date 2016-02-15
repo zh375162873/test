@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+    <title>修改昵称</title>
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">    
+    <script type="text/javascript" src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js"></script>    
+</head>
+<body>
+    <script type="text/javascript">
+	    function countsize(obj){
+	    	var length = $(obj).val().length;
+	    	if(length<4||length>11){
+	    		$("button").removeClass("item-btns");
+	    		$("button").addClass("item-btn-pw");
+	    		$("button").attr("disabled","true");
+	    	}else{
+	    		$("button").addClass("item-btns");
+	    		$("button").removeClass("item-btn-pw");
+	    		$("button").removeAttr("disabled");
+	    	}
+	    }
+    </script>
+
+	<div id="viewport" class="viewport">
+		<form action="__APP__/index/actChangeNickname" method="get">
+			<div class="home_nav_huodong">
+				<div class="change_username">
+					<input class="change_username_0" type="text" maxlength="16" onkeyup="countsize(this)" placeholder="设置您的昵称" name="nickname" value="{$userdata['nick_name']?$userdata['nick_name']:''}">
+					<img src="__PUBLIC__/home/images/btn_wrong.png">
+				</div>
+				<p class="change_username_explain">
+				允许汉字、英文和数字，4-10个字符</p>
+			</div>
+			<ul class="change_password_1">
+			  	<button name="sub_btn" type="submit" class="btn-pw">确认提交</button>
+		  	</ul>
+		</form>  	
+
+		
+	</div>	  
+</body>
+</html>

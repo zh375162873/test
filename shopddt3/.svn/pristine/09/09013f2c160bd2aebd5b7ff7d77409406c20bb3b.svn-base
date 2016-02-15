@@ -1,0 +1,58 @@
+<?php
+/**
+ * Created by ddt.
+ * User: 张辉
+ * Description:后台产品管理类，提供后台产品管理所需的操作方法
+ */
+ 
+namespace Admin\Controller;
+use BizService\UserService;
+use Think\Controller;
+use Think\Model;
+use BizService\GoodsService;
+use BizService\GoodsstoreService;
+use BizService\ExtendService;
+use BizService\Geohash;
+use BizService\ShopService;
+use BizService\ExeclService;
+use BizService\OthershareService;
+class DhcodeController extends BaseController {
+	public function _initialize(){
+		parent::_initialize();
+	}
+    public function index(){
+    	$arr = session();
+		$this->dhcode_list();
+    }
+	
+/**
+ *产品公共列表
+ */ 
+	public function dhcode_list(){
+	    //获取商城信息
+		$shop_info=get_shop_proxy();
+		$shop_id=$shop_info['shop_id']?$shop_info['shop_id']:0;
+		if($shop_id==0){
+		  exit('请先登录！');
+		}
+		$proxyId = session('proxyId');
+		$otherShare = new OthershareService();
+		$user = new UserService();
+		$dhcodeList = json_decode($otherShare->dhm_shop_list($proxyId),true);
+
+		// var_dump($dhcodeList);exit;
+		foreach ($dhcodeList['info'] as $key => $value) {
+			$dhcodeList['info'][$key]['user_name'] = D('Admin/Users')->findUserNameById($value['buyer_id']);
+		}
+
+		// var_dump($dhcodeList);exit;
+
+		$pageList = array_page($dhcodeList['info']);
+        // $this->assign('search_form',$searchForm);
+        $this->assign('order_list',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+
+		$this->display("list");
+    }
+}

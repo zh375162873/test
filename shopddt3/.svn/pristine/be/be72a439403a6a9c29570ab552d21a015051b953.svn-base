@@ -1,0 +1,284 @@
+<?php
+namespace Home\Controller;
+use BizService\ShopService;
+use BizService\UserService;
+use BizService\ExtendService;
+use BizService\OrderService;
+
+header("Content-type:text/html;charset=utf-8");
+
+class ExtendController extends BaseController
+{
+    private $shop_id;
+    public function _initialize(){
+        parent::_initialize();
+        $shop = get_shop_proxy();
+        $this->shop_id = $shop['shop_id'];
+    }
+    public function countData($channelId,$timer=0,$type=0){
+        $extend = new ExtendService();
+        $Order = new OrderService();
+        if(!$channelId){
+            return false;
+        }
+        $countData = array('extendusercount'=>0,'orderscount'=>0,'dealcount'=>0,'goodscount'=>0);
+        $countData['date'] = date('Y-m-d',strtotime('-'.$timer.' day'));
+        
+        $memberList = $extend->memberList($channelId);
+        $countData['membercount'] = sizeof($memberList);
+        foreach ($memberList as $key => $value) {
+            foreach($value['user_list'] as $key1 => $value1){
+                //得到推广生成会员的user_id
+                $condition['user_id'] = $value1['user_id'];
+                //输入今日时间戳，获取今日会员订单情况
+                $condition['start_time'] = strtotime($countData['date']);
+                //是否只统计当日
+                if($type){
+                    $condition['end_time'] = $condition['start_time']+86400;
+                    if($value1['reg_time']>=$condition['start_time']&&$value1['reg_time']<=$condition['end_time']){
+                        $countData['extendusercount']+=1;
+                    }
+                }else{
+                    //筛选今日注册人员
+                    if($value1['reg_time']>$condition['start_time']){
+                        $countData['extendusercount']+=1;
+                    }
+                }
+                $order_List[$key][$key1]=$Order->user_order_count($condition);
+                $memberList[$key]['orderscount']+=$order_List[$key][$key1]['order_num'];
+                $memberList[$key]['dealcount']+=$order_List[$key][$key1]['order_money'];
+                $memberList[$key]['goodscount']+=$order_List[$key][$key1]['order_goods_total'];
+            }
+        $countData['orderscount']+=$memberList[$key]['orderscount'];
+        $countData['dealcount']+=$memberList[$key]['dealcount'];
+        $countData['goodscount']+=$memberList[$key]['goodscount'];
+        }
+        return $countData;
+
+    }
+    public function myChannel()
+    {   
+        $extend = new ExtendService();
+        $Order = new OrderService();
+        $ExtendChannel = D('Admin/ExtendChannel');
+        $userId = session('userId');
+        $channelId = $ExtendChannel->findChannelIdByUserId($userId);
+        $channelInfo = $ExtendChannel->findInfoByChannelId($channelId);
+        $countData['today'] = $this->countData($channelId,0);
+
+        $this->assign('countdata', $countData);
+        $this->assign('channelinfo', $channelInfo);
+        
+        $this->display();
+    }
+
+    public function myExtend()
+    {
+        $Extend = new ExtendService();
+        $userId = session('userId');
+        $this->display();
+    }
+    public function personList()
+    {
+        $extend = new ExtendService();
+        $Order = new OrderService();
+        $ExtendChannel = D('Admin/ExtendChannel');
+        $userId = session('userId');
+        $countData = array();
+        $channelId = $ExtendChannel->findChannelIdByUserId($userId);
+        $channelInfo = $ExtendChannel->findInfoByChannelId($channelId);
+        if($channelId){
+            $memberList = $extend->memberList($channelId);
+            $countData['membercount'] = sizeof($memberList);
+            foreach ($memberList as $key => $value) {
+                foreach($value['user_list'] as $key1 => $value1){
+                    if(1){
+                        $condition['user_id'] = $value1['user_id'];
+                        $order_List[$key][$key1]=$Order->user_order_count($condition);
+                        $memberList[$key]['orderscount']+=$order_List[$key][$key1]['order_num'];
+                        $memberList[$key]['dealcount']+=$order_List[$key][$key1]['order_money'];
+                        $memberList[$key]['goodscount']+=$order_List[$key][$key1]['order_goods_total'];
+                    }
+                }
+                // var_dump($value['user_list']);
+                $memberList[$key]['username'] = substr($value['username'], 0,3).'****'.substr($value['username'],7);
+            }
+            // var_dump($memberList);exit;
+            $this->assign('member_list', $memberList);
+            $this->assign('countdata', $countData);
+        }
+
+        $this->display();
+    }
+
+    //修改分成比例页面
+    public function editDistribute(){
+        $ExtendChannel = D('Admin/ExtendChannel');
+        $userId = session('userId');
+        $channelId = $ExtendChannel->findChannelIdByUserId($userId);
+        $channelInfo = $ExtendChannel->findInfoByChannelId($channelId);
+        $this->assign('distribute',$channelInfo['distribute']);
+        $this->display();
+    }
+        //修改分成比例
+    public function actEditDistribute(){
+        $extend = new ExtendService();
+        $ExtendChannel = D('Admin/ExtendChannel');
+        $userId = session('userId');
+        $channelId = $ExtendChannel->findChannelIdByUserId($userId);
+        $channelData = array();
+        $channelData['distribute'] = I('post.distribute',0,'intval');
+        if(D('Admin/ExtendChannel')->updateExtend($channelId, $channelData)){
+             echo json_encode(array("error" => 0, "msg" => "渠道佣金分成比例设置为".$channelData['distribute']."%"));exit();
+        }else{
+             echo json_encode(array("error" => 1, "msg" => "设置渠道佣金分成比例失败!"));exit();
+        }
+    }
+    //用户注册发送短信验证
+    public function getCode_addextend()
+    {
+        $user = new UserService();
+        $extend = new ExtendService();
+        session('code', I('session.code', ''));
+        $phone_num = I('post.username', '', 'strval');
+        if (!preg_match('/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/', $phone_num)) {
+            echo json_encode(array("code" => 0, "msg" => "请输入合法手机号码~!"));
+            exit();
+        } else {
+            $userId = $user->checkUser($phone_num);
+            if ($userId) {
+                if(D('Admin/ExtendChannel')->findExtendIdByUserId($userId)){
+                    echo json_encode(array("code" => 3, "msg" => "该人员已成为点点通旗下的推广人员~!"));
+                    exit();
+                }
+            }else{
+                echo json_encode(array("code" => 3, "msg" => "该手机号码未注册~!"));
+                exit();
+            }
+            $code = strval(rand(1000, 9999));
+            $data = "您好,您的推广人员申请验证码是：" . $code . " 欢迎您即将成为点点通商城的渠道推广人员,请勿将验证码告知他人!";
+            if (!I('session.send_time', '')) {
+                if (time() - session('send_time') < 30) {
+                    $again_time = 30 - (time() - session('send_time'));
+                    echo json_encode(array("code" => 0, "msg" => "请求过于频繁,请等待" . $again_time . "秒"));
+                    exit();
+                }
+            }
+            session('code', $code . "_" . $phone_num);
+            // $co = $user->sendMsgForUser($phone_num, $data);
+            // session('send_time', time());//重新赋值时间
+            // if ($co == '0') {
+                echo json_encode(array("code" => 1, "msg" => $data));
+                exit();
+            // }
+        }
+    }
+    //核对验证码
+    public function checkCode()
+    {
+        $user = new UserService();
+        $phone_num = I('post.username', '', 'strval');
+        $check_code = I('post.check_code', '', 'strval');
+        echo $user->checkCode($phone_num, $check_code);
+    }
+    public function addExtend()
+    {   
+        $extend = new ExtendService();
+    //     $user = new UserService();
+    //     $phone_num = I('post.username', '', 'strval');
+    //     $check_code = I('post.check_code', '', 'strval');
+    //     echo $user->checkCode($phone_num, $check_code);$userId = session('userId');
+        $userId = session('userId');
+        $channelId = D('Admin/ExtendChannel')->findChannelIdByUserId($userId);
+        $userName = I('post.username','','strval');
+        $goodsCode = I('post.goodscode','','strval');
+        $memberName = I('post.membername','','strval');
+        return $extend->addExtendMember($channelId,$userName,$goodsCode,$memberName);
+    }
+    public function recentInfo(){
+        $type = I('get.type','','strval');
+        $userId = session('userId');
+        $channelId = D('Admin/ExtendChannel')->findChannelIdByUserId($userId);
+
+        $countData['today'] = $this->countData($channelId,0);
+        $countData['week'] = $this->countData($channelId,7);
+        $countData['month'] = $this->countData($channelId,30);
+        $recentData = array();
+        for($i=0;$i<30;$i++){
+           $recentData[$i] =  $this->countData($channelId,$i,1);
+        }
+        var_dump($countData);
+
+        $this->assign('count_data',$countData);
+        $this->assign('recent_data',$recentData);
+        if($type == 'membercount'){
+            $this->display('recentRegister');
+        }else if($type == 'ordercount'){
+            $this->display('recentOrder');
+        }else if($type == 'dealcount'){
+            $this->display('recentDeal');
+        }
+    }
+
+
+
+
+
+
+    public function changeNickname()
+    {
+        $user = new UserService();
+        $userId = session('userId');
+        $queryData = array('nick_name');
+        $userData = $user->userInfo($userId, $queryData);
+        $this->assign('userdata', $userData);
+        $this->display();
+    }
+
+    /**
+     * 关于我们
+     */
+    public function about(){
+        $shop = new ShopService();
+        $shop_info = $shop->get_shop_info($this->shop_id);
+        $this->assign("info",$shop_info[0]);
+        $this->display();
+    }
+    public function changePassword()
+    {
+        $this->display();
+    }
+
+    public function actChangeNickname()
+    {
+        $user = new UserService();
+        $userId = session('userId');
+        $nickName = I('get.nickname', '', 'strval');
+        $data = $user->changeUserData($userId, 'nick_name', $nickName);
+        redirect('mine');
+    }
+
+    public function actChangePassword()
+    {
+        $user = new UserService();
+        $oldPassword = I('post.old_password', '', 'strval');
+        $newPassword = I('post.new_password', '', 'strval');
+        if ($user->checkUser(session('userName'), $oldPassword) > 0) {
+            $data = $user->resetPasswd(session('userId'), $newPassword);
+            if ($data) {
+                echo "<script type='text/javascript'>alert('修改密码成功');window.location.href='" . U('user/mine') . "';</script>";
+            } else {
+                echo "<script type='text/javascript'>alert('修改密码失败');history.back();</script>";
+            }
+        } else {
+            echo "<script type='text/javascript'>alert('原密码输入错误');history.back();</script>";
+        }
+
+    }
+
+    public function location()
+    {
+        $this->display('location');
+    }
+
+}

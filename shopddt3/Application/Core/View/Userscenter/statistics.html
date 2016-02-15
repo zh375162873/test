@@ -1,0 +1,178 @@
+<layout name="layout"/>
+<style> 
+.white_content { position: absolute;  top: 25%;  left: 25%;  width: 50%;  height: 50%;  padding: 16px;  border: 16px solid orange;  background-color: white;  z-index:1002;  overflow: auto; padding-right: 26px; }  </style> 
+<div class="myContainer_uc container">
+    <h3 style="border-bottom:1px solid #d6e1ee;">商城情况统计</h3>
+  <!--   <div class="list-div">
+  		<table class="table table-hover" width="100%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="5" align="left" style="padding-left:10px;">
+			    当日统计
+			    </th>
+		    </tr>
+			<tr align="center">
+				<td></td>
+				<td>当日会员数</td>
+				<td>当日订单数</td>
+				<td>当日购物总额</td>
+				<td>当日销售商品总数</td>
+				<td>当日完成核销数</td>
+		    </tr>
+		    <tr align="center">
+				<td>当日统计</td>
+				<td>{$today.user_count}</td>
+				<td>{$today.order_num}</td>
+				<td>{$today.order_money}</td>
+				<td>{$today.order_goods_total}</td>
+				<td>{$today.dhm_xf_count}</td>
+		    </tr>
+	
+  		</table>
+	</div>
+    <div class="list-div">
+  		<table class="table table-hover" width="100%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="5" align="left" style="padding-left:10px;">
+			    当月统计
+			    </th>
+		    </tr>
+			<tr align="center">
+				<td></td>
+				<td>当月会员数</td>
+				<td>当月订单数</td>
+				<td>当月购物总额</td>
+				<td>当月销售商品总数</td>
+				<td>当月完成核销数</td>
+		    </tr>
+		    <tr align="center">
+				<td>当月统计</td>
+				<td>{$month.user_count}</td>
+				<td>{$month.order_num}</td>
+				<td>{$month.order_money}</td>
+				<td>{$month.order_goods_total}</td>
+				<td>{$month.dhm_xf_count}</td>
+		    </tr>
+	
+  		</table>
+	</div> -->
+	<form name="searchForm" class="form-inline" method="get" action="__APP__/core/userscenter/statistics">
+		<div class="form-group">
+		    <div class="input-group">
+		        <label class="input-group-addon">起始时间：</label>
+		        <input name="begin_time" style="width:180px" type="date" class="form-control datepicker" value="{$search_form['begin_time']}" data-msg="不是日期"> 
+		        <label class="input-group-addon">结束时间：</label>         
+		        <input name="end_time" style="width:180px" type="date" class="form-control datepicker" value="{$search_form['end_time']}" data-msg="不是日期">
+		   		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+		   		<input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+		    </div>
+		    <button class="btn btn-default" type="submit">筛选</button>
+		    <a class="btn btn-default" href="__APP__/core/userscenter/statistics">重置</a>
+		</div>
+    </form>
+	<div class="list-div">
+  		<table class="table table-hover" style="width:50%" cellspacing="1" cellpadding="3">
+		    <tr>
+			    <th colspan="6" align="left" style="padding-left:10px;">
+			    总量统计
+			    </th>
+		    </tr>
+
+			<tr align="center">
+				<th></th>
+				<th>会员数</th>
+				<th>订单数</th>
+				<th>购物总额</th>
+				<th>销售商品总数</th>
+				<th>完成核销总数</th>
+		    </tr>
+		    <if condition="$search_form['begin_time'] or $search_form['end_time']">
+			<tr align="center">
+				<td>按照时间段统计</td>
+				<td>{$time.user_count}</td>
+				<td>{$time.order_num}</td>
+				<td>{$time.order_money}</td>
+				<td>{$time.order_goods_total}</td>
+				<td>{$time.dhm_xf_count}</td>
+			</tr>
+			</if>
+		    <tr align="center">
+				<td>当日统计</td>
+				<td>{$today.user_count}</td>
+				<td>{$today.order_num}</td>
+				<td>{$today.order_money}</td>
+				<td>{$today.order_goods_total}</td>
+				<td>{$today.dhm_xf_count}</td>
+		    </tr>
+		    <tr align="center">
+				<td>当月统计</td>
+				<td>{$month.user_count}</td>
+				<td>{$month.order_num}</td>
+				<td>{$month.order_money}</td>
+				<td>{$month.order_goods_total}</td>
+				<td>{$month.dhm_xf_count}</td>
+		    </tr>
+		    <tr align="center">
+				<td>总量统计</td>
+				<td>{$total.user_count}</td>
+				<td>{$total.order_num}</td>
+				<td>{$total.order_money}</td>
+				<td>{$total.order_goods_total}</td>
+				<td>{$total.dhm_xf_count}</td>
+		    </tr>
+  		</table>
+	</div>
+	
+    <table class="table table-hover" style="width:50%" cellspacing="1" cellpadding="3">
+	
+	    
+	    </tr>
+	</table>
+
+	<div class="list-div">
+		<table class="table table-striped" style="width:50%" cellspacing="1" cellpadding="3">
+			<tr>
+				<th colspan="5" align="left" style="padding-left:10px;">会员购买情况统计</th>
+			</tr>
+			<tr align="center">
+				<td>平均订单数</td>
+				<td>平均购物金额</td>
+				<td>有订单会员比<br>(购买率)</td>
+				<td>二次订单会员比<br>(二次购买率)</td>
+				<td>五次订单会员比<br>(五次购买率)</td>
+			</tr>
+			<tr align="center">
+				<td>{$userdata.ave_order}笔</td>
+				<td>{$userdata.ave_money}元</td>
+				<td>{$userdata.onetime_rate}%</td>
+				<td>{$userdata.twotime_rate}%</td>
+				<td>{$userdata.fivetime_rate}%</td>
+			</tr>
+		</table>
+	</div>
+    
+
+<script type="text/javascript">
+    $(function(){
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+    });
+
+
+</script>
+	
+	

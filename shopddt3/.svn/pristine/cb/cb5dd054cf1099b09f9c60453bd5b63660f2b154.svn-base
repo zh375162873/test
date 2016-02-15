@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>点点通-闪购平台</title>
+    <link rel="stylesheet" type="text/css" href="{$uri}__PUBLIC__/home/css/index.css"> 
+</head>
+<body>
+    <div class="home_lbs"><a  class="colorC3" href="location.html"><img src="{$uri}__PUBLIC__/home/images/index/nav_place.png"><b>西安市</b></a></div>
+    <div class="adv_list ddt_block">
+        <!-- banner轮播Start -->
+        <script type="text/javascript" src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="{$uri}__PUBLIC__/home/js/TouchSlide.1.1.js"></script>
+        <div id="focus" class="focus">
+            <div class="hd">
+                <ul>
+                </ul>
+            </div>
+            <div class="bd">
+                <ul>
+                    <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_01.jpg" /></a></li>
+                    <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_02.jpg" /></a></li>
+                    <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_03.jpg" /></a></li>
+                    <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_04.jpg" /></a></li>
+                </ul>
+            </div>
+        </div>
+        <script type="text/javascript">
+            TouchSlide({
+                slideCell:"#focus",
+                titCell:".hd ul", //开启自动分页 autoPage:true ，此时设置 titCell 为导航元素包裹层
+                mainCell:".bd ul",
+                delayTime:600,
+                interTime:4000,
+                effect:"leftLoop",
+                autoPlay:true,//自动播放
+                autoPage:true, //自动分页
+                switchLoad:"_src" //切换加载，真实图片路径为"_src"
+            });
+        </script>
+        <!-- banner轮播End -->
+    </div>
+    <div class="ddt_block">
+        <div id="nav" class="focus">
+            <div class="nav_hd">
+                <ul></ul>
+            </div>
+            <div class="nav_bd">
+                <ul>
+                    <li>
+                        <ul class="home_sort">
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_01.png"><p>美食</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_02.png"><p>生活服务</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_03.png"><p>积分商城</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_04.png"><p>促销活动</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_05.png"><p>KTV</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_06.png"><p>周边游</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_07.png"><p>新品上市</p></a></li>
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_08.png"><p>商品分类</p></a></li> 
+                        </ul>
+                    </li>
+                     <li>
+                        <ul class="home_sort">
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_09.png"><p>演出赛事</p></a></li> 
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_10.png"><p>游戏电玩</p></a></li> 
+                            <li><a href="#"><img src="{$uri}__PUBLIC__/home/images/index/nav_menu_11.png"><p>储值卡</p></a></li> 
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <script type="text/javascript">
+            TouchSlide({
+                slideCell:"#nav",
+                titCell:".nav_hd ul",
+                mainCell:".nav_bd ul",
+                delayTime:600,
+                interTime:4000,
+                effect:"leftLoop",
+                autoPlay:false,
+                autoPage:true,
+                switchLoad:"_src"
+            });
+        </script>
+    </div>
+    <div class="home_nav_huodong">
+        <ul>
+            <li class="borderBm borderRt"><a href="#"><div class="huodong_title"><span class="colorDb">低价超值</span><small>十元惠生活</small></div>
+                <img class="huodong_img" src="{$uri}__PUBLIC__/home/images/index/pic_index_01.jpg"></a>
+            </li>
+            <li class="borderBm"><a href="#"><div class="huodong_title"><span class="colorE7">美食半价抢</span><small>吃遍大街小巷</small></div>
+                <img class="huodong_img" src="{$uri}__PUBLIC__/home/images/index/pic_index_02.png"></a>
+            </li>
+            <li class="borderRt"><a href="#"><div class="huodong_title"><span class="colorBb">我们约会吧</span><small>恋人家人好朋友</small></div>
+                <img class="huodong_img" src="{$uri}__PUBLIC__/home/images/index/pic_index_03.png"></a>
+            </li>
+            <li><a href="#"><div class="huodong_title"><span class="colorC6">工作简餐</span><small>实惠方便选择多</small></div>
+                <img class="huodong_img" src="{$uri}__PUBLIC__/home/images/index/pic_index_04.png"></a>
+            </li>
+        </ul>
+    </div>
+    <div class="home_list">
+        <section>
+            <b class="list_nav_title colorD5">猜你喜欢</b>
+            <img class="list_nav_img" src="{$uri}__PUBLIC__/home/images/index/nav_like.png">
+        </section>
+        <section>
+            <a class="goods_content" href="goods.html">
+                <div class="goodImg">
+                    <img src="{$uri}__PUBLIC__/home/images/index/pic_list_01.jpg">
+                </div>
+                <div class="goodInfo">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35">博雅口腔</h3>
+                        </div>
+                        <span class="wz color7d">锦业一路</span>
+                    </div>
+                    <p class="desc color7d">[锦业路]深度洗牙/补牙2选1，男女不限，提供免费WiFi</p>
+                    <div class="price_line color7d">
+                        <ins class="colorD5">9.9</ins>
+                        <del>465</del>
+                        <span>20</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+        <section>
+            <a class="goods_content" href="goods.html">
+                <div class="goodImg">
+                    <img src="{$uri}__PUBLIC__/home/images/index/pic_list_01.jpg">
+                </div>
+                <div class="goodInfo">
+                    <div class="title_line">
+                        <div class="title">
+                            <h3 class="item_name color35">博雅口腔</h3>
+                        </div>
+                        <span class="wz color7d">锦业一路</span>
+                    </div>
+                    <p class="desc color7d">[锦业路]深度洗牙/补牙2选1，男女不限，提供免费la</p>
+                    <div class="price_line color7d">
+                        <ins class="colorD5">9.9</ins>
+                        <del>465</del>
+                        <span>20</span>
+                    </div>
+                </div>
+            </a>
+        </section>
+    </div>
+    <div class="home_lazyLoad"></div>
+    </div>
+    <div class="home_list_end">
+    </div>
+    <include file="Index/footer"/>
+</body>
+</html>

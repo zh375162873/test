@@ -1,0 +1,68 @@
+<?php
+namespace Admin\Controller;
+use BizService\ExtendService;
+use BizService\GoodsService;
+use BizService\OrderService;
+use BizService\UserService;
+
+
+class CommissionController extends BaseController {
+
+    //渠道人员分成信息列表
+    public function ChannelList(){
+      
+     $this->display('ChannelList');
+    }
+	//渠道分成结算
+	public function ChannelSettlement(){
+	           $flag=1;
+               if($flag==1){
+				  $this->success ( '结算成功', U ( 'admin/Commission/ChannelList/Channel_id/'.I('Channel_id') ) ); 
+			   }else{
+				 $this->error ("操作失败");
+			   }
+    }
+	//渠道分成支付
+	public function ChannelPay(){
+     if(IS_POST){
+	   $flag=1;
+	   if($flag==1){
+		  $this->success ( '支付成功', U ( 'admin/Commission/ChannelList/Channel_id/'.I('Channel_id') ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+	 }else{ 
+       $this->display('ChannelPay');
+	 }
+    }
+	
+	
+    //渠道下的推广人员分成信息列表
+	 public function ChannelmemberList(){
+      
+     $this->display('ChannelmemberList');
+    }
+	//渠道下的推广人员分成结算
+	public function ChannelmemberSettlement(){
+       $flag=1;
+	   if($flag==1){
+		  $this->success ( '结算成功', U ( 'admin/Commission/ChannelmemberList/Channel_id/'.I('Channel_id') ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+    }
+	//渠道下的推广人员分成支付
+	public function ChannelmemberPay(){
+	  if(IS_POST){
+	   $flag=1;
+	   if($flag==1){
+		  $this->success ( '支付成功', U ( 'admin/Commission/ChannelmemberList/Channel_id/'.I('Channel_id') ) ); 
+	   }else{
+		 $this->error ("操作失败");
+	   }
+	 }else{ 
+       $this->display('ChannelmemberPay');
+	 }
+    }
+	
+}

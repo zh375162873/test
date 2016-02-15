@@ -1,0 +1,428 @@
+.div_box{
+    margin:10px 7px;
+    padding:5px 5px;
+    background:#fff;
+    border-radius:5px;
+    -webkit-box-shadow: 1px 3px 5px #d8d7d7;
+    box-shadow: 1px 3px 5px #d8d7d7;
+}
+/*customer_service_apply.html*/
+.customer_service p{
+    margin:10px 0;
+}
+.ddt_textarea{
+    box-sizing:border-box;
+    margin-bottom:10px;
+    width:90%;
+    height:150px;
+    resize:none;
+    padding:5px;
+}
+.customer_service .text_center{
+    text-align:center;
+}
+.submitBtn{
+    display:block;
+    width:80%;
+    height:42px;
+    margin:20px auto;
+    border-radius:5px;
+    background:#ea4952;
+    border:none;
+    color:#fff;
+    font-size:17px;
+    text-align:center;
+}
+
+/*customer_service_result.html*/
+.customer_service .noData{
+    padding:50px 0;
+    text-align:center;
+}
+.customer_service section{
+    min-height:110px;
+    background:rgba(167, 167, 167,0.5);
+}
+
+/*address_list.html*/
+.address_list .address_item{
+    position:relative;
+    min-height:90px;
+    border-bottom:1px solid #f3f3f3;
+}
+.address_list .address_item:last-child{
+    border-bottom:none;
+}
+.address_tips{
+    padding:50px 0;
+    margin:10px 7px 20px 7px;
+    text-align:center;
+    color:#cacaca;
+    background:#fff;
+    border-radius:5px;
+    -webkit-box-shadow: 1px 3px 5px #d8d7d7;
+    box-shadow: 1px 3px 5px #d8d7d7;
+    font-size:17px;
+}
+.address_item>div{
+    margin-right:15%;
+    position:relative;
+    display:block;
+    min-height:90px;
+}
+.address_item .address{
+    margin-left:10%;
+}
+.address_item .address p{
+    margin:0 10px;
+    padding-bottom:10px;
+}
+.address_item .address p:first-child{
+    padding-top:10px;
+}
+.address_item .address p span{
+    float:right;
+}
+.address_item .l{
+    position:absolute;
+    width:10%;
+    height:100%;
+    left:0;
+    top:0;
+    line-height:90px;
+    text-align:center;
+}
+.address_item .l i{
+    width:18px;
+    height:18px;
+    border-radius:18px;
+    display:inline-block;
+    border:1px solid #f3f3f3;
+}
+.address_item .addressActive .l i{
+    background:url(../12-17/btn_selection.png) no-repeat;
+    background-size:100%;
+    border-color:#fff;
+}
+.address_item .r{
+    position:absolute;
+    width:15%;
+    height:100%;
+    right:0;
+    top:0;
+    text-align:center;
+    line-height:90px;
+}
+.address_item .r a{
+    display:block;
+    height:100%;
+}
+.address_item .r a img{
+    margin-top:30px;
+    width:23px;
+    height:31px;
+}
+.add_address{
+    display:block;
+    width:60%;
+    height:42px;
+    margin:20px auto;
+    border-radius:5px;
+    background:#ea4952;
+    border:none;
+    color:#fff;
+    font-size:17px;
+    text-align:center;
+    line-height:42px;
+}
+
+/*add_address.html*/
+.add_address_form{
+    width:90%;
+    margin-left:5%;
+}
+.add_address_form input,.add_address_form select,.add_address_form textarea{
+    -webkit-box-sizing:border-box;
+    box-sizing:border-box;
+    margin-bottom:10px;
+    height:40px;
+    border-radius:5px;
+    background:#fff;
+    border:1px solid #f3f3f3;
+    outline:none;
+    padding-left:7px;
+    font-size:15px;
+}
+.add_address_form>div{
+    text-align:center;
+    padding-top:10px;
+}
+.add_address_form>div input{
+    width:96%;
+}
+.add_address_form>div textarea{
+    width:96%;
+    height:150px;
+    resize:none;
+    padding:5px;
+}
+.add_address_form>div div{
+    width:96%;
+    margin-left:2%;
+}
+.add_address_form>div div select{
+    float:left;
+    width:32%;
+    margin-left:2%;
+    color:#a6a6a6;
+}
+.add_address_form>div div select:first-child{
+    margin-left:0;
+}
+
+
+/*wuliu.html*/
+.goods_wuliu section{
+    margin-bottom:10px;
+}
+.goods_wuliu .noData{
+    padding:25px 0;
+    text-align:center;
+}
+.wuliu_info div{
+    padding:10px 0;
+    font-size:15px;
+}
+ul.wuliu li{
+    position:relative;
+    padding-left:40px;
+    padding-bottom:10px;
+    min-height:70px;
+    opacity:0.7;
+}
+ul.wuliu li::before,ul.wuliu li::after{
+    position:absolute;
+    content:"";
+    display:block;
+    background:#d7d7d7;
+}
+ul.wuliu li::before{
+    width:16px;
+    height:16px;
+    border-radius:16px;
+    top:0;
+    left:8px;
+}
+ul.wuliu li::after{
+    width:2px;
+    height:100%;
+    top:1px;
+    left:15px;
+}
+ul.wuliu .active{
+    opacity:1;
+}
+ul.wuliu .active::before,ul.wuliu .active::after{
+    background:#ffc046;
+}
+
+
+/*shopping_cart.html*/
+.shopping_cart{
+    margin-bottom:50px;
+}
+.shopping_cart_item{
+    padding-right:40px;
+    position:relative;
+}
+.shopping_cart .shopping_cart_item{
+    border-bottom:1px solid #f3f3f3;
+}
+.shopping_cart .shopping_cart_item:last-child{
+    border-bottom:none;
+}
+.shopping_cart_item a.operation{
+    position:absolute;
+    width:40px;
+    height:100%;
+    top:0;
+    right:0;
+}
+.shopping_cart_item a.operation span{
+    display:inline-block;
+    width:100%;
+    text-align:right;
+    margin-top:12px;
+}
+.shopping_cart_item a.operation img{
+    width: 14px;
+    height: 19px;
+    position:absolute;
+    right:10px;
+    bottom:12px;
+}
+.submit_sc{
+    position:fixed;
+    width:100%;
+    height:45px;
+    left:0;
+    bottom:0;
+    font-size:18px;
+    line-height:45px;
+    box-shadow:1px 3px 25px #a6a6a6;
+    color:#353535;
+    background:#fff;
+}
+.submit_sc span{
+    margin-left:15px;
+    color:#ea4952;
+}
+.submit_sc a,.submit_sc button{
+    position:absolute;
+    display:block;
+    width:100px;
+    height:45px;
+    line-height:45px;
+    text-align:center;
+    background:#f79c5c;
+    color:#fff;
+    border:0;
+    outline:0;
+    top:0;
+    right:0;
+    font-size:18px;
+}
+
+/*clean_shopping_cart.html*/
+.operation_type div{
+    margin-bottom:10px;
+    font-size:16px;
+    height:22px;
+}
+.operation_type div i{
+    display:inline-block;
+    margin-right:7px;
+    width:18px;
+    height:18px;
+    border-radius:100%;
+    border:1px solid #f3f3f3;
+    vertical-align:middle;
+}
+.operation_type div.otSelected i{
+    border-color:#fff;
+    background:url(../12-17/btn_selection.png) 0 0 no-repeat;
+    background-size:100%;
+}
+.clean_shopping_cart .shopping_cart_item{
+    padding-right:10px;
+    margin-bottom:270px;
+}
+.clean_shopping_cart .address_div{
+    min-height:40px;
+}
+.clean_shopping_cart .address_div a{
+    position:relative;
+    display:block;
+    padding-right:15px;
+    height:100%;
+}
+.clean_shopping_cart .address_div a::after{
+    content:"";
+    position:absolute;
+    display:block;
+    width:10px;
+    height:10px;
+    top:39%;
+    right:5px;
+    border-top:1px solid #a6a6a6;
+    border-right:1px solid #a6a6a6;
+    -webkit-transform:rotate(45deg);
+    transform:rotate(45deg);
+}
+.address_div p{
+    margin:0;
+    padding:0 0 7px 25px;
+    position:relative;
+}
+.address_div p span{
+    margin-left:50px;
+}
+.address_div p i{
+    position:absolute;
+    width:15px;
+    height:19px;
+    left:4px;
+    top:0;
+    background:url(../images/btn_location.png) 0 0 no-repeat;
+    background-size:100% 100%;
+}
+.clean_shopping_cart .address_div a.add_href{
+    line-height:50px;
+    text-align:center;
+    color:#c9c9c9;
+}
+.submit_clean_sc{
+    position:fixed;
+    width:100%;
+    height:250px;
+    padding:10px 8px;
+    left:0;
+    bottom:0;
+    background:#fff;
+    box-shadow:1px 3px 25px #a6a6a6;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.submit_clean_sc p,.submit_clean_sc a,.submit_clean_sc div{
+    margin-bottom:7px;
+}
+.submit_clean_sc p{
+    margin:0;
+    color:#f79c5c;
+}
+.submit_clean_sc a{
+    display:block;
+    margin-left:25%;
+    width:50%;
+    height:35px;
+    line-height:35px;
+    border-radius:35px;
+    text-align:center;
+    color:#fff;
+    font-size: 17px;
+}
+.submit_clean_sc a.wx_tn{
+    margin-top:10px;
+    background:#5ac952;
+}
+.submit_clean_sc a.zfb_tn{
+    background:#56abe4;
+}
+.money_list,.money_list div{
+    overflow:hidden;
+}
+.money_list div span{
+    display:block;
+    float:left;
+    width:33.3%;
+    text-align:center;
+}
+.submit_clean_sc .pay_money{
+    text-align:right;
+}
+.submit_clean_sc .pay_money strong{
+    font-size:16px;
+    color:#e1544f;
+    font-weight:normal;
+}
+.submit_clean_sc .money_total{
+    border-bottom:1px solid #f3f3f3;
+}
+.submit_clean_sc .money_total span{
+    float:right;
+}
+.submit_clean_sc .money_total strong{
+    font-size:16px;
+    color:#f79c5c;
+    font-weight:normal;
+}

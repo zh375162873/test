@@ -1,0 +1,67 @@
+<?php
+
+namespace Home\Controller;
+
+class LbsController extends BaseController
+{
+    private $shop_id;
+	private $url;
+	private $ak;
+	private $geotable_id;
+    public function _initialize(){
+        parent::_initialize();
+        $shop = get_shop_proxy();
+        $this->shop_id = $shop['shop_id'];
+		$this->ak ="cVYACkMpnKdlnR0IG6g7SN3X";
+		$this->geotable_id ='120330';
+    }
+    /**
+     * 表字段信息
+     */
+    public function column_list()
+    {
+		$url="http://api.map.baidu.com/geodata/v3/column/list";
+		$params=array();
+		$params['geotable_id']=$this->geotable_id;
+		$params['ak']=$this->ak;
+		$f=curl_http($url, $params, $method = 'GET');
+		$d=json_decode($f);
+		print_r($d);
+    }
+
+    /**
+     * 收藏商品
+     */
+    public function addfav_goods()
+    {
+        $goods_id = I('goods_id', 0, 'intval');
+        $fav = new FavoriteService();
+        $info = $fav->getFavorite($this->shop_id,session('userId'), $goods_id);
+        if ($info) {
+            $this->error("您已收藏过了，去我的收藏看看吧！");
+        }
+        $row = $fav->addFavorite($this->shop_id,session('userId'), $goods_id);
+        if (false !== $row) {
+            $this->success("收藏成功!");
+        } else {
+            $this->error("收藏失败，再试一次！");
+        }
+    }
+
+    /**
+     * 删除收藏
+     */
+    public function delfavorite()
+    {
+        if (IS_POST) {
+            $fav_id = I('fav_id', 0, 'intval');
+            $fav = new FavoriteService();
+            $row = $fav->delFavorite($this->shop_id,session('userId'), $fav_id);
+            if (false !== $row) {
+                $this->success("已取消收藏!");
+            } else {
+                $this->error("取消失败，再试一次！");
+            }
+        }
+    }
+}

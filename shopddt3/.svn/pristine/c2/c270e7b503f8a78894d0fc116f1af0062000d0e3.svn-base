@@ -1,0 +1,178 @@
+<include file="Index/header"/>
+
+<style>
+
+    .breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited {
+        color: #000000
+    }
+
+    .row-fluid a, .row-fluid a:link, .row-fluid a:visited {
+        color: #000000
+    }
+
+</style>
+<div class="container">
+    <!--面包屑导航-->
+    <ul class="breadcrumb">
+        <li>
+            <a href="<?php echo U('class/class_list') ;?>">分类管理</a>
+        </li>
+        <li class="active">分类修改</li>
+    </ul>
+    <div class="row" style="padding-top:10px;">
+        <form id="form1" action="" method="post" class="form-horizontal">
+            <!-- <div class="form-group">
+                    <label for="select11" class="col-md-2 control-label">分类</label>
+                    <div class="col-md-7">
+                        <select id="select11" class="form-control"  name="parent_id">
+                            <option value="0">顶级分类</option>
+                            <?php
+                             $i=0;
+                             foreach($classdata as $val){
+                            ?>
+                            <option value="{$val['gc_id']}" <?php if($val['gc_id']==$info['gc_parent_id']){?>selected="selected" <?php } ?> >{$val['gc_name']}</option>
+                                <?php
+                                 foreach($val['child'] as $subval){
+                                ?>
+                                  <option value="{$subval['gc_id']}" <?php if($subval['gc_id']==$info['gc_parent_id']){?>selected="selected" <?php } ?>  >&nbsp;&nbsp;---{$subval['gc_name']}</option>
+                                <?php
+                                }
+                                ?>
+                            <?php
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="help-block with-errors"></div>
+                </div>-->
+
+            <div class="form-group">
+                <label for="name" class="col-xs-2 control-label">分类名称<span class="span_required">*</span></label>
+
+                <div class="col-xs-5">
+                    <input class="form-control required" name="name" id="name" type="text" value="{$info['gc_name']}"
+                           data-msg="请输入分类名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="gc_images1" class="col-xs-2 control-label">分类图片<span class="span_required">*</span></label>
+
+                <div class="col-xs-10">
+                    <!--<input class="form-control" type="file" name="img">-->
+                    <label>
+                        <input  <?php if($info['gc_images']=='class_images/1.png'){?>checked="checked"<?php }?>
+                        type="radio" name="gc_images" id="gc_images1" value="class_images/1.png"><img
+                            src="__PUBLIC__/class_images/1.png"></label>
+                    <label>
+                        <input <?php if($info['gc_images']=='class_images/2.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/2.png"><img src="__PUBLIC__/class_images/2.png"></label>
+                    <label>
+                        <input <?php if($info['gc_images']=='class_images/3.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/3.png"><img src="__PUBLIC__/class_images/3.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/4.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/4.png"><img src="__PUBLIC__/class_images/4.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/5.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/5.png"><img src="__PUBLIC__/class_images/5.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/6.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/6.png"><img src="__PUBLIC__/class_images/6.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/7.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/7.png"><img src="__PUBLIC__/class_images/7.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/8.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/8.png"><img src="__PUBLIC__/class_images/8.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/9.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/9.png"><img src="__PUBLIC__/class_images/9.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/10.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/10.png"><img src="__PUBLIC__/class_images/10.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/11.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/11.png"><img src="__PUBLIC__/class_images/11.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/12.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/12.png"><img src="__PUBLIC__/class_images/12.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/13.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/13.png"><img src="__PUBLIC__/class_images/13.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/14.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/14.png"><img src="__PUBLIC__/class_images/14.png">
+				    </label>
+					<label>
+                        <input <?php if($info['gc_images']=='class_images/15.png'){?>checked="checked"<?php }?>
+                        type="radio"
+                        name="gc_images" value="class_images/15.png"><img src="__PUBLIC__/class_images/15.png">
+				    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="sort" class="col-xs-2 control-label">排序<span class="span_required">*</span></label>
+
+                <div class="col-xs-5">
+                    <input class="form-control number" name="sort" id="sort" type="text" value="{$info['gc_sort']}"
+                           max="99" min="0" data-msg="请输入0-99数字"/>
+                    排序从小到大(0~99)  
+                </div>
+            </div>
+			    
+			<div class="form-group">
+            <label for="sort" class="col-xs-2 control-label">seo关键词</label>
+
+            <div class="col-xs-5">
+                <input class="form-control" name="gc_keywords" id="gc_keywords" type="text" value="{$info['gc_keywords']}" />
+            </div>
+        </div>
+		
+		<div class="form-group">
+            <label for="sort" class="col-xs-2 control-label">seo描述</label>
+
+            <div class="col-xs-5">
+               <textarea  class="form-control"    name="gc_description">{$info['gc_description']}</textarea>
+            </div>
+        </div>  
+
+			
+            <input type="hidden" name="id" value="<?php echo $id;?>">
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-7">
+                    <button type="submit" name="sub" class="btn btn-primary">提交</button>
+                    <button id="reset" type="reset" class="btn btn-default">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<include file="Index/footer"/>
+<script>
+    ddt_validate($('#form1'));
+</script>

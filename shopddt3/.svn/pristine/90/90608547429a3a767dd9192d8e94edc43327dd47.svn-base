@@ -1,0 +1,100 @@
+<?php
+namespace Admin\Controller;
+class ArticleController extends BaseController
+{
+    private $article_item;
+    public function _initialize()
+    {
+        parent::_initialize();
+    }
+
+    public function article_list(){
+        //实例化文章模型
+        $news=M('article');
+        $news_list=$news->field(array('id','subject','message','createtime'))->order('id desc')->select();
+        foreach($news_list as $key=>$value){
+            $news_list[$key]['createtime']=date("Y-m-d H:i:s",$value['createtime']);
+        }
+        $this->assign('news_list',$news_list);
+        $this->display();
+    }
+
+
+    /**
+     * @函数    index
+     * @功能    显示添加文章主页面
+     */
+    public function index()
+    {
+        if ($id = (int)$_GET['id']) {
+            $article = M('article');
+            $article_item = $article->where("id=$id")->find();
+            $this->assign('article_item', $article_item);
+            $this->assign('btn_ok_act', 'update');
+        } else {
+            $this->assign('btn_ok_act', 'add');
+        }
+        $this->display();
+    }
+
+    /**
+     * @函数    add
+     * @功能    文章添加完成，写入数据库
+     */
+    public function add()
+    {
+        $article = D('Article');
+        if ($article->create()) {
+
+            $article->message = $_POST['message'];
+            $article->author = session('proxyId');
+
+            //将文章写入数据库
+            if ($article->add()) {
+                $this->success('文章添加成功', U('article/article_list'));
+            } else {
+                $this->error('文章添加失败，返回上级页面');
+            }
+
+        } else {
+            $this->error($article->getError());
+        }
+    }
+
+    /**
+     * @函数    delete
+     * @功能    删除文章
+     */
+    public function delete()
+    {
+        $article = M('article');
+        if ($article->delete($_GET['id'])) {
+            $this->success('文章删除成功');
+        } else {
+            $this->error($article->getLastSql());
+        }
+    }
+
+    /**
+     * @函数    edit
+     * @功能    删除文章
+     */
+    public function edit()
+    {
+        if ($_GET['id']) {
+            redirect(U('admin/article/index/id/' . $_GET['id']), 0, '编辑文章');
+        }
+    }
+
+    /**
+     * @函数    update
+     * @功能    更新修改后的文章到数据库
+     */
+    public function update()
+    {
+        $article = M('Article');
+        $data = array('subject' => $_POST['subject'], 'message' => $_POST['message'], 'lastmodifytime' => time());
+        $id = $_POST['id'];
+        $article->where('id=' . $id)->setField($data); // 根据条件保存修改的数据
+    }
+}

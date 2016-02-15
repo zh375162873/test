@@ -1,0 +1,213 @@
+<?php
+namespace Home\Controller;
+use BizService\FavoriteService;
+use BizService\UserService;
+use BizService\GoodsService;
+use Org\Net\IpLocation;
+use BizService\GoodshomeService;
+use BizService\ExtendService;
+header("Content-type:text/html;charset=utf-8");
+class GoodsController extends BaseController {
+	//产品列表页面默认
+    public function index(){
+        $this->goodslist();
+    }
+	
+	//产品列表页面
+    public function goodslist(){
+	    $type=I("type")?I("type"):0;
+		$gc_id=I("gc_id")?I("gc_id"):0;
+		$lat=I("lat")?I("lat"):0;
+		$long=I("long")?I("long"):0;
+		$data=array();
+		if($gc_id){
+		$data['gc_id']=$gc_id;
+		//分页
+		$data['limit']="0,5";
+		
+		//搜索分类名称作为标题
+		$class_info=M('goods_class')->where('gc_id='.$gc_id)->field('gc_name,gc_description,gc_keywords')->find();
+		$this->assign('description',$class_info['gc_description']);
+		$this->assign('keywords',$class_info['gc_keywords']);
+	    $this->assign('title',$class_info['gc_name']); 
+		}
+		if($type){
+		  $data['order']=$type;
+		}
+		if($lat){
+		    //gps定位
+		    $map = new \BizService\MapService();
+		    $f=$map->locationByGPS($long, $lat);
+		    $data['lat']=$f['lat'];
+			$data['lng']=$f['lng'];
+		}elseif(session('lat')&&session('lng')){
+		    $data['lat']=session('lat');
+			$data['lng']=session('lng');
+		}else{
+		    //百度定位
+		    $mapService=new \BizService\MapService();
+		    $map=$mapService->locationByIP();
+			$data['lat']=$map['lat'];
+			$data['lng']=$map['lng'];
+		}
+
+		$goodslist=array();
+		$GoodshomeService=new GoodshomeService();
+		$goodslist=$GoodshomeService->mgoods_list($data,0);
+		//测试ip定位
+		/*$ip = get_client_ip();
+        $Ips = new \Org\Net\IpLocation('UTFWry.dat'); // 实例化类 参数表示IP地址库文件
+        $area = $Ips->getlocation($ip); // 获取某个IP地址所在的位置*/
+		//获取gps信息
+		
+		
+		$this->assign('goodslist',$goodslist);
+		$this->assign('gc_id',$gc_id);
+		$this->assign('type',$type);
+		$this->assign('lat',$lat);
+		$this->assign('long',$long);
+        $this->display('goods_list'); 
+    }
+	
+	//产品列表页面(分页)
+    public function ajax_goodslist(){
+	    $type=I("type")?I("type"):0;
+		$gc_id=I("gc_id")?I("gc_id"):0;
+		$counting=I("counting")?I("counting"):0;
+		$oncenum=I("oncenum")?I("oncenum"):0;
+		$lat=I("lat")?I("lat"):0;
+		$lng=I("lng")?I("lng"):0;
+		if($lat&&$lng){
+		    $data['lat']=$lat;
+			$data['lng']=$lng;
+		}else{
+		    //百度定位
+		    $mapService=new \BizService\MapService();
+		    $map=$mapService->locationByIP();
+			$data['lat']=$map['lat'];
+			$data['lng']=$map['lng'];	
+		}
+		if($gc_id){
+		$data['gc_id']=$gc_id;
+		}
+		if($type){
+		$data['order']=$type;
+		}
+		$GoodshomeService=new GoodshomeService();
+		
+		//调取代理信息
+        $shop_info = get_shop_proxy();
+		$shop_id=$shop_info['shop_id']?$shop_info['shop_id']:1;
+		//获取传来的信息
+		$info=$_POST['info'];
+		$page         = isset($_REQUEST['counting'])   && intval($_REQUEST['counting'])  > 0 ? intval($_REQUEST['counting'])  : 1;
+	    $size         =isset($info['info_num'])   && intval($info['info_num'])  > 0 ? intval($info['info_num'])  : 5;
+	    $str="";
+		$p_data=$GoodshomeService->mgoods_list($data,0);
+	    $count = count($p_data);
+	    $max_page = ($count> 0) ? ceil($count / $size) : 1;
+		if ($page > $max_page)
+		{ 
+		   $array=array();
+		   echo json_encode($array);
+		   exit;
+		}
+
+		$limit="";
+		if($page>=1&&$size>0){
+		  $num=$size;
+		  $statnum=($page-1)*$num;
+		  $limit=" $statnum,$num ";
+		}
+		$data['limit']=$limit;
+		$goodslist=$GoodshomeService->mgoods_list($data,0);
+
+		if($max_page < $page){
+		  $array=array();
+		  echo json_encode($array);
+		}else{
+		  echo json_encode($goodslist);
+		}
+	
+    }
+	
+	//产品详情页面
+    public function goodsview(){
+	    $goods_id=I('id')?I('id'):0;
+		$goods_commonid=I('goods_commonid')?I('goods_commonid'):0;
+	    //获取产品详情信息
+		$goods=array();
+		if($goods_id){
+		  $goods=D('goods')->getinfobyid($goods_id);
+		}elseif($goods_commonid){
+		  $goods=D('goods')->getinfobycommonid($goods_commonid);
+		}else{
+		   $this->error('参数有误！', 'index');
+		}
+		if($goods){
+		  //调取商品轮播图
+		   $goods_lunbo=D('Admin/goodsimages')->info($goods['goods_commonid']);  
+		   $goods['lunbo']=$goods_lunbo;
+		  //获取公共信息
+		   $goods_common=D('Admin/goodscommon')->where("goods_commonid=".$goods['goods_commonid'])->find();
+		   $goods['subtitle']=$goods_common['subtitle'];
+		   $goods['position_tags']=$goods_common['position_tags'];
+		   
+		   $goods['usetime']=string2array($goods_common['usetime']);
+		   $goods['start_date']=$goods_common['start_date'];
+		   $goods['end_date']=$goods_common['end_date'];
+		   $goods['rules']=string2array($goods_common['rules']);
+		   $goods['mobile_body']=htmlspecialchars_decode($goods_common['mobile_body']);
+		   $goods['keywords']=$goods_common['keywords'];
+		   $goods['description']=$goods_common['description'];
+		   
+		  //获取商家信息
+		   $store=get_merchant_info($goods_common['store_id']); 
+		   $goods['store']=$store;
+		}else{
+		  $this->error('无此商品信息', 'index');
+		}
+		//检查此商品是否是特惠推广商品
+		$ExtendService=new ExtendService();
+		$channel=$ExtendService->checkExtendGoods($goods_id);
+		if(I('goods_code')){
+		  $goods_code=I('goods_code');
+		  echo  $goods_code;
+		  $goods_id=I('id');
+		  $channel_info=$ExtendService->getExtendGoods($goods_id,$goods_code);
+		  print_r($channel_info);
+		  if($channel_info){
+		    print_r($channel_info);
+		  }
+		}
+		
+		$fav = new FavoriteService();
+		$is_fav = $fav->getFavorite(session('userId'),$goods_id);
+		$this->assign('is_fav',$is_fav);
+		$this->assign('channel',$channel);
+		$this->assign('goods',$goods);
+        $this->display('goods');
+    }
+	
+	
+	
+	
+	//产品详情页面
+    public function setpostion(){
+	  $lat=I("lat")?I("lat"):0;
+	  $lng=I("lng")?I("lng"):0;
+	  $map = new \BizService\MapService();
+	  $f=$map->locationByGPS($long, $lat);
+	  if($lat){
+	   session("lat",$f['lat']);
+	  }
+	  if($lng){
+	   session("lng",$f['lng']);
+	  }
+	  echo session("lat");
+	}
+	
+	
+	
+    
+}

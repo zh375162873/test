@@ -1,0 +1,90 @@
+<?php
+/*
+ * 现金流水支付记录模型
+ * 对用户账户的现金统计
+ */
+namespace Home\model;
+use Think\Model;
+class LsPriceModel extends Model {
+    protected $fields=array("id","shop_id","buyer_id","money","content","ac_id","type","addtime","_pk"=>"id");
+    protected $_auto=array(
+    		array("addtime","time",1,"function"),
+    );
+    
+    //现金账户流水列表
+    public function list_price_ls(){
+    	
+    }
+    
+   
+    /*
+     * 现金账户流水记录
+     * 记录现金账户的进账记录（现金红包），
+     * 出账记录（消费产品）
+     * $type:0：默认普通商品购买的消费 ac_id为订单id
+     *       1：兑奖活动商品购买的消费  ac_id为订单id
+     *       2：兑奖活动现金红包获取的充值 ac_id为活动id
+     *       注，仅仅是记录商户现金账户变动的表
+     */
+    public function del_price_ls($dateinfo,$type){
+      
+        	//初始化数据
+        	$info=array(
+        	    "shop_id"=>$dateinfo['shop_id'],
+        	    "buyer_id"=>$dateinfo['buyer_id'],
+        	    "money"=>$dateinfo['ye_paymoney'],
+        	    "content"=>"购买商品：".$dateinfo['goods']['goods_name']." 账户余额花费：".$dateinfo['ye_paymoney'],
+        	    "ac_id"=>$dateinfo['order_id'],
+        	    "type"=>$type,
+        	    "addtime"=>time(),
+        	);
+
+    	
+        if($this->data($info)->add()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    //减少金额账户流水
+    public function add_price_ls($dateinfo,$type){
+        $info=array(
+            "shop_id"=>$dateinfo['shop_id'],
+            "buyer_id"=>$dateinfo['userid'],
+            "money"=>$dateinfo['money'],
+            "content"=>"参加活动".$dateinfo['active_name']."获取现金".$dateinfo['money'],
+            "ac_id"=>$dateinfo['ac_id'],
+            "type"=>$type,
+            "addtime"=>time(),
+        );
+        
+        if($this->data($info)->add()){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    
+    //增加账户流水记录
+    public function ls_price_jl($data,$type,$admin_name){
+       $info=array(
+            "shop_id"=>$data['shop_id'],
+            "buyer_id"=>$data['userid'],
+            "money"=>$data['money'],
+            "content"=>$data['content'],
+            "ac_id"=>$data['ac_id'],
+            "type"=>$type,
+            "addtime"=>time(),
+            "admin_name" =>$admin_name,
+        );
+        
+        if($this->data($info)->add()){
+            return true;
+        }else{
+            return false;
+        }
+        
+    }
+    
+}

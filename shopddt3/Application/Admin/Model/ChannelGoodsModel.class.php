@@ -1,0 +1,94 @@
+<?php
+/*
+ * 订单商品模型
+ */
+namespace Admin\model;
+use Think\Model;
+class ChannelGoodsModel extends Model {
+	 // protected $_validate = array(   
+		// 							array('name','','渠道名称已经存在！',0,'unique',1), // 在新增的时候验证name字段是否唯一     
+		// 					);
+
+	/**
+
+	 * 推广商品列表
+	 * @param $channelName		渠道名称
+	 * @return mixed
+
+	 */
+	public function extendGoodsList($extendId){
+		if(!$extendId) 
+			return false;
+		$data = $this->where('channel_user='.$extendId.' and proxy_id='.session('proxyId'))->select();//返回字符串
+		return $data;
+	}
+
+	/**
+
+	 * 添加推广商品
+	 * @param $extendMemberData		推广人员信息
+	 * @return mixed
+
+	 */
+	public function addExtendGoods($extendGoodsData){
+		if(!$extendGoodsData) 
+			return false;
+		$data = $this->data($extendGoodsData)->add();//返回字符串
+		return $data ? $data : false;
+	}
+
+	/**
+
+	 * 检查是否存在，返回推广商品表id
+	 * @param $userId		用户id
+	 * @return mixed
+
+	 */
+	public function findExtendGoodId($data){
+		if(!$data) 
+			return false;
+		$data = $this->where('channel_user='.$data['extendId'].' and goods_sn="'.$data['goods_sn'].'"')->getField('id');//返回字符串
+		return $data ? $data : false;
+	}	
+	/**
+
+	 * 检查是否存在，返回当前商品在推广优惠商品查到的个数（外部接口）
+	 * @param $goodsId		商品id
+	 * @return mixed
+
+	 */
+	public function checkExtendGoods($goodsId){
+		if(!$goodsId) 
+			return false;
+		$data = $this->where('goods_id='.$goodsId.' and quantity>0')->count();//返回查到的个数
+		return $data ? $data : false;
+	}
+	/**
+
+	 * 返回推广优惠商品信息（外部接口）
+	 * @param $userId		用户id
+	 * @return mixed
+
+	 */
+	public function getExtendGoods($goodsId,$extendId){
+		if(!$goodsId||!$extendId) 
+			return false;
+		$data = $this->where('goods_id='.$goodsId.' and channel_user='.$extendId.' and quantity>0')->find();//返回查到的信息
+		return $data ? $data : false;
+	}
+
+	/**
+
+	 * 更新推广商品信息
+	 * @param $id		推广优惠商品Id
+	 * @param $editdata		修改信息
+	 * @return mixed
+
+	 */
+	public function updateExtendGoods($id,$editdata){
+		if(!isset($editdata)) 
+			return false;
+      	$data = $this->where('id='.$id)->save($editdata);
+      	return $data ? $data : false;
+	}
+}

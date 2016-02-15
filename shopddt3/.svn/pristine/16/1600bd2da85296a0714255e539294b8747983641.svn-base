@@ -1,0 +1,50 @@
+<?php
+/**
+ * Created by ddt.
+ * User: 谢林
+ * Date: 2015/9/21 10:54
+ * Description:公共函数库
+ */
+
+/**
+ * 根据域名获取商城基本信息
+ */
+function shop_info(){
+    $domain = $_SERVER['SERVER_NAME']?$_SERVER['SERVER_NAME']:get_domain();
+	
+	echo $domain;
+    $shop_service = new \BizService\ShopService();
+    $shop_info = $shop_service->get_shop_info_by_domain($domain,array('shop_id','shop_title','member_id','shop_company_name','shop_keywords'));
+    session('proxyId', $shop_info[0]['member_id']);//代理ID
+    session('shopId', $shop_info[0]['shop_id']);//商城ID
+
+    $regFrom = I('get.ddt_from', '');
+    session('regFrom', $regFrom);
+    return $shop_info[0];
+}
+/**
+ * 根据两点间的经纬度计算距离
+ * @param float $latitude 纬度值
+ * @param float $longitude 经度值
+ * @return float
+ */
+function getDistance($latitude1, $longitude1, $latitude2, $longitude2)
+{
+    $earth_radius = 6371000;
+    $dLat = deg2rad($latitude2 - $latitude1);
+    $dLon = deg2rad($longitude2 - $longitude1);
+    $a = sin($dLat / 2) * sin($dLat / 2) + cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * sin($dLon / 2) * sin($dLon / 2);
+    $c = 2 * asin(sqrt($a));
+    $d = $earth_radius * $c;
+    return round($d);   //四舍五入
+}
+
+/**
+ * 获取当前主机域名
+ * @param $url
+ * @return mixed
+ */
+function get_domain()
+{
+    return $_SERVER['HTTP_HOST'];
+}

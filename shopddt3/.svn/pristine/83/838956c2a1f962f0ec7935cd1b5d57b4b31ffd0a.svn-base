@@ -1,0 +1,35 @@
+<?php
+namespace Admin\Controller;
+use BizService\UserService;
+use BizService\OrderService;
+class IndexController extends BaseController {
+    public $shop_id,$order_service;
+    public function _initialize(){
+        parent::_initialize();
+        $shop_info=get_shop_proxy();
+        $this->shop_id = $shop_info['shop_id'];
+        $this->order_service = new OrderService();
+    }
+    public function index(){
+        $this->display("layout");
+    }
+    public function statistics(){
+        $order_count = $this->order_service->shangcheng_order_count($this->shop_id);
+   
+        $this->assign("order_count",$order_count);
+        $this->display("index");
+    }
+    public function add(){
+        $user = new UserService();
+        dump($user->addUser());
+    }
+
+    public function update(){
+        $user = new UserService();
+        dump($user->updateUser());
+    }
+
+    public function login(){
+        $this->display();
+    }
+}

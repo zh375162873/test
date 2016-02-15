@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>订单支付-点点通闪购平台</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+    <script src="{$uri}__PUBLIC__/home/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+</head>
+<body>
+<div class="pay_body">
+    <foreach name="orderall" item="val" >
+	   <section class="pay_goods">
+			<div class="goodImg">
+				<img src="{$val.goods.goods_image}">
+			</div>
+			<div class="goodInfo">
+				<div class="pay_title">
+					<h3>{$val.goods.goods_name}</h3>
+					<p>{$val.goods.goods_plun}</p>
+				</div>
+				<div class="pay_goodsPrice"><del>{$val.goods.market_price}元</del><ins>{$val.goods.goods_price}元</ins></div>
+			</div>
+		</section>
+		<section class="od_quantity">
+			<span class="oq_left">商品数量:</span><span class="oq_right">{$val.goods_num}个</span>
+		</section>
+    </foreach>
+    <section class="od_quantity">
+        <span class="oq_left">商品总价:</span><span class="oq_right">{$goods_amount}元</span>
+    </section>
+    
+    <if condition="$orderinfo['extend_id'] neq 0">
+    <section class="od_quantity">
+        <span class="oq_left">优惠价格:</span><span class="oq_right">{$orderinfo['goods']['goods_price']*$orderinfo['extend_discount']/100}元</span>
+    </section>
+    </if>
+	
+   <if condition="$online_paymoney neq 0">
+   <section class="od_total">
+        <span class="ot_left">在线支付:</span><span class="ot_right">{$online_paymoney}元</span>
+    </section>
+    </if>
+    <if condition="$ye_paymoney neq 0">
+    <section class="od_total">
+        <span class="ot_left">余额支付:</span><span class="ot_right">{$ye_paymoney}元</span>
+    </section>
+    </if>
+	<section class="od_total">
+        <span class="ot_left">运费:</span><span class="ot_right" id="yunfei">0元</span>
+    </section>
+	<section class="od_total">
+        <span class="ot_left">自提优惠:</span><span class="ot_right" id="youhui">0元</span>
+    </section>
+	
+    <section class="od_total">
+        <span class="ot_left">合计:</span><span class="ot_right" id="total">{$order_amount}元</span>
+    </section>
+	
+	<section class="od_total">
+        <input id="express1" type="radio" name="sendtype" value="1"  onclick="change_express(1)"  >快递发货
+		<input id="express2" type="radio" name="sendtype" value="2"   onclick="change_express(2)" >上门自提
+    </section>
+	<script>
+ function change_express(num){
+   if(num==1){
+
+        $.get("/index.php/index/ajax_get_shipping_fee/parent_id/{$order_id}/sendtype/1", function(result){
+		           var  t={$order_amount};
+				   var t2=t+parseInt(result);
+				   $("#yunfei").html(result+"元");
+				   $("#youhui").html("0元");
+				   $("#total").html(t2+"元");
+				   $("#sendtype").val(1);
+				    });
+
+   }else{
+    
+        $.get("/index.php/index/ajax_get_shipping_fee/parent_id/{$order_id}/sendtype/2", function(result){
+		           var  t={$order_amount};
+				   var  t2=t-parseInt(result);
+				   $("#youhui").html(result+"元");
+				   $("#yunfei").html("0元");
+				   $("#total").html(t2+"元");
+				   $("#sendtype").val(2);
+				    });
+	
+   }
+ }
+</script>	
+    <section class="od_submit">
+        <if condition="$orderinfo['extend_id'] neq 0">
+        <div class="tip">优惠商品数量{$orderinfo.extend_num}&nbsp;&nbsp;&nbsp;&nbsp; 总共优惠价格{$orderinfo.order_youhui}</div>
+        </if>
+        <div class="tip">*请勿离开此页,并在15分钟内完成支付，过期订单将不会保留</div>
+          <if condition="$pay neq ''">
+            <if condition = "$http_agent eq 1">
+	           <!--  
+	            <form>
+	            	<button class="sub_wx" type="submit">微信支付</button>
+		        </form>-->
+		        {$pay.wxpay} 
+	        <else />
+	         <!-- {$pay.alipay} -->
+	        <!-- {$pay.wapalipay}-->
+			  <form id='alipaysubmit' name='alipaysubmit' action='{:U('order/pay_online')}' method='get'>
+<input type='hidden' name='order_id' value='{$order_id}'/>
+<input type='hidden' name='pay_type' value='1'/>
+<input type='hidden' name='sendtype' value='1' id="sendtype"/>
+<button class='sub_ye' type='submit'>支付宝支付</button>
+</form> 
+	        </if>
+	      <else />
+	        <form action="{:U('order/yezhifu')}" method="post">
+	            <input type="hidden" name="order_id" value="{$orderinfo.order_id}" />
+	            <button class="sub_ye" type="submit">余额支付</button>
+	        </form>
+          </if>
+        <div class="yue">钱包余额: &nbsp;<span>{$userinfo.user_money}元</span></div>
+    </section>
+</div>
+<include file="Index/footer"/>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<include file="Index/header"/>
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('goods/goods_common_list')}" onclick="jumpTo(this);">所有商品</li>
+        <li data-url="{:U('goods/goods_list')}" onclick="jumpTo(this);">现金商品</a></li>
+        <li data-url="{:U('goods/goods_integral_list')}" onclick="jumpTo(this);">积分商品</li>
+        <li data-url="{:U('goods/goods_prize_list')}" onclick="jumpTo(this);" class="active">活动商品</li>
+        <li data-url="{:U('goods/goods_common_add')}" onclick="jumpTo(this);">添加商品</li>
+    </ul>
+</div>
+
+<form class="form-inline" id="" action="" style="margin-bottom:20px;" method="post">
+		<div class="form-group">
+
+			<select class="form-control" name="goodsclass">
+				<option value="0">所有分类</option>
+				<?php
+				foreach($goodsclass as $val){
+				?>
+		<option value="{$val['gc_id']}"  <?php if($class==$val['gc_id']){?> selected="selected"<?php }?> >{$val['gc_name']}</option>
+				<?php
+				}
+				?>
+			</select>
+			<select class="form-control" name="goodsstatus">
+				<option  value="0" <?php if($goodsstatus==0){?> selected="selected"<?php }?>>全部状态</option>
+				<option  value="1" <?php if($goodsstatus==1){?> selected="selected"<?php }?>>上架中</option>
+				<option  value="2" <?php if($goodsstatus==2){?> selected="selected"<?php }?>>已售完</option>
+				<option  value="3" <?php if($goodsstatus==3){?> selected="selected"<?php }?>>未上架</option>
+			</select>
+			<select class="form-control" onchange="setchannel()" id="channel_type" name="channel_type">
+				<option value="0">全部渠道</option>
+				<?php
+				foreach($channelList as $val){
+				?>
+				<option value="{$val['id']}" <?php if($channel_type==$val['id']){?>selected="selected"  <?php }?>>{$val['name']}</option>
+				<?php
+				}
+				?>
+			</select>
+			<label id="channel">
+			<select class="form-control" id="channel_id" name="channel_id">
+				<option  value="0">全部人员</option>
+				     <?php  
+					  foreach($memberList as $val){
+					  ?>
+                       <option value="{$val['id']}" <?php if($channel_id==$val['id']){?>selected="selected"  <?php }?> >{$val['user_name']}</option>
+					  <?php
+					  }
+					  ?>
+			</select>
+			</label>
+			<script>
+				  function  setchannel(){
+				   pid=$("#channel_type").val(); 
+				   $.get("<?php echo U('goods/ajax_get_channel') ;?>", {pid:pid }, function(result){
+				   $("#channel").html(result);
+				    });
+				  }
+				</script>
+		</div>
+		<div class="form-group" style="padding-top:5px;">
+			<label>开始日期:</label>
+			<input id="begin_time" name="begin_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$begin_time}">
+			<label>结束日期:</label>
+			<input id="end_time" name="end_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$end_time}">
+			<label>关键词:</label>  <input type="text" class="form-control" name="keywords" value="{$keywords}" style="width: 140px;" placeholder="输入名称,编号">
+		</div>  
+		<button class="btn btn-default" type="submit">筛选</button>
+	</form>
+
+
+<div class="row-fluid">
+    <div class="biaoge">
+
+
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th style="border-right:1px solid #CCCCCC">ID</th>
+                <th style="border-right:1px solid #CCCCCC">商品编号</th>
+                <th style="border-right:1px solid #CCCCCC">商品名称</th>
+                <th style="border-right:1px solid #CCCCCC">原价</th>
+                <th style="border-right:1px solid #CCCCCC">售价</th>
+                <th style="border-right:1px solid #CCCCCC">上架库存</th>
+                <th style="border-right:1px solid #CCCCCC">已售</th>
+                <th style="border-right:1px solid #CCCCCC">上架时间</th>
+                <th style="border-right:1px solid #CCCCCC">商品状态</th>
+				<th style="border-right:1px solid #CCCCCC">是否上架</th>
+                <th style="border-right:1px solid #CCCCCC">操作</th>
+            </tr>
+
+            <?php
+	  foreach($goodslist['list'] as $val ){
+	  ?>
+            <tr class="trbor"  <?php if($val['goods_storage']==0&&$val['goods_state']==1){?> style="color:#FF0000" <?php } ?> >
+                <td>{$val['goods_id']}</td>
+                <td>{$val['goods_serial']}</td>
+                <td>{$val['goods_name']}</td>
+                <td>{$val['goods_marketprice']}</td>
+                <td>{$val['goods_price']}</td>
+                <td>{$val['goods_storage_p']}</td>
+                <td>{$val['goods_salenum_p']}</td>
+                <td>{$val['goods_addtime']}</td>
+                <td>{$val['goods_status']}</td>
+                <td><?php if($val['goods_state']==0){?><a href="<?php echo U("admin/goods/setgoods_state",array('goods_commonid'=>$val['goods_commonid'],'goods_type'=>3,'type'=>1));?>"><img src="__PUBLIC__/admin/img/goods/no.gif"></a><?php }else{?> <a href="<?php echo U('admin/goods/setgoods_state',array('goods_commonid'=>$val['goods_commonid'],'goods_type'=>3,'type'=>0));?>"><img src="__PUBLIC__/admin/img/goods/yes.gif"></a> <?php }?></td>
+                <td class="alink">
+                    <a href="{:U("goods/goods_view?goods_id=".$val['goods_commonid'])}" data-toggle="modal"
+                    title="预览">预览</a>
+                    <a href="{:U("goods/goods_common_state?goods_id=".$val['goods_commonid'])}"
+                    data-toggle="modal" title="编辑">编辑</a>
+                </td>
+            </tr>
+            <?php
+	  }
+	  ?>
+        </table>
+    </div>
+    <?php
+  echo $goodslist['page'];
+  ?>
+</div>
+
+<include file="Index/footer"/>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+    });
+
+</script>
+

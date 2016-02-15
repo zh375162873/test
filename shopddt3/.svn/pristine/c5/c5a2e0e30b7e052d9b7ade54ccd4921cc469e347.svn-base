@@ -1,0 +1,139 @@
+<?php
+namespace Admin\Controller;
+use BizService\ShopService;
+use BizService\ExeclService;
+class PinglunController extends BaseController {
+    public $pinglun,$shop_id,$users;
+
+    public function _initialize(){
+        parent::_initialize();
+        $this->pinglun = D("PinglunManage");
+        $shop_info=get_shop_proxy();
+        $this->shop_id = $shop_info['shop_id']?$shop_info['shop_id']:1;
+    }
+    
+    /**
+     * 获取商城评论列表
+     */
+    public function index(){
+        //处理提交数据
+        if($_GET){
+            $order = empty($_GET['order'])?0:intval($_GET['order']);
+            $pltype = empty($_GET['pltype'])?0:intval($_GET['pltype']);//订单状态
+            $class = empty($_GET['class'])?0:intval($_GET['class']);//商品分类
+            $begin_time = empty($_GET['begin_time'])?'':trim($_GET['begin_time']);
+            $end_time = empty($_GET['end_time'])?'':trim($_GET['end_time']);
+            $keywords = empty($_GET['keywords'])?'':trim($_GET['keywords']);
+            $order_by = 'pl_addtime DESC';
+            if($order){
+                switch ($order){
+                    case 1:
+                        $order_by = "id ASC";
+                        break;
+                    case 2:
+                        $order_by = "id DESC";
+                        break;
+                    case 3:
+                        $order_by = "pl_points ASC";
+                        break;
+                    case 4:
+                        $order_by = "pl_points DESC";
+                        break;
+                    case 5:
+                        $order_by = "pl_status ASC";
+                        break;
+                    case 6:
+                        $order_by = "pl_status DESC";
+                        break;
+                } 
+            }
+            
+            $data=array();
+            if($pltype){
+                $data['pl_points'] = $pltype;
+            }
+            if($begin_time&&$end_time){
+    	        $data['pl_addtime'] = array(array('gt',strtotime($begin_time)),array('lt',strtotime($end_time)),'and');
+    	    }
+    	    elseif($begin_time){
+    	        $data['pl_addtime'] = array('gt',strtotime($begin_time));
+    	    }
+    	    elseif ($end_time){
+    	        $data['pl_addtime'] = array('lt',strtotime($end_time));
+    	    }
+    	    
+    	    if($keywords){
+    	        $order_sn = D("orders")->where(array("order_sn"=>array('like','%'.$keywords.'%')))->field("order_id")->select();
+    	        $order_goods = D("OrdersGoods")->where(array("goods_name"=>array('like','%'.$keywords.'%')))->field("goods_id")->select();
+    	        $sn_string = '';
+    	        for($i=0;$i<count($order_sn);$i++){
+    	            $sn_string = $order_sn[$i]['order_id'];
+    	            if($i!=(count($order_sn)-1)){
+    	                $sn_string = ',';
+    	            }
+    	        }
+    	        $goods_string ='';
+    	        for($i=0;$i<count($order_goods);$i++){
+    	            $goods_string= $order_goods[$i]['goods_id'];
+    	            if($i!=(count($order_goods)-1)){
+    	                $goods_string = ',';
+    	            }
+    	        }
+    	        $where = array();
+    	        $where['order_id']=array('in',$sn_string);
+    	        $where['goods_id']=array('in',$goods_string);
+    	        $where['pl_content']=array('like','%'.$keywords.'%');
+    	        $where['_logic']='or';
+    	        $data['_complex'] = $where;
+    	    }
+    	    
+    	    $this->assign("order",$order);
+    	    $this->assign("pltype",$pltype);
+    	    $this->assign("begin_time",$begin_time);
+    	    $this->assign("end_time",$end_time);
+    	    $this->assign("keywords",$keywords);
+        }
+        
+        $arr = $this->pinglun->search_list($this->shop_id,$data,$order_by);
+        $goodsclass = D('goodsclass')->getTree(0,true,$this->shop_id);
+        // var_dump($goodsclass);exit;
+        $this->assign("goodsclass",$goodsclass);
+        $this->assign("arr",$arr['list']);
+        $this->assign("page",$arr['page']);
+        $this->display("list");
+    }
+    
+    //导出评论信息
+    public function pinglun_exe(){
+        $list = $this->pinglun->list_excel($this->shop_id);
+        $ExeclService = new ExeclService();
+        $ExeclService->downMoreColumnDateToExel($list,"评论列表信息",array('order_sn','goods_name','user_name','nick_name','pl_points','pl_content','pl_addtime','show'),array('订单号','商品名称','用户账号','用户昵称','评分','评价内容','评价时间','评价状态'),array(20,20,35,10,10,60,25,25),200);
+    }
+    
+    /**
+     * 更改评论状态
+     */
+    public function change_status(){
+        $id = $_POST['id'];
+        $status = empty($_POST['status'])?0:$_POST['status'];
+        $arr = $this->pinglun->where(array("id"=>$id))->field("goods_id")->find();
+        $goods_id = $arr['goods_id'];
+        if($this->pinglun->where(array("id"=>$id))->data(array("pl_status"=>$status))->save()){
+            //统计数据
+            $this->pinglun->chanage_state($goods_id,$status);
+            $data['error']=0;//操作成功
+            $data['message']="操作成功";
+            $data['content']=$status;
+            $data['id']=$id;
+            $this->ajaxReturn($data);
+        }else{
+            $data['error']=2;//操作失败
+            $data['message']="操作失败";
+            $data['id']=$id;
+            $this->ajaxReturn($data);
+        }
+        
+    }
+    
+    
+}

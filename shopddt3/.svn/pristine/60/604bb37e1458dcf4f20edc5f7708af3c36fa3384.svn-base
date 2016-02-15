@@ -1,0 +1,147 @@
+<include file="Index/header" />
+<!--日期选择-->
+<link rel="stylesheet" href="__PUBLIC__/admin/css/datepicker.css">
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<!--文件上传-->
+<link rel="stylesheet" href="__PUBLIC__/static/uploadify/uploadify.css">
+<script src="__PUBLIC__/static/uploadify/jquery.uploadify.min.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="__PUBLIC__/admin/css/normalize.css">
+<!--[if lte IE 6]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+<!--[if lte IE 7]>
+<style>
+.form-group{
+clear:both;
+padding-bottom:10px;}
+
+.control-label{
+padding-right:20px;}
+
+</style>
+
+<![endif]-->
+
+<style>
+
+.breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited{
+color:#000000}
+.row-fluid a, .row-fluid a:link, .row-fluid a:visited{
+color:#000000}
+
+</style>
+
+  <!--面包屑导航-->
+<ul class="breadcrumb">
+  <li>
+    <a href="<?php echo U('goods/goods_common_list') ;?>">商品管理</a> 
+  </li>
+  <li class="active">现金商品</li>
+</ul>
+  
+  <!--子菜单-->
+  <div class="row-fluid" style=" margin-top:10px;">
+	<ul class="nav nav-tabs">
+	    <li class="active"><a href="javascript:void(0);">限时抢购</a></li>
+		<li  ><a href="<?php echo U('goods/goods_periods?goods_id='.$goods_id) ;?>">多时段抢购</a></li>
+		<!--<li  class="active"  ><a href="javascript:void(0);">现金商品</a></li>-->
+        <!--<li ><a href="<?php echo U('goods/goods_common_images?goods_id='.$goods_id) ;?>">图片管理</a></li>-->
+        <!--<li  ><a href="<?php echo U('goods/goods_common_state1?goods_id='.$goods_id) ;?>">现金购买商品上架</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state2?goods_id='.$goods_id) ;?>">积分商品上架</a></li>
+        <li ><a href="javascript:void(0);">活动商品上架</a></li>-->
+	</ul>
+  </div> 
+  
+  <div class="row"  style="padding-top:10px; padding-left:20px;">
+   <form id="form1" action="" method="post" enctype="multipart/form-data"  class="form-horizontal" data-toggle="validator" role="form">
+ <hr>
+   <h4>限时抢购：</h4>
+   <hr>  
+<script>
+var i=<?php  echo  count($list); ?>;
+</script>   
+ <div class="form-group">
+	         <label for="select11" class="col-md-1 control-label">设置时间</label>
+		     <div class="col-md-11">
+				 <div id="rules">
+
+					<div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+			 <div class="col-md-9 form-inline"  style="padding-left:0px; ">
+			   <label for="select11" class="col-md-1 control-label">是否开启</label><br>
+			   <input type="radio">开启
+			   <input type="radio">关闭
+			 </div>		
+             <div class="col-md-9 form-inline"  style="padding-left:0px; ">
+			 日期范围： <input id="start_date5{$key}" class="form-control "   name="period_start[]"  type="text"  value="{$list['begin_date']}"  style="width:100px;" placeholder="开始时间"    />
+					-
+					<input id="end_date6{$key}" class="form-control required"   name="period_end[]"  type="text"  value="{$list['end_date']}"  data-msg="请输入有效期"  style="width:100px;" placeholder="结束时间"  />
+					
+			  时间范围： <input name="start_m[]" value="{$list['begin_h']}"  type="text" size="5" class="form-control" style="width:50px;display:inline">时 
+			            <input name="start_i[]" value="{$list['begin_i']}" type="text" size="5" class="form-control" style="width:50px;display:inline">分-
+			            <input name="end_m[]"   value="{$list['end_h']}" type="text" size="5" class="form-control" style="width:50px;display:inline">时 
+					    <input name="end_i[]"   value="{$list['end_i']}" type="text" size="5" class="form-control" style="width:50px;display:inline">分
+			 </div>
+			  
+</div>  
+
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#start_date5{$key}').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+		$('#end_date6{$key}').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+      
+    });
+</script>
+
+					
+				 </div> 
+				
+              </div>
+		  </div>
+		  
+		  <input type="hidden" name="goods_id" value="{$goods_id}">
+		  <input type="hidden" name="type" value="1">
+	 <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-7"  style="padding-top:10px;">
+                   <!-- <button type="button"  onclick="window.location.href='<?php echo U('admin/goods/goods_common_edit_base/goods_id/'.$goodscommon_data['goods_commonid']) ;?>'"  class="btn btn-primary">上一步</button>-->
+                    <button type="submit" name="sub"   class="btn btn-primary">保存</button>
+                </div>
+      </div>
+</form>
+<script>
+function add_rules(key){ 
+	     $.get("<?php echo U('goods/ajax_add_goods_period') ;?>",{key:key} ,function(result){
+	       $("#rules").append(result);
+		   i=i+1;
+          // $("div").html(result);
+          });
+	   }
+	
+	function del_content(objdom){
+		$(objdom).parent().remove();
+	}   
+	    
+</script>

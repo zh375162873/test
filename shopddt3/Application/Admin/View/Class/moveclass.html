@@ -1,0 +1,58 @@
+<include file="Index/header"/>
+<style>
+
+    .breadcrumb a, .breadcrumb a:link, .breadcrumb a:visited {
+        color: #000000
+    }
+
+    .row-fluid a, .row-fluid a:link, .row-fluid a:visited {
+        color: #000000
+    }
+
+</style>
+
+<!--面包屑导航-->
+<ul class="breadcrumb">
+    <li>
+        <a href="{:U('class/class_list')}">分类管理</a>
+    </li>
+    <li class="active">分类添加</li>
+</ul>
+<div class="row">
+    <form id="form1" action="" method="post" class="form-horizontal">
+
+        <div class="form-group">
+            <label for="move" class="col-xs-2 control-label">操作方式</label>
+
+            <div class="col-xs-5">
+                <label><input type="radio" name="type" id="move" value="1" checked="checked">转移</label>
+                <label><input type="radio" name="type" value="2">复制</label>
+            </div>
+        </div>
+        <div class="form-group" style="clear:both">
+            <label class="col-xs-2 control-label">选择要转移到的分类<span class="span_required">*</span></label>
+
+            <div class="col-xs-5">
+			   <foreach name="classdata" item="val">
+                <label>
+                <input type="checkbox" name="gc_ids[]" required minlength="1" data-msg="请选择您要操作到的分类" value="{$val['gc_id']}">{$val['gc_name']}
+                    </label>
+                </foreach>
+
+                <input type="hidden" name="gc_id_old" value="{$gc_id_old}">
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button type="submit" name="sub" class="btn btn-primary btn_important">提交</button>
+                <button id="reset" type="reset" class="btn btn-default">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+<include file="Index/footer"/>
+<script>
+    ddt_validate($('#form1'));
+</script>

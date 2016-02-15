@@ -1,0 +1,59 @@
+<include file="Index/header"/>
+<link href="{$uri}__PUBLIC__/temp/indexTrue.css" rel="stylesheet">
+<ul class="breadcrumb" style="text-align:left">
+  <li>
+    模板管理
+  </li>
+  <li class="active">首页管理</li>
+</ul>
+
+  <!--子菜单-->
+  <div class="row-fluid" style=" margin-top:10px;">
+	<ul class="nav nav-tabs">
+	    <li class="active" ><a href="javascript:void(0);">模板编辑</a></li>
+		<li><a target="_blank" href="<?php echo U('admin/tempitem/index_show') ;?>">模板预览</a></li>
+	</ul>
+  </div>
+
+
+<div class="row-fluid">
+   <div>
+     <div class="item-box goods_list" style="width:100%"  >
+	    <div class="item-list" style="float:left; overflow:hidden " >
+	    <iframe scrolling="auto" width="100%" frameborder="0"  src="{:U('admin/tempitem/index_edit')}"  marginwidth="0" marginheight="0"   height=100% id="iframepage" ></iframe>
+		</div>
+<script type="text/javascript" language="javascript">
+//控制iframe高度
+function iFrameHeight() {
+
+	var ifm= document.getElementById("iframepage");
+
+	var subWeb = document.frames ? document.frames["iframepage"].document :
+
+ifm.contentDocument;
+
+		if(ifm != null && subWeb != null) {
+
+		ifm.height = subWeb.body.scrollHeight;
+
+		}
+
+}
+</script> 
+     <div class="module-list" style="float:left">
+	    <?php
+		foreach($res as $val){
+		?>
+	    <div class="module_adv_list">
+		    <img src="{$uri}__PUBLIC__/temp/res/{$val['style_id']}.png">
+            <span>{$val['style_title']}</span><a nctype="btn_add_item" class="add" href="{:U('admin/tempitem/itemadd/style_id/'.$val['style_id'].'/temp_id/'.$temp_id)}" data-module-type="adv_list" style=" right:10px;">添加</a>
+        </div>
+		<?php
+		}
+		?>     
+    </div>
+</div>
+<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/temp/indexTrue.js" type="text/javascript"></script>
+</div>
+<include file="Index/footer"/>

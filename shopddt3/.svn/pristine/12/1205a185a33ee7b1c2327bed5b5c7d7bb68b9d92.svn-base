@@ -1,0 +1,8 @@
+<div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+	<div class="col-md-9 form-inline"  style="padding-left:0px; ">
+	 <input id="start_date5{$key}" class="form-control "   name="period_start[]"  type="text"  value="{$val['begin_date']}"  style="width:150px;" placeholder="xxxx-xx-xx  xx:xx:xx"    />
+			<input id="end_date6{$key}" class="form-control required"   name="period_end[]"  type="text"  value="{$val['end_date']}"  data-msg="输入正确的手机号码"  style="width:160px;" placeholder="输入正确的手机号码"  />
+<input name="start_m[]" value="{$val['begin_h']}"  type="text"class="form-control" style="width:520px;display:inline"  placeholder="输入1-200子评论内容"> 	
+	</div>
+    <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+</div>  

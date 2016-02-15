@@ -1,0 +1,145 @@
+<layout name="layoutExtend"/>
+
+<div class="container">
+	<div class="secondaryMenu" style="border-bottom:1px solid #d6e1ee;">
+    	<ul class="nav nav-tabs">
+			<li>
+				<span><a class="btn btn-success btn-sm" href="__APP__/admin/extend/memberList">返回推广列表</a></span>
+			</li>
+			<li style="float:right"><span>共{$count}个订单</span></li>
+		</ul>
+    </div>
+
+	<form class="input-group" name="searchForm" style="width:500px" method="get" action="__APP__/admin/extend/extendGoodsOrder?">
+<!-- 		<span class="input-group-btn" style="width:150px">
+			<select name="channelid" class="form-control">
+			<option {$search_form['channelid'] == -1?'selected="selected"':''} value="-1">所有人员</option>
+			<foreach name="channel_list" item="channel" >
+				<option {$search_form['channelid'] == $channel['id']?'selected="selected"':''} value="{$channel.id}">{$channel.name}</option>
+			</foreach>
+		</select>
+       	</span>
+		<span class="input-group-btn" style="width:300px">
+			<input class="form-control" type="text" maxlength="11" value="{$search_form['username']}" placeholder="输入姓名或手机号码查询人员" name="username"/>
+       	</span> -->
+       		<input name="extendid" type="hidden" value="{$extendid}" />
+            <input name="goodsid" type="hidden" value="{$goodsid}" />
+       		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+            <input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+	<!-- 	<span class="input-group-btn">
+			<button class="btn btn-info btn-sm" onclick="submit()">查询</button>
+       	</span> -->
+	</form>
+
+    <div class="biaoge">
+        <table class="table table-hover">
+            <thead class="biaoti">
+         		<th name="order_id" onclick="changeOrder(this)">编号</th>
+         		<th name="order_sn" onclick="changeOrder(this)">订单号</th>
+         		<th name="goods_name" onclick="changeOrder(this)">商品名称</th>
+         		<th name="store_name" onclick="changeOrder(this)">商家名称</th>
+         		<th name="goods_price" onclick="changeOrder(this)">商品单价</th>
+         		<th name="goods_num" onclick="changeOrder(this)">商品数量</th>
+         		<if condition="$extendid">
+         			<th name="extend_discount" onclick="changeOrder(this)">优惠折扣</th>
+         		</if>
+         		<th name="goods_price" onclick="changeOrder(this)">订单总额</th>
+         		<th name="add_time" onclick="changeOrder(this)">下单时间</th>
+         		<th name="buyer_name" onclick="changeOrder(this)">用户名</th>
+         		<th name="add_time" onclick="changeOrder(this)">核销码</th><!-- 
+         		<th name="goods_price" onclick="changeOrder(this)">购买时间</th>
+         		<th name="store_name" onclick="changeOrder(this)">消费状态</th>
+         		<th name="goods_price" onclick="changeOrder(this)">消费时间</th> --><!-- 
+                <th name="discount" onclick="changeOrder(this)">折扣率</th>
+                <th name="extend_price" onclick="changeOrder(this)">优惠价格</th>
+                <th name="goods_state" onclick="changeOrder(this)">上架</th>
+                <th name="goods_storage" onclick="changeOrder(this)">商品库存</th>
+                <th name="quantity" onclick="changeOrder(this)">优惠数量</th>
+                <th name="begin_time" onclick="changeOrder(this)">优惠开始时间</th>
+                <th name="end_time" onclick="changeOrder(this)">优惠结束时间</th>
+                <th name="buy_count" onclick="changeOrder(this)">已优惠购买</th>
+                <th name="addtime" onclick="changeOrder(this)">添加时间</th>
+                <th>操作</th> -->
+            </thead>
+            <tbody>
+            	<foreach name="order_list" item="order" key="k" >
+		           <tr class="trbor" style="background: rgb(237, 244, 253);">
+		                <td>{$order.order_id}</td>
+		                <td>{$order.order_sn}</td>
+		                <td>{$order.goods.goods_name}</td>
+		                <td>{$order.store_name}</td>
+		                <td>{$order.goods.goods_price}</td>
+		                <td>{$order.goods_num}</td>
+		         		<if condition="$extendid">
+		         			<td>{$order.extend_discount}%</td>
+		         		</if>
+		                <td>{$order.order_amount}</td>	
+		                <td>{$order.buyer_name|date="m月d日 H:i",###}</td>	
+		                <td>{$order.buyer_name}</td>
+		                <td>
+		                	<foreach name="order.dhm" item="dhm" >
+		                	<p>{$dhm.dhm_code}&nbsp;
+		                	<if condition="$dhm.status eq 0">未消费</p>
+		                	<else/>已消费&nbsp;&nbsp;消费时间&nbsp;{$dhm.dh_time|date="m月d日 H:i",###}
+		                	</if>
+		                	</foreach>
+		                </td>
+		           <!--      <td>{$order.quantity}</td>
+		                <td>{$order.begin_time}</td>
+		                <td>{$goods.addtime|date="Y-m-d H:i",###}</td> -->
+		                <!-- <td>
+		                	<a  data-toggle="modal" data-target="#editextendgoods{$goods.id}"><u>编辑</u></a>&nbsp;
+		                	<a href="javascript:void(0)" onclick="deleteExtendGoods({$goods.id},'{$goods.goods_name}')"><u>删除</u></a>
+	                	</td> -->
+		            </tr>
+	            </foreach>
+            </tbody>
+        </table>
+    </div>
+    <div style="float:right">
+    	{$page}
+    </div>
+</div>
+
+<script type="text/javascript">
+	页面加载时执行函数
+    // $(function(){
+    //     /*初始化时间控件*/
+    //     $('#begin_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    //     $('#end_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    // });
+    function changeOrder(obj){
+        var data = $(obj).attr('name');
+        var ordername = $('input[name="ordername"]').val();
+        var ordertype = $('input[name="ordertype"]').val();
+        if(data==ordername){
+            if(ordertype!='DESC')
+            $('input[name="ordertype"]').val('DESC');
+            else
+            $('input[name="ordertype"]').val('ASC');
+            $('form[name="searchForm"]').submit();
+        }else{
+            $('input[name="ordername"]').val(data);
+            $('input[name="ordertype"]').val('ASC');
+            $('form[name="searchForm"]').submit();
+        }
+        // alert(data);
+    }
+   
+</script>
+	
+	

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>送货地址</title>
+    <script src="__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/shop.css">
+    <link rel="stylesheet" href="__PUBLIC__/home/css/temp.css">
+</head>
+<body>
+    <div class="address_list">
+	    <if condition="empty($addr_list)">
+	    	<div>暂无收货地址</div>
+	    <else />
+	    	<volist name="addr_list" id="vo">
+	    	<section class="address_item">
+			<?php if(I('order_id')>0){?>
+			<a href="{:U('order/createpay',array('id'=>I('order_id')))}">
+			<?php }?>
+	            <div class="addressActive" onClick="selectMe(this)">
+	                <div class="l"><i></i></div>
+	                <div class="address">
+	                    <p>{$vo.name}<span>{$vo.tel}</span></p>
+	                    <p>{$vo.addr}</p>
+	                </div>
+	            </div>
+	            <aside class="r"><a href="{:U('Address/rmAddress', array('id'=>$vo['id']))}" onClick="confirm('是否删除此收货地址？')">删除</a></aside>
+			<?php if(I('order_id')>0){?>
+			  </a>
+			<?php }?>
+	        </section>
+	        </volist>
+	    </if>
+        <a class="add_address" href="{:U('Address/addAddress',array('order_id'=>I('order_id')))}">添加收货地址</a>
+    </div>
+    <include file="Index/footer"/>
+</body>
+<script>
+    function selectMe(t){
+        if(t.className&&t.className==="addressActive"){
+            return;
+        }else{
+            document.getElementsByClassName("addressActive")[0].className="";
+            t.className = "addressActive";
+        }
+    }
+</script>
+</html>

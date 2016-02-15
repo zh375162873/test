@@ -1,0 +1,6 @@
+<div class="col-md-7" style="padding-bottom:10px;">
+			  <input class="form-control"  name="rules[]"     type="text"   />
+</div>
+<div class="col-md-7" style="padding-bottom:10px;">
+			  <input class="form-control"  name="rules[]"     type="text"   />
+</div>

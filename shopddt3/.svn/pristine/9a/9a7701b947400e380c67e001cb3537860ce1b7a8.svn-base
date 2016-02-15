@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>支付账号</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content payment_content">
+    <form class="addPsForm" action="__APP__/home/extend/updatePaymentInfo" method="post">
+        <h4>设置向您支付收益的账号:</h4>
+        <ul>
+            <li class="radioGroup">
+                <label><input type="radio" name="pay_type" value="支付宝" {$info['pay_type']=='支付宝'?'checked="checked"':''}>支付宝</label>
+                <label><input type="radio" name="pay_type" value="微信支付" {$info['pay_type']=='微信支付'?'checked="checked"':''}>微信支付</label>
+                <label><input type="radio" name="pay_type" value="银行卡" {$info['pay_type']=='银行卡'?'checked="checked"':''}>银行卡</label>
+            </li>
+            <li><input name="true_name" type="text" value="{$info.true_name}" placeholder="姓名/户名"></li>
+            <li><input name="user_name" type="text" value="{$info.user_name}" placeholder="账号/卡号"></li>
+            <li><input name="remark" type="text" value="{$info.remark}" placeholder="备注/开户行"></li>
+        </ul>
+        <button type="submit">保存</button>
+    </form>
+</div>
+</body>
+</html>

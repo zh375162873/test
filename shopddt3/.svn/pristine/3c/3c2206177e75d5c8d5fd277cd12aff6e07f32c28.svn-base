@@ -1,0 +1,34 @@
+<?php
+namespace Home\Controller;
+use BizService\RegionService;
+
+class AddressController extends BaseController
+{
+	public $regionService;
+    public function _initialize(){
+        parent::_initialize();
+		$this->regionService = new RegionService();
+    }
+	
+    public function index(){
+        $this->display();
+    }
+	    
+    public function addressList(){
+		$addr_list = $this->regionService->get_receive_address(session('userId'));
+		dump($addr_list);
+        //$this->display();
+    }
+
+    public function addAddress(){
+        $region_list = $this->regionService->get_region_list(1, true);
+		dump($region_list);
+        //$this->display();
+    }
+	
+    public function regionList(){
+    	$region_id = I('post.id', 0);
+        $region_list = $this->regionService->get_region_list($region_id, true);
+        echo json_encode($region_list);
+    }
+}

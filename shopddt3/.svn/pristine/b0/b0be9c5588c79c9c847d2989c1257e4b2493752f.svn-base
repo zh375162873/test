@@ -1,0 +1,39 @@
+<?php
+namespace Admin\Model;
+use Think\Model;
+class GoodsbrowseModel extends Model 
+{ 
+  protected $tableName = 'goods_browse'; 
+  protected $fields = array(
+  'id', //id
+  'goods_id', //	int(11)	否		商品ID
+  'member_id', //	int(11)	否		会员ID
+  'browsetime',//int(11)	否		浏览时间
+  'gc_id',// int(11)	否		商品分类
+  'gc_id_1',// 	int(11)	否		商品一级分类
+  'gc_id_2',// 	int(11)	否		商品二级分类
+  'gc_id_3',//	int(11)	否		商品三级分类
+  '_pk'=>'id'//主键
+  );
+  //定义自动填充
+ protected $_auto = array ( 
+   array('browsetime','time',1,'function'),    
+ );
+ 
+   //新增浏览信息
+  public  function  addBrowse($data){
+  
+  
+  }
+  
+  //查询单个商品浏览信息
+  public function  getBrowse($id){
+  
+  
+  }
+  
+ 
+ 
+ 
+}
+?>

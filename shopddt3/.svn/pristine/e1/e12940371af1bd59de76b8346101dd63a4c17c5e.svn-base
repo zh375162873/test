@@ -1,0 +1,60 @@
+
+	  <foreach name="goodslist['list']" item="val">
+            <tr class="trbor"  <if condition="($val['goods_storage'] eq 0) and ($val['goods_state'] eq 1)"> style="color:#FF0000" </if> >
+                <td>{$val['goods_id']}</td>
+                <td>{$val['goods_serial']}</td>
+                <td>{$val['goods_name']}</td>
+                <td>{$val['goods_marketprice']}</td>
+                <td>{$val['goods_price']}</td>
+                <td>{$val['goods_storage_p']}</td>
+                <td>{$val['goods_salenum_p']}</td>
+                <td>{$val['goods_addtime']}</td>
+                <td>{$val['goods_status']}</td>
+                <td><if condition="$val['goods_state'] eq 0"><a href="{:U("admin/goods/setgoods_state",array('goods_commonid'=>$val['goods_commonid'],'goods_type'=>3,'type'=>1))}"><img src="__PUBLIC__/admin/img/goods/no.gif"></a><else/> <a href="{:U('admin/goods/setgoods_state',array('goods_commonid'=>$val['goods_commonid'],'goods_type'=>3,'type'=>0))}"><img src="__PUBLIC__/admin/img/goods/yes.gif"></a> </if></td>
+                <td class="alink">
+                    <a href="{:U("goods/goods_view?goods_id=".$val['goods_commonid'])}" data-toggle="modal" title="预览">预览</a>
+                    <a href="{:U("goods/goods_common_state?goods_id=".$val['goods_commonid'])}"  data-toggle="modal" title="编辑">编辑</a>
+                </td>
+            </tr>
+        </foreach>
+        </table>
+    </div>
+{$goodslist['page']}
+</div>
+<input id="sortFlag" type="hidden" value={$_GET["order"]}>
+<include file="Index/footer"/>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+        checkOder();
+    });
+    function checkOder(){
+        var order = $("#sortFlag").val();
+        if(!order){
+            return;
+        }
+        order = parseInt(order);
+        var index;
+        if((order%2)==0){
+            index = order/2;
+        }else{
+            index = (order+1)/2;
+        }
+        $("th a").eq(index-1).parent().addClass("active");
+    }
+</script>
+

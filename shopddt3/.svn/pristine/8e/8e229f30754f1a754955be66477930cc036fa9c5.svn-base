@@ -1,0 +1,642 @@
+<?php
+/*
+ * 订单主表处理
+ * 关联相关订单商品模型，订单扩展模型，订单支付模型
+ * 
+ */
+namespace Home\model;
+use BizService\OrderService;
+use BizService\GoodsstoreService;
+use Think\Model\AdvModel;
+use BizService\UserService;
+use BizService\ExtendService;
+class OrdersModel extends AdvModel {
+	public $ordergoods,$orderlog,$orderpay,$_userid,$lsprice,$commission_order,$dhmMange,$orderservice,$moneymanage,$userservice,$GoodsstoreService,$extend_service;
+	public function __construct(){
+	    parent::__construct();
+	    $this->ordergoods=D("Home/OrdersGoods");
+	    $this->orderlog=D("Home/OrdersLog");
+	    $this->orderpay=D("Home/OrdersPay");
+	    $this->lsprice=D("Home/LsPrice");//现金账户流水记录
+	    $this->moneymanage=D("Home/MoneyManage");//现金流水记录
+	    $this->dhmMange=D("Home/DhmManage");
+	    $this->commission_order=D("Home/CommissionOrder");//订单分成体系
+	    $this->userservice=new UserService();
+	    $this->orderservice=new OrderService();
+	    $this->GoodsstoreService=new GoodsstoreService();
+	    $this->extend_service = new ExtendService();
+	    $this->_userid = session("userId");
+	} 
+    
+	//相关字段验证
+	protected $_auto = array(
+			array("payment_time","time",1,"function"),
+			array("finnshed_time","time",1,"function"),
+			array("add_time","time",1,"function"),
+	);
+	
+	//生成订单处理 $goods_arr商品属性，数量
+	public function createorder($goods_arr,$money_info){
+		//初始化订单数据
+		    $userinfo = $this->userservice->userInfo($this->_userid);
+			$data['order_sn']=$this->createorder_sn();
+			$data['shop_id']=$goods_arr['shop_id'];
+			$data['store_id']=$goods_arr['store_id'];
+			$data['store_name']=$goods_arr['store_name'];
+			$data['buyer_id']=$userinfo['user_id'];
+			$data['buyer_name']=$userinfo["user_name"];
+			$data['buyer_nickname']=$userinfo["nick_name"];
+			$data['tuijian_id']=$userinfo['parent_id'];//可从商品中获取，或者通过用户id获取相关的推荐人信息
+			$data['extend_id']=empty($money_info['extend_id'])?0:$money_info['extend_id'];
+			$data['extend_num']=empty($money_info['extend_num'])?0:$money_info['extend_num'];
+			$data['extend_discount']=empty($money_info['extend_discount'])?0:$money_info['extend_discount'];
+			$data['order_youhui']=empty($money_info['order_youhui'])?0:$money_info['order_youhui'];
+			$data['goods_id'] = $goods_arr['goods_id'];
+            $data['add_time']=time();
+            $data['goods_amount']=$money_info['goods_amount'];
+            $data['order_amount']=$money_info['order_amount'];
+            $data['ye_paymoney']=$money_info['ye_paymoney'];
+            $data['online_paymoney']=$money_info['online_paymoney'];
+            $data['goods_num']=$goods_arr['goods_num'];
+            $data['evaluation_state']=0;
+            $data['order_status']=0;
+            //$this->GoodsstoreService->changestoragebyid($goods_arr['goods_id'],$goods_arr['goods_num'],$type=1);
+           // exit();
+            //日记只记录
+            $log_content .= "购买商品-".$goods_arr['goods_name'].",数量为".$goods_arr['goods_num'];
+            
+            $this->startTrans();
+            $result=$this->data($data)->add();
+            //如果优惠码存在就生成减少相对应的优惠码(需要赵星提供接口)
+            if($money_info['extend_id']&&$money_info['extend_num']){
+                $log_content .= " 使用".$money_info['extend_num']."个优惠口令，优惠".$money_info['order_youhui']."元";
+                if($this->extend_service->updateExtendGoodsStore($money_info['extend_id'],$goods_arr['goods_id'],-$money_info['extend_num']))
+                {
+                   
+                }else{
+                    $this->rollback();
+                }
+            }
+             
+			if($result){
+			    //添加订单商品
+			    $goodsdate=array(
+			        "order_id" => intval($result),
+			        "goods_id" => $goods_arr['goods_id'],
+			        "goods_serial" =>$goods_arr['goods_serial'],
+			        "goods_name" => $goods_arr['goods_name'],
+			        "goods_plun" => $goods_arr['goods_plun'],
+			        "market_price"=> $goods_arr['market_price'],
+			        "goods_price" => $goods_arr['goods_price'],
+			        "goods_divided" => $goods_arr['goods_divided'],
+			        "goods_num" => $goods_arr['goods_num'],
+			        "goods_image" => $goods_arr['goods_image'],
+			        "shop_id" => $goods_arr['shop_id'],
+			        "store_id" => $goods_arr['store_id'],
+			        "buyer_id" => $this->_userid,
+			    );
+			    if($this->ordergoods->data($goodsdate)->add()){
+			        //记录添加生成操作订单记录
+			        $logarr=array(
+			            "order_id"=>intval($result),
+			            "log_msg"=>$log_content,
+			            "log_time"=>time(),
+			            "log_role"=>1,//用户角色
+			            "log_user"=>$this->_userid,//用户id
+			            "log_orderstate"=>0,
+			            "log_type"=>1,
+			        );
+			        if($this->orderlog->add_log($logarr)){//记录订单流水
+			            //减少上架商品数量
+			            if($this->GoodsstoreService->changestoragebyid($goods_arr['goods_id'],$goods_arr['goods_num'],$type=1)){			            
+			                $this->commit();
+    			            return intval($result);
+			            }else {
+			                $this->rollback();
+			            }
+			        }else{
+			            $this->rollback();//事务回滚
+			        }
+			    }else{
+			        $this->rollback();//事务回滚
+			    }
+			}else{
+				return false;
+			}
+	}
+	
+	/*
+	 * 支付成功后的订单相关处理（所有支付完成后都到这里处理数据状态修改）
+	 */
+	public function notiy_order($parameter,$type){
+	    //查找主订单信息
+		$order_sn=$parameter['out_trade_no'];
+	    $info = $this->where(array("order_sn"=>$order_sn))->find();
+	    $order_info = $this->getinfo($info['order_id']);
+		
+		//查找其他订单信息
+		$order_list = $this->where(array("parent_id"=>$info['order_id']))->select();
+		
+		
+		//循环出所有订单信息
+		//商品总价
+		$goods_amount=0;
+		//余额支付
+		$ye_paymoney=0;
+		//在线支付
+		$online_paymoney=0;
+		//合计支付
+		$order_amount=0;
+		//总运费
+		$yunfei_amount=0;
+		//快递类型
+		$sendtype=1;
+		//用户id
+		$user_id=0;
+		//附加金额添加到余额还是在线
+		$add_pay_type=0;
+		$orderdb = D("Orders");
+		foreach($orderlist as $key=>$val){
+		  //调取订单商品信息
+		  $orderinfo1 = $orderdb->getinfo($val['order_id']);
+		  $goods_amount=$goods_amount+$orderinfo1['goods_amount'];
+		  $ye_paymoney=$ye_paymoney+$orderinfo1['ye_paymoney'];
+		  $online_paymoney=$online_paymoney+$orderinfo1['online_paymoney'];
+		  $order_amount=$order_amount+$orderinfo1['order_amount'];
+		  $sendtype=$val['send_type'];
+		  $user_id=$val['buy_id'];
+		}
+		//总运费
+		$yunfei_amount= get_shipping_fee($info['order_id'],$sendtype);
+		//包含运费的总金额
+		$amount=$order_amount+$yunfei_amount;
+		//用户信息
+		$userinfo=M("users")->where("user_id=".$user_id)->find();
+		//用户余额
+		$ye_amount=$userinfo['user_money'];
+		 //判断要修改的金额，放到余额还是在线支付
+		if($ye_amount>=$amount){
+		  //加入到余额里
+		  $add_pay_type=0;
+		}
+		if($online_paymoney>0){
+		  //加入到在线支付金额里面
+		  $add_pay_type=1;
+		}
+		
+		echo  $online_paymoney;
+		
+		
+		
+		foreach($order_list as $val){
+		  
+	      //循环处理此批次的订单
+		     $parameter['out_trade_no']=$val['order_sn'];
+		  //修改订单，将新的费用修改进去。
+		      //此订单的运费金额
+			  $goods_yun= get_shipping_fee($val['order_id'],$val['send_type'],1);
+              switch($add_pay_type){
+			   case 0:
+				 //修改余额
+				  if($val['send_type']==1){
+					//加
+					$this->where("order_id=".$val['order_id'])->setInc('ye_paymoney',$goods_yun);
+					//最后修改总价
+					$this->where("order_id=".$val['order_id'])->setInc('order_amount',$goods_yun);
+				  }elseif($val['send_type']==2){
+					//减
+					$this->where("order_id=".$val['order_id'])->setDec('ye_paymoney',$goods_yun);
+					//最后修改总价
+					$this->where("order_id=".$val['order_id'])->setDec('order_amount',$goods_yun);
+				  }
+				  break;
+			  case 1:
+			      //如果放到在线支付里面就修在线支付金额
+				  if($val['send_type']==1){
+					//加
+					$this->where("order_id=".$val['order_id'])->setInc('online_paymoney',$goods_yun);
+					//最后修改总价
+					$this->where("order_id=".$val['order_id'])->setInc('order_amount',$goods_yun);
+				  }elseif($val['send_type']==2){
+					//减
+					$this->where("order_id=".$val['order_id'])->setDec('online_paymoney',$goods_yun);
+					//最后修改总价
+					$this->where("order_id=".$val['order_id'])->setDec('order_amount',$goods_yun);
+				  }
+				  break;
+			  
+			  }
+			  
+			  
+		  //处理状态	  
+		  if($type>0){  	  
+			   if($this->notiy_order_do($parameter,$type)){
+			  
+			   }else{
+				 return false;
+			   }
+		   }elseif($type==0){
+		       if($this->yezhifu_chuli($val['order_id'])){
+			  
+			   }else{
+				 return false;
+			   }
+		   }
+		}
+		return true;
+
+		
+		
+		
+	if(1>1){	
+	   //改变订单状态
+	   $order_sn=$parameter['out_trade_no'];
+	   $info = $this->where(array("order_sn"=>$order_sn))->find();
+	   $order_info = $this->getinfo($info['order_id']);
+	   $payinfo = array(
+	        "pay_sn" =>$parameter['trade_no'],
+	        "buyer_id" =>$info['buyer_id'],
+	        "buyer_email"=>$parameter['buyer_email'],
+	        "out_trade_no"=>$parameter['out_trade_no'],
+	        "addtime" =>time(),
+	        "pay_type"=>$type,
+	   );
+	   
+	   
+	   
+
+		$userinfo = $this->extend_service->getChannelInfo($this->_userid);
+		//获取渠道相关信息（需要赵星提供接口）
+		$channel_info['channel_id'] = $userinfo['id']?$userinfo['id']:0;
+		$channel_info['income_rate'] = $userinfo['distribute']?$userinfo['distribute']:0;
+	    $commission_fee = $order_info['goods']['goods_divided']*$order_info['goods_num'];
+	   
+	   //订单分成详情数据组织
+	   $commission_order_info = array(
+	         "shop_id" => $order_info['shop_id'],
+	         "order_id" => $order_info['order_id'],
+	         "order_sn" => $order_info['order_sn'],
+	         "channel_id" => $channel_info['channel_id'],//渠道id
+	         "referee_id" => $order_info['tuijian_id'],
+	         "buyer_id" => $order_info['buyer_id'],
+	         "order_fee" => $order_info['order_amount'],
+	         "commission_fee" => $commission_fee,
+	         "income_rate" => $channel_info['income_rate'],//渠道提成比例
+	         "channel_money" => $commission_fee*($channel_info['income_rate']/100),//渠道提成金额
+	         "referee_money" => $commission_fee*(1-($channel_info['income_rate']/100)),//推广人提成金额
+	         "user_status" => 0,
+	         "qd_status" => 0,
+	         "create_time" => time(),
+	   );
+	   
+	   
+	   $this->startTrans();
+       //改变状态,同时记录操作流程
+       //如果有余额就要先进行用户余额处理
+       if($info['ye_paymoney']>0)
+       {
+           $ye_paymoney = -$info['ye_paymoney'];
+           if(!$this->userservice->changeUserMoney($this->_userid,$ye_paymoney)){
+               $this->rollback();
+           }
+       }
+       
+       //**记录支付宝相关返回信息，为退款做准备**
+       if($this->changestatus($info['order_id'],1)&&$this->where(array("order_sn"=>$order_sn))->data(array("pay_sn"=>$parameter['trade_no'],"payment_time"=>time(),"payment_code"=>$type))->save()&&$this->orderpay->data($payinfo)->add())
+       {
+           //生成核销码
+           if($this->dhmMange->create_dhm($order_info,1)){
+              //账户现金流水记录，现金流水记录
+              if($this->moneymanage->delMoney($order_info,0)){
+                 if($info['ye_paymoney']>0){
+                     //添加订单分成详情
+                     if($this->lsprice->del_price_ls($order_info,0)&&$this->commission_order->data($commission_order_info)->add()){
+                         $this->commit();
+                         return true;
+                     }else{
+                         $this->rollback();
+                     }
+                 }else{
+                     $this->commit();
+                     return true;
+                 }
+               }else{
+                   $this->rollback();
+               }
+           }else{
+               $this->rollback();
+           }
+       }else{
+           $this->rollback();
+       }
+	   
+	   } 
+	}
+	
+	
+	/*
+	 * 支付成功后的子订单相关处理
+	 */
+	public function notiy_order_do($parameter,$type){
+	   //改变订单状态
+	   $order_sn=$parameter['out_trade_no'];
+	   $info = $this->where(array("order_sn"=>$order_sn))->find();
+	   $order_info = $this->getinfo($info['order_id']);
+	   $payinfo = array(
+	        "pay_sn" =>$parameter['trade_no'],
+	        "buyer_id" =>$info['buyer_id'],
+	        "buyer_email"=>$parameter['buyer_email'],
+	        "out_trade_no"=>$parameter['out_trade_no'],
+	        "addtime" =>time(),
+	        "pay_type"=>$type,
+	   );
+
+		$userinfo = $this->extend_service->getChannelInfo($this->_userid);
+		//获取渠道相关信息（需要赵星提供接口）
+		$channel_info['channel_id'] = $userinfo['id']?$userinfo['id']:0;
+		$channel_info['income_rate'] = $userinfo['distribute']?$userinfo['distribute']:0;
+	    $commission_fee = $order_info['goods']['goods_divided']*$order_info['goods_num'];
+	   
+	   //订单分成详情数据组织
+	   $commission_order_info = array(
+	         "shop_id" => $order_info['shop_id'],
+	         "order_id" => $order_info['order_id'],
+	         "order_sn" => $order_info['order_sn'],
+	         "channel_id" => $channel_info['channel_id'],//渠道id
+	         "referee_id" => $order_info['tuijian_id'],
+	         "buyer_id" => $order_info['buyer_id'],
+	         "order_fee" => $order_info['order_amount'],
+	         "commission_fee" => $commission_fee,
+	         "income_rate" => $channel_info['income_rate'],//渠道提成比例
+	         "channel_money" => $commission_fee*($channel_info['income_rate']/100),//渠道提成金额
+	         "referee_money" => $commission_fee*(1-($channel_info['income_rate']/100)),//推广人提成金额
+	         "user_status" => 0,
+	         "qd_status" => 0,
+	         "create_time" => time(),
+	   );
+	   
+	   
+	   $this->startTrans();
+       //改变状态,同时记录操作流程
+       //如果有余额就要先进行用户余额处理
+       if($info['ye_paymoney']>0)
+       {
+           $ye_paymoney = -$info['ye_paymoney'];
+           if(!$this->userservice->changeUserMoney($this->_userid,$ye_paymoney)){
+               $this->rollback();
+           }
+       }
+       
+       //**记录支付宝相关返回信息，为退款做准备**
+       if($this->changestatus($info['order_id'],1)&&$this->where(array("order_sn"=>$order_sn))->data(array("pay_sn"=>$parameter['trade_no'],"payment_time"=>time(),"payment_code"=>$type))->save()&&$this->orderpay->data($payinfo)->add())
+       {
+           //生成核销码
+           if($this->dhmMange->create_dhm($order_info,1)){
+              //账户现金流水记录，现金流水记录
+              if($this->moneymanage->delMoney($order_info,0)){
+                 if($info['ye_paymoney']>0){
+                     //添加订单分成详情
+                     if($this->lsprice->del_price_ls($order_info,0)&&$this->commission_order->data($commission_order_info)->add()){
+                         $this->commit();
+                         return true;
+                     }else{
+                         $this->rollback();
+                     }
+                 }else{
+                     $this->commit();
+                     return true;
+                 }
+               }else{
+                   $this->rollback();
+               }
+           }else{
+               $this->rollback();
+           }
+       }else{
+           $this->rollback();
+       } 
+	}
+	
+	
+	
+	
+	
+	//余额处理支付处理
+	public function yezhifu_chuli($order_id){
+	    //订单详情
+	    $orderinfo = $this->getinfo($order_id);
+	    //$userinfo = $this->userservice->userInfo($this->_userid);
+		$userinfo = $this->extend_service->getChannelInfo($this->_userid);
+	    //获取渠道相关信息（需要赵星提供接口）
+	    $channel_info['channel_id'] = $userinfo['id']?$userinfo['id']:0;
+	    $channel_info['income_rate'] = $userinfo['distribute']?$userinfo['distribute']:0;
+
+	    $commission_fee = $orderinfo['goods']['goods_divided']*$orderinfo['goods_num'];
+	    //订单分成详情数据组织
+	    $commission_order_info = array(
+	        "shop_id" => $orderinfo['shop_id'],
+	        "order_id" => $orderinfo['order_id'],
+	        "order_sn" => $orderinfo['order_sn'],
+	        "channel_id" => $channel_info['channel_id'],//渠道id
+	        "referee_id" => $orderinfo['tuijian_id'],
+	        "buyer_id" => $orderinfo['buyer_id'],
+	        "order_fee" => $orderinfo['order_amount'],
+	        "commission_fee" => $commission_fee,
+	        "income_rate" => $channel_info['income_rate'],//渠道提成比例
+	        "channel_money" => $commission_fee*($channel_info['income_rate']/100),//渠道提成金额
+	        "referee_money" => $commission_fee*(1-($channel_info['income_rate']/100)),//推广人提成金额
+	        "user_status" => 0,
+	        "qd_status" => 0,
+	        "create_time" => time(),
+	    );
+	    $this->startTrans();
+	    if($this->changestatus($orderinfo['order_id'],1)&&$this->where(array("order_id"=>$order_id))->data(array("payment_time"=>time(),"payment_code"=>3))->save()){
+	        //生成核销码
+	        if($this->dhmMange->create_dhm($orderinfo,1)){
+	            //账户现金流水记录，现金流水记录
+	            if($orderinfo['ye_paymoney']){
+	                $ye_paymoney = -$orderinfo['ye_paymoney'];
+	                if(!$this->userservice->changeUserMoney($this->_userid,$ye_paymoney)){
+	                    $this->rollback();
+	                }
+	                if(!$this->commission_order->data($commission_order_info)->add()){
+	                    $this->rollback();
+	                }
+	                
+	                if($this->lsprice->del_price_ls($orderinfo,0)&&$this->moneymanage->delMoney($orderinfo,0)){
+	                    $this->commit();
+	                    return true;
+	                }else{
+	                    $this->rollback();
+	                }
+	            }else{
+	                $this->rollback();
+	            }
+	        }else{
+	            $this->rollback();
+	        }
+	    }else{
+	        $this->rollback();
+	    }
+	}
+	
+	/**
+	 * 订单搜索
+	 * @param unknown $userid
+	 * @param unknown $page
+	 * @param unknown $rule 1-已支付，未消费 2-已消费 3-退款单
+	 * @return Ambigous <\Think\mixed, boolean, unknown>|boolean
+	 */
+	public function list_order($userid,$page,$pageNum,$rule){
+	  //处理数据
+	  $map = array();
+	  $map['buyer_id'] = $userid;
+	 
+	  if($rule==1){
+	      $map['order_status'] = 1;
+	      $map['refund_state'] = array("in",array("0","2","4"));
+	  }elseif ($rule==2){
+	      $map['order_status'] = 2;
+	  }elseif ($rule==3){
+	      $map['order_status'] = 1;
+	      $map['refund_state'] = array("in",array("1","3","4"));
+	  }else{
+	      $map['order_status'] = array("neq",0);
+	  }
+	  
+	  
+	  //统计
+	  $info['total_num'] = $this->where(array("buyer_id"=>$userid,"order_status"=>array("neq",0)))->count();
+	  $info['wxf_num'] = $this->where(array("buyer_id"=>$userid,"order_status"=>1,"refund_state"=>array("in",array("0","2","4"))))->count();
+	  $info['yxf_num'] = $this->where(array("buyer_id"=>$userid,"order_status"=>2))->count();
+	  $info['ytk_num'] = $this->where(array("buyer_id"=>$userid,"order_status"=>1,"refund_state"=>array("in",array("1","3","4"))))->count();
+	    
+	    
+	  $pagesize=$pageNum;
+	  $limit=$pagesize*($page-1).",".$pagesize;
+	  $arr=$this->where($map)->order("add_time DESC")->limit($limit)->select();
+	  
+	  if(!empty($arr)){
+	      for($i=0;$i<count($arr);$i++){
+	          $arr[$i]['goods']=$this->ordergoods->where(array("order_id"=>$arr[$i]['order_id']))->find();
+	          $dhm=$this->dhmMange->where(array("order_id"=>$arr[$i]['order_id'],"status"=>0,"refund_status"=>array("neq",2)))->select();
+	          //判断订单相对应状态(存在未消费)pj_status为11代表存在未消费，12代表存在退款中的，为200代表可以评价
+	          if($dhm){
+	              $arr[$i]['dhm']=$dhm;
+	          }
+	      }
+	  }
+	  $data['info']=$info;
+	  $data['arr']=$arr;
+	  return $data;
+	}
+	
+	public function ajax_list_order($userid,$page,$pageNum,$rule){
+	    //处理数据
+	    $map = array();
+	    $map['buyer_id'] = $userid;
+	    if($rule==1){
+	          $map['order_status'] = 1;
+	          $map['refund_state'] = array("in",array("0","2","4"));
+    	  }elseif ($rule==2){
+    	      $map['order_status'] = 2;
+    	  }elseif ($rule==3){
+    	      $map['order_status'] = 1;
+    	      $map['refund_state'] = array("in",array("1","3","4"));
+    	  }else{
+    	      $map['order_status'] = array("neq",0);
+    	  }
+	     
+	     
+	    $pagesize=$pageNum;
+	    $limit=$pagesize*($page-1).",".$pagesize;
+	    $arr=$this->where($map)->order("add_time DESC")->limit($limit)->select();
+	     
+	    if(!empty($arr)){
+	        for($i=0;$i<count($arr);$i++){
+	            $arr[$i]['goods']=$this->ordergoods->where(array("order_id"=>$arr[$i]['order_id']))->find();
+	            $dhm=$this->dhmMange->where(array("order_id"=>$arr[$i]['order_id'],"status"=>0,"refund_status"=>array("neq",2)))->select();
+	            //判断订单相对应状态(存在未消费)pj_status为11代表存在未消费，12代表存在退款中的，为200代表可以评价
+	            if($dhm){
+	                $arr[$i]['dhm']=$dhm;
+	            }
+	        }
+	    }
+	   
+	    return $arr;
+	}
+	
+	//获取订单详情
+	public function getinfo($order_id){
+	    //获取订单信息
+	    $arr=$this->where(array("order_id"=>$order_id))->find();
+	    if(!empty($arr)){
+    	    $goods=$this->ordergoods->where(array("order_id"=>$order_id))->find();
+    	    $arr['goods']=$goods;
+    	    //获取核销码
+    	    $dhm=$this->dhmMange->where(array("order_id"=>$order_id))->select();
+    	    $arr['dhm']=$dhm;
+	    }
+	    return $arr;
+	}
+
+	
+	//取消订单
+	public function delorder($order_id){
+	    //用户取消订单
+	   return $this->data(array("order_status"=>3))->save();
+	}
+	
+	//判断订单号是否重复
+	public function createorder_sn(){
+	    $order_sn=$this->orderservice->create_ordersn();
+		$arr=$this->where(array("order_sn"=>$order_sn))->find();
+		if($arr){
+			$this->createorder_sn();
+		}else{
+			return $order_sn;
+		}
+	}
+	
+	//改变订单状态 $status 1:已支付，2:已消费，3:取消订单
+	public function changestatus($order_id,$status){
+	 
+	    if($this->where(array("order_id"=>$order_id))->data(array("order_status"=>$status))->save()){
+	       if($status==2){
+	           $this->where(array("order_id"=>$order_id))->data(array("finnshed_time"=>time()))->save();
+	       }
+	         $info = $this->getinfo($order_id);
+	         $log_msg = "购买商品-".$info['goods']['goods_name'].",数量为".$info['goods_num'];
+	       if($info['extend_id']&&$info['extend_num']){
+	         $log_msg .=" 使用".$info['extend_num']."个优惠口令，优惠".$info['order_youhui']."元";
+	       }
+	       
+	       $logarr=array(
+                        "order_id"=>$info['order_id'],
+                        "log_msg"=>$log_msg,
+                        "log_time"=>time(),
+                        "log_role"=>"1",//用户角色
+                        "log_user"=>$info['buyer_id'],//用户id
+                        "log_orderstate"=>$status,
+                        "log_type"=>1,
+                 );
+	        $this->orderlog->add_log($logarr);
+	        return true;
+	    }else{
+	        return false;
+	    }
+	}
+	
+	//检查订单支付状态
+	public function checkorderstatus($order_sn){
+	    $status=$this->where(array("order_sn"=>$order_sn))->field("order_status")->find();
+	    if($status['order_status']==1){
+	        return true;
+	    }else{
+	        return false;
+	    }
+	}
+	
+	
+}
+

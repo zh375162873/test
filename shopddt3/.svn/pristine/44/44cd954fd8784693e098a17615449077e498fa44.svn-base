@@ -1,0 +1,24 @@
+<?php
+/**
+ * 售后服务
+ * @author 梁健
+ */
+namespace BizService;
+class OrderDisputService extends BaseService
+{
+	/**
+	 * 所有售后列表
+	 */
+	public function dispute_list(){
+		
+	}
+	
+	/**
+	 * 售后详情
+	 */
+	public function dispute_info($order_id = 0){
+		if(!$order_id){
+			return false;
+		}
+	}
+}

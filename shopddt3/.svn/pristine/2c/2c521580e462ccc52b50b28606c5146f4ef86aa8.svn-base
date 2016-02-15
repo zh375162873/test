@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>{$goods['goods_name']}-点点通-闪购平台</title>
+	<meta name="keywords" content="{$goods['keywords']}"/>
+    <meta name="description" content="{$goods['description']}"/>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/shop.css">
+	<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+var $$ = function (obj) {
+    if (obj != null && obj != undefined && obj.toString().length > 0) {
+        if (obj[0] == '#') {
+            return document.getElementById(obj.substr(1, obj.length - 1));
+        }
+    }
+}
+function chgNum(a) {
+    var number = $$("#number");
+    var storenum = $("#msg").html();
+    var p = parseInt(number.value);
+
+    if (a == 1) {
+		//alert("此商品只能购买一个~！");return false;
+        if (p < storenum) {number.value = ++p;
+		
+		}else{
+		   alert("已达到最大数量~！");return false;
+		}
+    }
+    else {
+        if (p > 1) number.value = --p;
+    }
+}
+</script>
+
+</head>
+<body>
+<header></header>
+<section>
+    <div class="goods_img">
+        <img src="{$goods['lunbo'][0]['goods_image']}">
+        <div class="img_mask">
+            <div class="summary">
+                <h2>{$goods['goods_name']}</h2>
+                <p>{$goods['subtitle']}</p>
+            </div>
+            <!--<div class="share_right">分享</div>-->
+        </div>
+    </div>
+</section>
+<section class="goods_form">
+    <div class="goods_price">
+        <span class="price colorB4"><?=$goods['goods_price']?></span>
+		<span>库存：</span><!--库存数量-->
+		<span id="msg" >{$goods['goods_storage']}</span><!--库存数量-->
+        <span class="yishou color7d">已售{$goods['goods_salenum']}份</span>
+    </div>
+    <form id="addGoodsqy" action="<?php echo U('home/order/create'); ?>" method="post">
+		<input type="button" value="-" class="minus" onClick="chgNum(-1)" />	
+		<input type="text"  id='number' name="number"  value="1" class="goods_qy"/>	
+		<input type="button" value="+" class="add" onClick="chgNum(1)" />
+       <!-- <button class="minus"></button>
+        <input value="1" type="text" class="goods_qy">
+        <button class="add"></button>-->
+        <input type="hidden" name="goods_id" value="{$goods.goods_id}" >
+        <button class="subBtn" type="submit">立即抢购</button>
+    </form>
+</section>
+<section class="goods_reviews">
+    <a href="<?php echo U('pinglun/pl_list',array('goods_id'=>$goods['goods_id'])); ?>">
+        <div class="reviews">
+           <div class="star_gray">
+		       <?php
+			   $n=$goods['evaluation_good_star']/5*100;
+			   if($n==0){
+			   $n=100;
+			   $goods['evaluation_good_star']=5;
+			   $goods['evaluation_count']=0;
+			   }
+			   ?>
+               <div class="star" style="width:{$n}%">★★★★★</div>
+           </div>
+            <span class="colorFf">{$goods['evaluation_good_star']}分</span>
+        </div>
+        <span class="reviews_right">{$goods['evaluation_count']}人评价</span>
+    </a>
+</section>
+<section class="goods_shopDesc">
+    <div class="title">商家信息</div>
+    <div class="loc_tel">
+        <div class="name color35">{$goods['store']['merchant_name']}</div>
+        <div class="loc">
+            <p>{$goods['store']['address']}</p>
+            <div><a><img src="{$uri}__PUBLIC__/home/images/btn_location.png" width="12px" height="15px"> 
+			<?php
+			if(session('lat')){
+			$n_latitude = session('lat');
+            $n_longitude = session('lng');
+			$distance = getDistance($n_latitude, $n_longitude, $goods['latitude'], $goods['longitude']);
+			echo $distance;
+			?>
+			 m
+			<?php
+			}
+			?>
+			
+			</a></div>
+        </div>
+        <div class="tel"><a href="tel:{$goods['store']['merchant_tel']}"></a></div>
+    </div>
+    <!--<div class="shops colorC3">查看全部分店</div>-->
+    <div id="allShops" class="allShopsNone">
+        <div class="loc_tel">
+            <div class="name color35">西树泡芙（万达店）</div>
+            <div class="loc">
+                <p>地址地址地址地址地址地址地址地址地址地址地址地址地址地址地址地址</p>
+                <div><a><img src="{$uri}__PUBLIC__/home/images/btn_location.png" width="12px" height="15px"> 300m</a></div>
+            </div>
+            <div class="tel"><a href="#"></a></div>
+        </div>
+        <div class="loc_tel">
+            <div class="name color35">西树泡芙（万达店）</div>
+            <div class="loc">
+                <p>地址地址地址地址地址地址地址地址地址地址地址地址地址地址地址地址</p>
+                <div><a><img src="{$uri}__PUBLIC__/home/images/btn_location.png" width="12px" height="15px"> 300m</a></div>
+            </div>
+            <div class="tel"><a href="#"></a></div>
+        </div>
+    </div>
+</section>
+<section class="goods_info">
+    <div class="gName">商品介绍</div>
+    <!--<div class="gList">
+        <div class="gtLeft colorF7">代金劵</div><div class="colorF7">1张</div><div class="gtRight colorF7">60元</div>
+    </div>-->
+    <div class="info">
+       <!-- <ul>
+            <li><span>店内人均消费参考价：</span><span>18元</span></li>
+            <li><span>适用范围：</span><span>全场通用</span></li>
+            <li><span>部分菜价参考：</span><span>原味香草曲奇（12元/个）</span></li>->
+            <li class="spanVis"><span style="visibility:hidden;">部分菜价参考：</span><span>原味香草曲奇（12元/个）</span></li>
+            <li class="spanVis"><span style="visibility:hidden;">部分菜价参考：</span><span>原味香草曲奇（12元/个）</span></li>
+        </ul>-->
+		{$goods['mobile_body']}
+		
+    </div>
+</section>
+<section class="note">
+    <div class="title">购买须知</div>
+    <div class="note_list">
+        <dl>
+            <dt>有效期</dt>
+            <dd><?php echo date('Y:m:d',$goods['start_date']);?> 至 <?php echo date('Y:m:d',$goods['start_date']);?>（周末、法定节假日通用）</dd>
+            <dt>使用时间</dt>
+            <dd><?php echo $goods['usetime'][0];?>:<?php echo $goods['usetime'][1];?>-<?php echo $goods['usetime'][2];?>:<?php echo $goods['usetime'][3];?></dd>
+            <dt>使用规则</dt>
+			<?php
+			foreach($goods['rules'] as $val){
+			?>
+            <dd>{$val}</dd>
+            <?php
+			}
+			?>
+        </dl>
+    </div>
+</section>
+<include file="Index/footer"/>
+
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript">
+// 微信配置
+wx.config({
+    debug: false, 
+    appId: "wx78f2a6e509a564a9", 
+    timestamp: '上一步生成的时间戳', 
+    nonceStr: '上一步中的字符串', 
+    signature: '上一步生成的签名',
+    jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage'] // 功能列表，我们要使用JS-SDK的什么功能
+});
+// config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在 页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready 函数中。
+wx.ready(function(){
+    // 获取“分享到朋友圈”按钮点击状态及自定义分享内容接口
+    wx.onMenuShareTimeline({
+        title: '分享标题', // 分享标题
+        link:"分享的url,以http或https开头",
+        imgUrl: "分享图标的url,以http或https开头" // 分享图标
+    });
+    // 获取“分享给朋友”按钮点击状态及自定义分享内容接口
+    wx.onMenuShareAppMessage({
+        title: '分享标题', // 分享标题
+        desc: "分享描述", // 分享描述
+        link:"分享的url,以http或https开头",
+        imgUrl: "分享图标的url,以http或https开头", // 分享图标
+        type: 'link', // 分享类型,music、video或link，不填默认为link
+    });
+});
+</script>
+
+https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=wx78f2a6e509a564a9&secret=d4624c36b6795d1d99dcf0547af5443d
+
+
+
+
+
+
+<script >
+
+function weixinShareTimeline(title,desc,link,imgUrl){
+	WeixinJSBridge.invoke('shareTimeline',{
+		"img_url":imgUrl,
+		//"img_width":"640",
+		//"img_height":"640",
+		"link":link,
+		"desc": desc,
+		"title":title
+	});	
+}
+//发送给好友
+
+function weixinSendAppMessage(title,desc,link,imgUrl){
+	WeixinJSBridge.invoke('sendAppMessage',{
+	//"appid":appId,
+	"img_url":imgUrl,
+	//"img_width":"640",
+	//"img_height":"640",
+	"link":link,
+	"desc":desc,
+	"title":title
+	});
+}
+//分享到腾讯微博
+
+function weixinShareWeibo(title,link){
+	WeixinJSBridge.invoke('shareWeibo',{
+		"content":title + link,
+		"url":link
+	});
+}
+//关注指定的微信号
+
+function weixinAddContact(name){
+	WeixinJSBridge.invoke("addContact", {webtype: "1",username: name}, function(e) {
+		WeixinJSBridge.log(e.err_msg);
+		//e.err_msg:add_contact:added 已经添加
+		//e.err_msg:add_contact:cancel 取消添加
+		//e.err_msg:add_contact:ok 添加成功
+		if(e.err_msg == 'add_contact:added' || e.err_msg == 'add_contact:ok'){
+		    //关注成功，或者已经关注过
+		}
+	})
+}
+</script>
+</body>
+</html>

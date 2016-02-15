@@ -1,0 +1,241 @@
+<?php
+namespace Admin\Controller;
+use BizService\ExtendService;
+use BizService\GoodsService;
+
+
+class ExtendController extends BaseController {
+        public $extend;
+    public function _initialize(){
+        // $shop = new ShopService;
+        // if('ture'!=I('get.houtai',''))
+        //     $shop->checkShop();
+
+        // $extend = new ExtendService();
+    }
+
+    public function index(){
+    	$search = I('post.search','','strval');
+    	$extend = new ExtendService();
+    	// var_dump($_SESSION);exit;
+        $userName = trim(I('get.username','','strval'));
+        $orderName = trim(I('get.ordername','','strval'));
+        $orderType = trim(I('get.ordertype','','strval'));
+
+        $searchForm['username'] = $userName;
+        $searchForm['ordername'] = $orderName;
+        $searchForm['ordertype'] = $orderType;
+    	$channelList = $extend->channelList($searchForm);
+        $memberCount = $extend->memberCount(-1);
+        
+    	// var_dump($channelList);exit;   
+        $pageList = array_page($channelList);
+        // var_dump($pageList);exit;
+        $this->assign('search_form',$searchForm);
+        $this->assign('member_count',$memberCount);
+        $this->assign('channel_list',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+        $this->display();
+    }
+
+    //代理商后台同步登出
+    public function jumpOut(){
+        //销毁session
+        session('proxyKeyStatus',null);
+        //跳转核心平台主页
+        $url='location:http://'.C('WIFI_URL').'/proxy/default/index';
+        header($url);
+    }
+    public function addChannel(){
+    	$channelName = I('post.channelname','','strval');
+    	$userName = I('post.username','','strval');
+    	$memberName = I('post.membername','','strval');
+        $extend = new ExtendService();
+        if($extend->addChannel($channelName,$userName,$memberName)){
+            echo "增加渠道成功";
+        }else{
+            echo "增加渠道失败";
+        }
+    }
+
+    public function addExtendMember(){
+        $channelId = I('post.channelid',0,'intval');
+        $userName = I('post.username','','strval');
+        $goodsCode = I('post.goodscode','','strval');
+        $memberName = I('post.membername','','strval');
+        $extend = new ExtendService();
+        if($extend->addExtendMember($channelId,$userName,$goodsCode,$memberName)){
+            echo "增加成员成功";
+        }else{
+            echo "增加成员失败";
+        }
+    }
+    //返回推广人员列表  
+    public function memberList(){
+        $extend = new ExtendService();
+
+        $channelId = I('get.channelid',-1,'intval');
+        $userName = trim(I('get.username','','strval'));
+        $orderName = trim(I('get.ordername','','strval'));
+        $orderType = trim(I('get.ordertype','','strval'));
+
+        $searchForm['channelid'] = $channelId;
+        $searchForm['username'] = $userName;
+        $searchForm['ordername'] = $orderName;
+        $searchForm['ordertype'] = $orderType;
+
+        $channelList = $extend->channelList();
+        $memberList = $extend->memberList($channelId,$searchForm);
+        $pageList = array_page($memberList);
+
+        // var_dump(session('proxyId'));exit;   
+        // var_dump($memberList);exit;   
+        $this->assign('search_form',$searchForm);
+        $this->assign('channel_list',$channelList);
+        $this->assign('member_list',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+        $this->display();
+    }
+
+    public function editMember(){
+        $extendId = I('post.extendid','','strval');
+        $channelId = I('post.channelid','','strval');
+        $goodsCode = I('post.goodscode','','strval');
+        $memberName = I('post.membername','','strval');
+        $extend = new ExtendService();
+        if($extend->editMember($channelId,$extendId,$goodsCode,$memberName)){
+            echo "修改推广人员信息成功";
+        }else{
+            echo "修改推广人员信息失败";
+        }
+    }
+
+    public function editChannel(){
+        $channelId = I('post.channelid',0,'intval');
+        $channelName = I('post.channelname','','strval');
+        $userName = I('post.username','','strval');
+        $memberName = I('post.membername','','strval');
+        $extend = new ExtendService();
+        $res=$extend->editChannel($channelId,$channelName,$userName,$memberName);
+        if($res){
+            echo "修改渠道成功";
+        }else{
+            echo "修改渠道失败";
+        }
+    }
+
+    //删除渠道账号
+    public function deleteChannel(){
+        $extend = new ExtendService();
+        $channelId = I('post.id',0);
+        $res = 0;
+        if($channelId)
+            $res=$extend->deleteChannel($channelId);
+        echo $res?'删除用户成功':'删除用户失败';
+    }
+
+    //删除推广人员账号
+    public function deleteMember(){
+        $extend = new ExtendService();
+        $memberId = I('post.id',0);
+        $res = 0;
+        if($memberId)
+            $res=$extend->deleteMember($memberId);
+        echo $res?'删除推广人员成功':'删除推广人员失败'.$memberId;
+    }
+
+    public function editGoodsCode(){
+        $extendId = I('post.extendid',0,'intval');
+        $goodsCode = I('post.goodscode','','strval');
+        $extend = new ExtendService();
+        if($extend->editGoodsCode($extendId,$goodsCode)){
+            echo "修改推广优惠标签成功";
+        }else{
+            echo "修改推广优惠标签失败";
+        }
+    }
+
+    // public function extendInfo(){
+    //     $extend = new ExtendService();
+    //     $channelId = I('post.id',0,'intval');
+    //     $data = $extend->extendInfo($channelId);
+    //     return $data;
+    // }
+    public function extendGoodsList(){
+        //获取参数
+        $extendId = I('get.extendId',0,'intval');
+        $orderName = trim(I('get.ordername','','strval'));
+        $orderType = trim(I('get.ordertype','','strval'));
+        $searchForm['ordername'] = $orderName;
+        $searchForm['ordertype'] = $orderType;
+
+        $extend = new ExtendService();
+        $good = new GoodsService();
+        //输出channel_goods表中数据
+        $list=$extend->extendGoodsList($extendId);
+
+        //根据货号调用商品接口，找到商品名称、价格、市场价、库存、上架状态并计算出优惠价
+        foreach ($list as $key => $value) {
+            $arr = $good->getGoodsBySerial($list[$key]['goods_sn']);
+            $list[$key]['goods_name'] = $arr['goods_name'];
+            $list[$key]['goods_price'] = $arr['goods_price'];
+            $list[$key]['goods_marketprice'] = $arr['goods_marketprice'];
+            $list[$key]['goods_storage'] = $arr['goods_storage'];
+            $list[$key]['goods_state'] = $arr['goods_state'];
+            $list[$key]['extend_price'] = $arr['goods_price']*$list[$key]['discount']/100;
+        }
+        //调用BaseService中的排序函数进行数组排序
+        $extendGoodsList = $extend->array_sort($list,$orderName,$orderType);
+        //分页
+        $pageList = array_page($extendGoodsList);
+        //输出
+        $this->assign('extendid',$extendId);
+        $this->assign('search_form',$searchForm);
+        $this->assign('goods_list',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+        $this->display();
+    }
+    //增加推广优惠商品
+    public function addExtendGoods(){
+        $data = array();
+        $data['extendId'] = I('get.extendid',0,'intval');
+        $data['goodsSn'] = I('post.goods_sn','','strval');
+        $data['discount'] = I('post.discount',0,'intval');
+        $data['quantity'] = I('post.quantity','','strval');
+
+        $extend = new ExtendService();
+        if($extend->addExtendGoods($data)){
+            echo "增加推广优惠成功";
+        }else{
+            echo "增加推广优惠失败";
+        }
+    }
+    //修改推广优惠商品
+    public function editExtendGoods(){
+        $data = array();
+        $id =  I('post.id',0,'intval');
+        $data['discount'] = I('post.discount',0,'intval');
+        $data['quantity'] = I('post.quantity','','strval');
+        $extend = new ExtendService();
+        if($extend->editExtendGoods($id,$data)){
+            echo "修改推广优惠成功";
+        }else{
+            echo "修改推广优惠失败";
+        }
+    }
+
+    //删除推广优惠商品
+    public function deleteExtendGoods(){
+        $extend = new ExtendService();
+        $extendGoodsId = I('post.id',0);
+        $res = 0;
+        if($extendGoodsId)
+            $res=$extend->deleteExtendGoods($extendGoodsId);
+        echo $res?'删除推广优惠商品成功':'删除推广优惠商品失败';
+    }
+
+
+}

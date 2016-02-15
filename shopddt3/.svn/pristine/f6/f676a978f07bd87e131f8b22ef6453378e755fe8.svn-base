@@ -1,0 +1,24 @@
+<?php
+
+namespace Home\Controller;
+use BizService\UserService;
+use BizService\GoodsService;
+header("Content-type:text/html;charset=utf-8");
+class PinglunController extends BaseController {
+    public $pinglun;
+    public function _initialize(){
+        parent::_initialize();
+        $this->pinglun = D("PinglunManage");
+    }
+
+    public function pl_list(){
+        //初始化数据
+        $goods_id = I("get.goods_id");
+        $arr=$this->pinglun->getlist($goods_id);
+        
+        $this->assign("list",$arr['list']);
+        $this->assign('info',$arr['info']);  
+        $this->display("list");
+    }
+    
+}

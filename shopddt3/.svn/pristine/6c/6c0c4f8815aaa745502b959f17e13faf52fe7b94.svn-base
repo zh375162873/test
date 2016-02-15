@@ -1,0 +1,472 @@
+<?php
+
+namespace BizService;
+
+/**
+ * 多商城Service
+ *
+ * @author 谢林
+ */
+class ExtendService extends BaseService
+{
+
+    /**
+     * 代理商平台登录状态判断
+     */
+    public function checkShop()
+    {
+        if (session('proxyKeyStatus') != 'on') {
+            $url = 'location:' . C('WIFI_URL') . '/proxy/default/index';
+            header($url);
+            exit;
+        }
+    }
+
+
+    /**
+     * 渠道列表
+     * @return array
+     */
+    public function channelList($condition = null)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $UsersModel = D('Users');
+        $channelData = $ChannelModel->channelList($condition);
+        
+        // $data = self::get_shop_info_by_proxy(79);
+        // 增加未分组渠道
+        $channelCount = sizeof($channelData);
+        if(!$condition['username']){
+            $channelData[$channelCount]['id']='0';
+            $channelData[$channelCount]['name']='未分组';
+            $channelData[$channelCount]['username']='————';
+            $channelData[$channelCount]['user_name']='————';
+            $channelData[$channelCount]['add_time']='————';
+        }
+        // dump($channelCount);exit;
+        foreach ($channelData as $key => $value) {
+            $channelData[$key]['username'] = $UsersModel->findUserNameById($channelData[$key]['user_id']);   
+        }
+         // dump($channelData);exit;
+        return $channelData;
+
+    }
+
+    /**
+     * 推广人员列表
+     * @param $channelId        渠道Id
+     * @return array
+     */
+    public function memberList($channelId,$condition=null)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $UsersModel = D('Users');
+        $memberData = $ChannelModel->memberList($channelId,$condition);
+        //向更新列表中部分字段的表达形式
+        foreach ($memberData as $key => $value) {
+            $memberData[$key]['username'] = $UsersModel->findUserNameById($memberData[$key]['user_id']);
+            $memberData[$key]['parent'] = $ChannelModel->findChannelNameById($value['parent_id']);
+            $memberData[$key]['identity'] = C('SHOP_URL').'/home/index/index?ddt_from='.base64_encode($memberData[$key]['identity']);
+            if($condition){
+            }
+        }
+        return $memberData;
+    }   
+
+    /**
+     * 推广人员数量
+     * @param $channelId        渠道Id
+     * @return array
+     */
+    public function memberCount($channelId)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $data = $ChannelModel->memberCount($channelId);
+        return $data;
+    }
+
+
+    /**
+     * 推广人员列表
+     * @param $channelId        渠道Id
+     * @return array
+     */
+    public function extendInfo($channelId, $condition = null)
+    {
+        $ChannelModel = D('ExtendChannel');
+        if (empty($condition)) {
+            $extendData = $ChannelModel->findInfoByChannelId($channelId);
+            return $extendData;
+        }
+    }
+
+    /**
+     * 添加渠道
+     * @param $channelName        渠道名称
+     * @param $userName            用户名
+     * @param $memberName        昵称
+     * @return boolean
+     */
+    public function addChannel($channelName, $userName, $memberName)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $UsersModel = D('Users');
+        //检查是否输入存在
+        if (empty($channelName) || empty($userName) || empty($memberName)) {
+            return false;//有输入为空
+        }
+
+        // 检查是否存在渠道名称重复
+        if ($ChannelModel->findChannelIdByName($channelName)) {
+            return false;//渠道名称重复
+        }
+        //检查是否负责人用户名存在
+        if ($UsersModel->findUserIdByName($userName) == 0) {
+            return false;//用户名不存在
+        } else {
+            $userId = $UsersModel->findUserIdByName($userName);
+            // 检查是否负责人用户已列为该商城渠道负责人
+            if ($ChannelModel->findChannelIdByUserId($userId)) {
+                return false;//已经成为该商城渠道负责人
+            } else {
+                //再判断，是否是一般推广人员，是一般推广人员，进行数据更改提升为渠道
+                if ($ChannelModel->findExtendIdByUserId($userId)) {
+                    $channelData = array();
+                    $channelId = $ChannelModel->findExtendIdByUserId($userId);
+                    $channelData['name'] = $channelName;
+                    $channelData['user_name'] = $memberName;
+                    $channelData['parent_id'] = $channelId;
+                    $channelData['is_channel'] = 0;
+                    $data = $ChannelModel->updateExtend($channelId, $channelData);
+                    return $data;
+                } else {
+                    //添加渠道
+                    $channelData = array();
+                    $channelData['proxy_id'] = session('proxyId');
+                    $channelData['name'] = $channelName;
+                    $channelData['user_id'] = $userId;
+                    $channelData['user_name'] = $memberName;
+                    $channelData['identity'] = $userId . 'from' . session('proxyId');
+                    $channelData['add_time'] = time();
+                    $data = $ChannelModel->addChannel($channelData);
+                    return $data;
+                }
+            }
+
+        }
+    }
+
+    /**
+     * 修改渠道
+     * @param $channelName        渠道名称
+     * @param $userName            用户名
+     * @param $memberName        昵称
+     * @return boolean
+     */
+    public function editChannel($channelId, $channelName, $userName, $memberName)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $UsersModel = D('Users');
+        //检查是否输入存在
+        if ($channelId == 0 || empty($channelName) || empty($userName) || empty($memberName)) {
+            return false;//有输入为空
+        }
+
+        // 检查是否存在渠道名称重复
+        if ($ChannelModel->findChannelIdByName($channelName, $channelId)) {
+            return false;//渠道名称重复
+        }
+        //检查是否负责人用户名存在
+        if ($UsersModel->findUserIdByName($userName) == 0) {
+            return false;//用户名不存在
+
+        } else {
+            $userId = $UsersModel->findUserIdByName($userName);
+            // 检查是否负责人用户已列为该商城渠道负责人
+            if ($ChannelModel->findChannelIdByUserId($userId, $channelId)) {
+                return false;//已经成为该商城渠道负责人
+            } else {
+                //再判断，是否是一般推广人员，是一般推广人员，并更改为渠道负责人，将原渠道负责人调至未分组
+                if ($ChannelModel->findExtendIdByUserId($userId)) {
+
+                    //将原渠道负责人调至未分组
+                    $toMemberData = $ChannelModel->changeChannelToMember($channelId);
+                    //更新负责人信息
+                    $channelData = array();
+                    $channelNewId = $ChannelModel->findExtendIdByUserId($userId);//新渠道的Id
+                    $channelData['name'] = $channelName;
+                    $channelData['user_name'] = $memberName;
+                    $channelData['parent_id'] = $channelNewId;
+                    $channelData['is_channel'] = 0;
+                    $updateChannelData = $ChannelModel->updateExtend($channelNewId, $channelData);
+                    //修改渠道下所有人员的parent_id
+                    $updateMemberParentIdData = $ChannelModel->updateMemberParentId($channelNewId, $channelId);
+                    if ($toMemberData || $updateChannelData || $updateMemberParentIdData)
+                        return ture;
+                    else
+                        return false;
+
+                    // return $data;
+                } else {
+                    //将原渠道负责人调至未分组
+                    $toMemberData = $ChannelModel->changeChannelToMember($channelId);
+                    //非推广人员，直接新增渠道信息
+                    $channelData = array();
+                    $channelData['proxy_id'] = session('proxyId');
+                    $channelData['name'] = $channelName;
+                    $channelData['user_id'] = $userId;
+                    $channelData['user_name'] = $memberName;
+                    $channelData['goods_code'] = $goodsCode;
+                    $channelData['identity'] = $userId . 'from' . session('proxyId');
+                    $channelData['add_time'] = time();
+                    $channelNewId = $ChannelModel->addChannel($channelData);
+                    //修改渠道下所有人员的parent_id
+                    $updateMemberParentIdData = $ChannelModel->updateMemberParentId($channelNewId, $channelId);
+                    if ($toMemberData || $updateMemberParentIdData)
+                        return ture;
+                    else
+                        return false;
+                    // return $data;
+                }
+
+            }
+        }
+    }
+
+    /**
+     * 添加渠道
+     * @param $channelId        渠道Id
+     * @param $userName            用户名
+     * @param $memberName        昵称
+     * @return boolean
+     */
+
+    public function addExtendMember($channelId, $userName,$goodsCode, $memberName)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $UsersModel = D('Users');
+        //检查是否输入存在
+        if (empty($channelId) && empty($userName) && empty($memberName)) {
+            return false;//有输入为空
+        }
+        //检查是否存在渠道
+        if (!($ChannelModel->findUserIdByChannelId($channelId) || $channelId == 0)) {
+            return false;//渠道不存在也不是未分组
+        }
+        if ($ChannelModel->findExtendIdByLabel($goodsCode)) {
+            return false;//有优惠标签重复
+        }
+        //检查是否用户名存在
+        if ($UsersModel->findUserIdByName($userName) == 0) {
+            return false;//用户名不存在
+        } else {
+            $userId = $UsersModel->findUserIdByName($userName);
+            //检查是否用户已为该商城推广人员
+            if ($ChannelModel->findExtendIdByUserId($userId)) {
+                return false;//已经成为该商城渠道推广人员
+            } else {
+                $extendMemberData = array();
+                $extendMemberData['proxy_id'] = session('proxyId');
+                $extendMemberData['parent_id'] = $channelId;
+                $extendMemberData['user_id'] = $userId;
+                $extendMemberData['user_name'] = $memberName;
+                $extendMemberData['goods_code'] = $goodsCode;
+                $extendMemberData['is_channel'] = 1;
+                $extendMemberData['identity'] = $userId . 'from' . session('proxyId');
+                $extendMemberData['add_time'] = time();
+                $data = $ChannelModel->addExtendMember($extendMemberData);
+                return $data;
+            }
+        }
+    }
+
+    /**
+     * 删除渠道
+     * @param $userId        用户id
+     * @return mixed
+     */
+    public function deleteChannel($channelId)
+    {
+        $ChannelModel = D('ExtendChannel');
+        //将原渠道负责人调至未分组
+        $toMemberData = $ChannelModel->changeChannelToMember($channelId);
+        //修改渠道下所有人员的parent_id
+        $updateMemberParentIdData = $ChannelModel->updateMemberParentId(0, $channelId);
+        if ($toMemberData || $updateMemberParentIdData)
+            return ture;
+        else
+            return false;
+        return $data;
+    }
+
+    /**
+     * 修改推广人员
+     * @param $channelName        渠道名称
+     * @param $userName            用户名
+     * @param $memberName        昵称
+     * @return boolean
+     */
+    public function editMember($channelId, $extendId,$goodsCode, $memberName)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $UsersModel = D('Users');
+        //检查是否输入存在
+        if (empty($channelId) && empty($extendId) && empty($memberName)) {
+            return false;//有输入为空
+        }
+        if ($ChannelModel->findExtendIdByLabel($goodsCode,$extendId)) {
+            return false;//有优惠标签重复
+        }
+        $extendMemberData = array();
+        $extendMemberData['parent_id'] = $channelId;
+        $extendMemberData['goods_code'] = $goodsCode;
+        $extendMemberData['user_name'] = $memberName;
+        $data = $ChannelModel->updateExtend($extendId, $extendMemberData);
+        return $data;
+    }
+
+    /**
+     * 删除渠道
+     * @param $userId        用户id
+     * @return mixed
+     */
+    public function deleteMember($channelId)
+    {
+        $ChannelModel = D('ExtendChannel');
+        $data = $ChannelModel->delete($channelId);
+        return $data;
+    }
+
+    /**
+     * 修改推广优惠标签
+     * @param $extendId        推广ID
+     * @param $goodsCode       优惠标签
+     * @return boolean
+     */
+    public function editGoodsCode($extendId,$goodsCode)
+    {
+        $ChannelModel = D('ExtendChannel');
+        //检查是否输入存在
+        if (empty($extendId) || empty($goodsCode)) {
+            return false;//有输入为空
+        }  
+        if ($ChannelModel->findExtendIdByLabel($goodsCode,$extendId)) {
+            return false;//有优惠标签重复
+        }
+        $channelData['goods_code']=$goodsCode;
+
+        $data = $ChannelModel->where('id='.$extendId)->save($channelData);
+        return $data ? $data : false;
+    }
+
+
+
+    public function extendGoodsList($extendId){
+        $ChannelGoodsModel = D('ChannelGoods');
+        $data = $ChannelGoodsModel->extendGoodsList($extendId);
+        return $data;
+    }
+    /**
+     * 添加推广优惠
+     * @param $channelId        渠道Id
+     * @param $userName            用户名
+     * @param $memberName        昵称
+     * @return boolean
+     */
+
+    public function addExtendGoods($data)
+    {
+        $ChannelGoodsModel = D('ChannelGoods');
+        $good = new GoodsService();
+        //检查是否输入存在
+        if (empty($data['goods_sn']) && empty($data['discount']) && empty($data['quantity'])) {
+            return false;//有输入为空
+        }
+        //检查是否存在商品
+        $goodsInfo = $good->getGoodsBySerial($data['goods_sn']);
+        if (!$goodsInfo['goods_id']) {
+            return false;//商品不存在
+        }
+        if ($ChannelGoodsModel->findExtendGoodId($data)){
+            return false;//已加入该用户的推广列表中
+        }
+        
+        $extendGoodsData = array();
+        $extendGoodsData['proxy_id'] = session('proxyId');
+        $extendGoodsData['channel_user'] = $data['extendId'];
+        $extendGoodsData['goods_id'] = $goodsInfo['goods_id'];
+        $extendGoodsData['goods_sn'] = $data['goods_sn'];
+        $extendGoodsData['discount'] = $data['discount'];
+        $extendGoodsData['quantity'] = $data['quantity'];
+        $extendGoodsData['begin_time'] = strtotime($data['begin_time']);
+        $extendGoodsData['end_time'] = strtotime($data['end_time'])+86399;
+        $extendGoodsData['addtime'] = time();
+        $data = $ChannelGoodsModel->addExtendGoods($extendGoodsData);
+        return $data;
+           
+    }
+    /**
+     * 修改推广优惠
+     * @param $channelId        渠道Id
+     * @param $userName            用户名
+     * @param $memberName        昵称
+     * @return boolean
+     */
+
+    public function editExtendGoods($id,$editdata)
+    {
+        $ChannelGoodsModel = D('ChannelGoods');
+        //检查是否输入存在
+        if (empty($id) && empty($editdata['discount']) && empty($editdata['quantity'])) {
+            return false;//有输入为空
+        }
+        $editdata['begin_time'] = strtotime($editdata['begin_time']);
+        $editdata['end_time'] = strtotime($editdata['end_time'])+86399;
+
+        $data = $ChannelGoodsModel->updateExtendGoods($id,$editdata);
+        return $data;
+           
+    }
+
+    /**
+     * 删除推广优惠
+     * @param $extendGoodsId        推广优惠id
+     * @return mixed
+     */
+    public function deleteExtendGoods($extendGoodsId)
+    {
+        $ChannelGoodsModel = D('ChannelGoods');
+        $data = $ChannelGoodsModel->delete($extendGoodsId);
+        return $data;
+    }
+
+    /**
+     * 返回推广优惠商品信息（外部接口）
+     * @param $goodsId         商品id
+     * @param $goodsCode       商品推广码
+     * @return mixed
+     */
+    public function getExtendGoods($goodsId,$goodsCode){
+
+        $ChannelGoodsModel = D('Admin/ChannelGoods');
+        $ChannelModel = D('Admin/ExtendChannel');
+        if(!$goodsId||!$goodsCode) 
+            return false;
+            $extendId = $ChannelModel->findExtendIdByGoodsCode($goodsCode);
+            if($extendId){
+                $data = $ChannelGoodsModel->getExtendGoods($goodsId,$extendId);
+            }
+        return $data ? $data : false;
+    }
+
+    /**
+     * 检查是否存在，返回当前商品在推广优惠商品查到的个数（外部接口）
+     * @param $goodsId     商品id
+     * @return mixed
+     */
+    public function checkExtendGoods($goodsId){
+        $ChannelGoodsModel = D('Admin/ChannelGoods');
+        $count = $ChannelGoodsModel->checkExtendGoods($goodsId);
+        return $count ? $count : false;
+    }
+}

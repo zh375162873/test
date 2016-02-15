@@ -1,0 +1,33 @@
+<?php
+namespace Home\Controller;
+use BizService\UserService;
+
+class AddressController extends BaseController
+{
+    private $shop_id;
+    public function _initialize(){
+        parent::_initialize();
+        $shop = get_shop_proxy();
+        $this->shop_id = $shop['shop_id'];
+    }
+    public function index(){
+        $this->display();
+    }    
+    public function addressList(){
+        $this->display();
+    }
+
+    public function addAddress(){
+
+        $province_list = D('Admin/Region')->getRegions(1,1);
+        $this->assign('province_list',$province_list);
+        // var_dump($province_list);exit;
+        $this->display();
+    }
+    public function regionList($type = 0, $parent = 0){
+        $type=isset($_POST['region_type'])?I('post.region_type',0,'intval'):$type;
+        $parent=isset($_POST['region_parent'])?I('post.region_parent',0,'intval'):$parent;
+        $list = D('Admin/Region')->getRegions($type,$parent);
+        echo json_encode($list);
+    }
+}

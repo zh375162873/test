@@ -1,0 +1,277 @@
+<?php
+
+namespace Core\Controller;
+use BizService\UserService;
+use BizService\ShopService;
+use BizService\OrderService;
+use BizService\OthershareService;
+class UserscenterController extends BaseController {
+
+    //初始化加载是否登录的验证权限
+    public function _initialize(){
+        $user = new UserService;
+        if('ture'!=I('get.houtai',''))
+            $user->checkUsercenter();
+    }
+    
+    //wifi后台同步登出
+    public function jumpOut(){
+        //销毁session
+        session_destroy();
+        //跳转核心平台主页
+        $url='location:'.C('WIFI_URL').'/admin/default/index';
+        header($url);
+    }
+            //Yii框架中登出
+          //    public function actionLogout() {
+             //     Yii::app()->admin->logout(false);
+             //     // $this->redirect(Yii::app()->admin->loginUrl);
+             //     $url='location:http://localhost:8084/home/userscenter/jumpout';
+             //     header($url);
+                // }
+            //Yii框架中跳转，传密令
+                // public function actionJumptp(){
+                //     $key=md5('admin'.substr(time(),-4));
+                //     $url='location:http://localhost:8084/home/userscenter/jumpin?key='.$key;
+                //     header($url);
+                // }
+    //用户中心管理
+    public function index(){
+        $user = new UserService;
+        $shop = new ShopService;
+        $Order = new OrderService;
+        $searchForm['username'] = trim(I('get.username','','strval'));
+        $searchForm['region'] = trim(I('get.region','','strval'));
+        $searchForm['come_from'] = trim(I('get.come_from','','strval'));
+        $searchForm['status'] = trim(I('get.status','','strval'));
+        $searchForm['bought'] = trim(I('get.bought','','strval'));
+        $searchForm['begin_time'] = trim(I('get.begin_time','','strval'));
+        $searchForm['end_time'] = trim(I('get.end_time','','strval'));
+        $searchForm['ordername'] = trim(I('get.ordername','','strval'));
+        $searchForm['ordertype'] = trim(I('get.ordertype','','strval'));
+        // $userName = I('post.username','');
+        // $porxy = I('post.proxy','');
+        // $startTime = I('post.startime','');
+        // $endTime = I('post.endtime','');
+        // $status = I('post.status','');
+        // $orderTag = I('post.ordertag','');
+        // $orderDesc = I('post.orderdesc',0);
+        // $condition = array();
+        // $condition['userName'] = $userName;
+        // $condition['porxy'] = $porxy;
+        // $condition['startTime'] =  $startTime;
+        // $condition['endTime'] = $endTime;
+        // $condition['status'] = $status;
+        // $condition['orderTag'] = $orderTag;
+        // $condition['orderDesc'] = $orderDesc;
+        $condition = array();
+        $users_list = $user->userList($searchForm);
+        //将代理Id替换为商城名称
+        foreach ($users_list as $key => $value) {
+            $shopData = $shop->get_shop_info_by_proxy(intval($value['reg_from']));
+            $condition['user_id'] = $value['user_id'];
+            $OrderInfo[$key]= $Order->user_order_count($condition);
+            $users_list[$key]['order_num'] = $OrderInfo[$key]['order_num'];
+            $users_list[$key]['order_money'] = $OrderInfo[$key]['order_money'];
+            // $Orderlist[$key]= $Order->user_order_list($users_list[$key]['user_id']);
+            //调用拍拍数据库API查询手机归属地
+            // $mobile_from = $this->get_mobile_area($value['user_name']);
+            $users_list[$key]['mobile_from'] = $mobile_from['province'].$mobile_from['cityname'];
+            if($shopData)
+                $users_list[$key]['reg_from'] = $shopData[0]['shop_name'];
+            else 
+                $users_list[$key]['reg_from'] = '直接注册';
+            if(($searchForm['bought']=='exist'&&$users_list[$key]['order_num'])||($searchForm['bought']=='none'&&!$users_list[$key]['order_num'])){
+                $temp[]=$users_list[$key];
+            }
+        }
+        if($searchForm['bought']){
+            $users_list=$temp;
+        }
+        //订单数量和交易金额排序
+        if($searchForm['ordername'] == 'order_num'||$searchForm['ordername'] == 'order_money'){
+            $users_list = $user->array_sort($users_list,$searchForm['ordername'],$searchForm['ordertype']);
+        }
+
+        // var_dump($users_list);exit;
+        $this->assign('search_form',$searchForm);
+        $pageList = array_page($users_list);
+        // var_dump($pageList);exit;
+        $this->assign('userslist',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+        $this->display();
+    }
+
+    public function userOrderList(){
+        $Order = new OrderService;
+        $userId = I('get.user_id',0);
+        if($userId){
+            $orderList= $Order->user_order_list($userId);
+            var_dump($orderList);exit;
+        }
+    }
+    public function statistics(){
+        $user = new UserService;
+        $shop = new ShopService;
+        $Order = new OrderService;
+        $Othershare = new OthershareService;
+
+        //当日信息
+        $condition = array();
+        $condition['type'] = 1;
+        $condition['start_time'] = strtotime(date('Y-m-d',strtotime('+0 day')));
+        $today = $Order->user_order_count($condition);
+        $today['user_count'] = $user->userCount($condition);
+        $condition['status'] = 2;
+        $today['dhm_xf_count'] = $Othershare->dhm_count($condition);
+        //当月信息
+        $condition = array();
+        $condition['type'] = 1;
+        $condition['start_time'] = strtotime(date('Y-m',strtotime('+0 month')));
+        
+        $month = $Order->user_order_count($condition);
+        $month['user_count'] = $user->userCount($condition);
+        $condition['status'] = 2;
+        $month['dhm_xf_count'] = $Othershare->dhm_count($condition);
+        //总量信息
+        $condition = array();
+        $condition['type'] = 1;
+        $total = $Order->user_order_count($condition);
+        $total['user_count'] = $user->userCount($condition);
+        $condition['status'] = 2;
+        $total['dhm_xf_count'] = $Othershare->dhm_count($condition);
+
+
+        //会员购买情况统计
+        $userdata = array();
+        //平均订单数以及平均购物金额
+        $userdata['ave_order'] = sprintf("%.3f",$total['order_num']/$total['user_count']);
+        $userdata['ave_money'] = sprintf("%.3f",$total['order_money']/$total['user_count']);
+        $fliter = array();
+        //购买率
+        $fliter['ordernum'] = 1;
+        $userdata['onetime_count'] = $Order->count_user_order($fliter);
+        $userdata['onetime_rate'] = sprintf("%.3f",$userdata['onetime_count']/$total['user_count'])*100;
+        $fliter['ordernum'] = 2;
+        $userdata['twotime_count'] = $Order->count_user_order($fliter);
+        $userdata['twotime_rate'] = sprintf("%.3f",$userdata['twotime_count']/$total['user_count'])*100;
+        $fliter['ordernum'] = 5;
+        $userdata['fivetime_count'] = $Order->count_user_order($fliter);
+        $userdata['fivetime_rate'] = sprintf("%.3f",$userdata['fivetime_count']/$total['user_count'])*100;
+
+        $this->assign('today',$today);
+        $this->assign('month',$month);
+        $this->assign('total',$total);
+        $this->assign('userdata',$userdata);
+
+        // var_dump($today);
+        // var_dump($month);
+        // var_dump($total);
+        // var_dump($userdata);
+        // exit;
+        $this->display();
+    }
+
+    //修改会员账号状态
+    public function changeState(){
+        $user = new UserService;
+        $userId = I('post.id',0);
+        $status = I('post.status',-1);
+        if($status==0||$status==1){
+            $change = $status?0:1;
+            $res=$user->changeUserData($userId,'is_validated',$change);
+            echo $change?($res?'禁用成功':'禁用失败'):($res?'启用成功':'启用失败');
+        }else{
+            echo '修改失败';
+            exit;
+        }
+    }
+    //重置会员密码
+    public function resetPasswd(){
+        $user = new UserService;
+        $userId = I('post.id',0);
+        $rePassword = I('post.passwd','');
+        if($rePassword!=''){
+            $res=$user->resetPasswd($userId,$rePassword);
+            echo $res?'修改密码成功':'修改密码失败';
+        }else{
+            echo '输入密码无效';
+            exit;
+        }
+    }
+    //修改会员账户资金
+    public function changeUserMoney(){
+        $user = new UserService;
+        $Order = new OrderService;
+        $userId = I('post.id',0,'intval');
+        $change = I('post.change',0,'floatval');    
+        $content = I('post.content','','strval');    
+        // echo $change;exit;
+        if($change!=0){
+            $data =array();
+            $data['shop_id'] = 0;
+            $data['userid'] = $userId;
+            $data['money'] = abs($change);
+            $data['content'] = $content;
+            $type = $change>0?3:4;
+            $admin_name = "admin";
+            $res1=$user->changeUserMoney($userId,$change);
+            if($res1){
+                $res2=$Order->ls_jl($data,$type,$admin_name);
+                if($res2){
+                    echo json_encode(array("code"=>0,"msg"=>"修改会员资金账户成功！"));exit();
+                }else{
+                    //用户表修改成功，流水表修改失败，用户表数据回滚
+                    $change = 0-$change;
+                    $res1=$user->changeUserMoney($userId,$change);
+                    echo json_encode(array("code"=>3,"msg"=>"流水表出错,修改会员资金账户失败！"));exit();
+                }
+            }else{
+                echo json_encode(array("code"=>2,"msg"=>"修改会员资金账户失败！"));exit();
+            }
+        }else{
+            echo json_encode(array("code"=>1,"msg"=>"修改数值为零！"));exit();
+        }
+    }
+    //删除会员账号
+    public function deleteUser(){
+        $user = new UserService;
+        $userId = I('post.id',0);
+        $res = 0;
+        if($userId)
+            $res=$user->deleteUser($userId);
+        echo $res?'删除用户成功':'删除用户失败';
+    }
+
+    public function get_mobile_area($mobile){
+    //根据淘宝的数据库调用返回值
+        // $url = "http://tcc.taobao.com/cc/json/mobile_tel_segment.htm?tel=".$mobile."&t=".time();
+    //根据拍拍的数据库调用返回值
+        $url = "http://virtual.paipai.com/extinfo/GetMobileProductInfo?mobile=".$mobile."&amount=10000&callname=info";
+
+        $content = file_get_contents($url);
+        $content = iconv('GB2312', 'UTF-8', $content);
+        $find = array('"',"'",'{','}','(',')','\r','\n','\r\n',';','info');
+        $json = str_replace($find, '', $content);
+        $sda=strstr($json,'<',true);
+        $array = explode(',', $sda);
+        $info = array();
+        foreach($array as $val){
+            $temp = explode(':', $val);
+            $key = trim($temp[0]);
+            $info[$key] = trim($temp[1]);
+        }
+        // var_dump($info);exit;
+        return $info;
+        // array (size=8)
+        //   'mobile' => string '13333333333' (length=11)
+        //   'province' => string '河北' (length=6)
+        //   'isp' => string '中国电信' (length=12)
+        //   'stock' => string '1' (length=1)
+        //   'amount' => string '10000' (length=5)
+        //   'maxprice' => string '0' (length=1)
+        //   'minprice' => string '0' (length=1)
+        //   'cityname' => string '秦皇岛' (length=9)
+    }
+}

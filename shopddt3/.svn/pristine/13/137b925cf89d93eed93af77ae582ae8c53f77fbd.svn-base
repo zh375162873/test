@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="{$uri}__PUBLIC__/admin/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/font.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/style.css">
+	<style>
+        .headerNav {
+            height: 40px;
+            border-bottom: 1px solid #ddd8ce;
+			margin-bottom:10px;
+        }
+        .headerNav ul li {
+            display: inline-block;
+            font-size: 14px;
+            height: 39px;
+            line-height: 39px;
+            padding: 0 10px;
+            margin-top: 1.5px;
+			cursor:pointer;
+        }
+        .headerNav ul .active {
+            border-bottom: 3px solid #FA580F;
+        }
+		.container{
+			width:100%;
+			overflow-x:hidden;
+		}
+    </style>
+    <script src="{$uri}__PUBLIC__/admin/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/admin/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/admin/js/general.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/admin/js/common.js" type="text/javascript"></script>
+    <script src="{$uri}__PUBLIC__/admin/js/jquery.validate.min.js" type="text/javascript"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="http://apps.bdimg.com/libs/html5shiv/3.7/html5shiv.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<script>
+    function jumpTo(e) {
+        var url = $(e).attr("data-url");
+        $(e).addClass("active");
+        location.href = url;
+    }
+</script>
+<body>
+<div class="container">

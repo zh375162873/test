@@ -1,0 +1,34 @@
+<?php
+/*
+ * 赠送好友控制器
+ * @auth 王春一
+ */
+namespace Home\Controller;
+
+header("Content-type:text/html;charset=utf-8");
+
+class ZsonghyController extends BaseController
+{
+    public $dhm_db;
+    public function __construct(){
+        parent::__construct();
+        $this->dhm_db = D("DhmManage");
+    }
+    
+    //赠送好友
+    public function donation(){
+        $dhm_id = I("get.dhm_id");
+        $dhminfo = $this->dhm_db->where(array("id"=>$dhm_id))->field("order_id,dhm_code,goods_id")->find();
+        $goods_info = D("OrdersGoods")->where(array("order_id"=>$dhminfo['order_id'],"goods_id"=>$dhminfo['goods_id']))->find();
+        $data =array(
+            "order_id" => $goods_info['order_id'],
+            "goods_id" => $goods_info['goods_id'],
+            "goods_name" => $goods_info['goods_name'],
+            "goods_image" => $goods_info['goods_image'],
+            "dhm_code" => $dhminfo['dhm_code'],
+        );
+        //echo "<pre>";print_r($data);exit();
+        $this->assign("info",$data);
+        $this->display("donation");
+    }
+}

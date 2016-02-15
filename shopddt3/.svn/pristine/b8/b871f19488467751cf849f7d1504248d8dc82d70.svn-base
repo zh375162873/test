@@ -1,0 +1,52 @@
+<?php
+
+namespace Home\Controller;
+use BizService\UserService;
+use BizService\GoodsService;
+use BizService\GoodsstoreService;
+use Think\Controller;
+
+class PinglunController extends BaseController {
+    public $pinglun,$goods_service;
+    public function __construct(){
+        parent::__construct();
+        $this->pinglun = D("PinglunManage"); 
+        $this->goods_service = new GoodsstoreService();
+    }
+
+    public function pl_list(){
+        //初始化数据
+        $goods_id = I("get.goods_id");
+        $arr=$this->pinglun->getlist($goods_id);
+        $goodsinfo=$this->goods_service->getinfo($goods_id,array("goods_id,goods_name"),1);
+		
+		$adddata=array
+		           (
+                    'id' => 32,
+                    'goods_id' => 130,
+                    'order_id' => 780,
+                    'goods_type' => 0,
+                    'shop_id' => 1,
+                    'store_id' => 4768,
+                    'buyer_id' => 1376,
+                    'pl_content' => '食之无味，弃之可惜。',
+                    'pl_parentid' => 0,
+                    'pl_addtime' => '2016-01-06 16:12:02',
+                    'pl_updatetime' => '',
+                    'pl_points' => 5,
+                    'pl_status' => 1,
+                    'nickname' => '赵星',
+                    'user_name' => '134****8284'
+                );
+		
+	$arr['list']=	array_merge($arr['list'],$adddata);
+		
+		
+		
+        $this->assign("goodsinfo",$goodsinfo);
+        $this->assign("list",$arr['list']);
+        $this->assign('info',$arr['info']);  
+        $this->display("list");
+    }
+    
+}

@@ -1,0 +1,8 @@
+<div class="col-md-12" style="padding-bottom:10px; padding-left:0px;">
+             <div class="col-md-9"  style="padding-left:0px;">
+			  <input type="text" size="5" class="form-control" style="width:30px;display:inline">日-<input type="text" size="5" class="form-control" style="width:30px;display:inline">日
+			   <input type="text" size="5" class="form-control" style="width:30px;display:inline">时 <input type="text" size="5" class="form-control" style="width:30px;display:inline">分-
+			   <input type="text" size="5" class="form-control" style="width:30px;display:inline">时 <input type="text" size="5" class="form-control" style="width:30px;display:inline">分
+			 </div>
+			  <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+</div>  

@@ -1,0 +1,26 @@
+<?php
+namespace Admin\Controller;
+use Think\Controller;
+use BizService\GoodsstoreService;
+
+class OrderchuliController extends Controller{
+    public $order,$ordergoods,$orderlog;
+    public function __construct(){
+        parent::__construct();
+        $this->order = D("Orders");
+        $this->ordergoods = D("OrdersGoods");
+        $this->orderlog = D("OrdersLog");
+        $this->goodsstoreservice = new GoodsstoreService();
+    }
+    
+    //未支付订单处理
+    public function chuli_wxf_order(){
+        $arr = $this->order->where(array("order_status"=>0))->select();
+        echo "<pre>";print_r($arr);exit();
+        //获取所有订单中商品的数量
+        
+        for($i=0;$i<count($arr);$i++){
+            $this->goodsstoreservice->changestoragebyid($arr[$i]['goods_id'],-$arr[$i]['goods_num'],$type=1);
+        }
+    }
+}

@@ -1,0 +1,340 @@
+<?php
+
+namespace Home\Controller;
+
+use BizService\ShareService;
+use Think\Controller;
+use BizService\UserService;
+
+header("Content-type:text/html;charset=utf-8");
+
+class IndexController extends Controller
+{
+    public function _initialize(){
+        $shop_info = shop_info();
+        $this->assign("shop_base_info",$shop_info);
+    }
+    //商城主页
+    public function index()
+    {
+        //如果有坐标传来就保存到session中
+        $lat = I('location_lat') ? I('location_lat') : 0;
+        $lng = I('location_lng') ? I('location_lng') : 0;
+        if ($lat && $lng) {
+            session('lat', $lat);
+            session('lng', $lng);
+        }
+
+        //获取商城信息
+        $shop_proxy = get_shop_proxy();
+        $shop_id = $shop_proxy['shop_id'] ? $shop_proxy['shop_id'] : 1;
+        //搜索本商城首页信息
+        $shouye = D("Admin/temp")->getinfo(array('shop_id' => $shop_id, 'temp_type' => 1));
+        $temp_id = $shouye['temp_id'] ? $shouye['temp_id'] : 0;
+
+        //var_dump($_SERVER);
+        //获取已添加的样式
+        $item_param = array();
+        $item_param['temp_id'] = $temp_id;
+        $item_param['item_is_used'] = 1;
+        $item_param['shop_id'] = $shop_id;
+        $item_order = 'item_order asc ,item_id asc';
+        $item_data = D("Tempitem")->getlist($item_param, $item_order);
+		//获取微信坐标
+		require_once './ThinkPHP/Library/Vendor/WeixinJssdk/WeixinJssdk.php';
+	    $jssdk=new \WeixinJssdk();
+        $signPackage = $jssdk->GetSignPackage();
+		$this->assign('signPackage', $signPackage);
+
+        $this->assign('show', 1);
+        $this->assign('item_data', $item_data);
+        $this->assign('temp_id', $temp_id);
+        $this->assign('username', session('userName'));
+        $share_service = new ShareService();
+        $share = $share_service->get_share_set($shop_proxy['shop_id']);
+        $this->assign('share',$share[0]);
+		$this->assign('uri', "");
+        $this->display("temp_index");
+    }
+
+    //用户登录页
+    public function userLogin()
+    {
+        $userName = session('userName');
+        if (isset($userName)) {
+            redirect('index');
+        }
+        $encodeUrlstr = I('get.before_url','');
+        $before_url = urldecode($encodeUrlstr);
+        cookie('before_url',$before_url);
+        $this->display('userLogin');
+    }
+
+    //用户登录
+    public function userActLogin()
+    {
+        $user = new UserService();
+        $userName = I('post.username', '');
+        $password = I('post.password', '');
+        //过滤条件
+
+        $data = $user->userLogin($userName, $password);
+        if ($data){
+            // $this->error('登录失败', 'userLogin');
+            $info = array("status"=>0,"info"=>'密码错误或未注册');
+        }else{
+            $before_url = cookie('before_url');
+            if($before_url){
+                cookie('before_url',null);
+                $info = array("status"=>1,"info"=>$before_url);
+                // redirect($before_url);
+            }else{
+                $info = array("status"=>1,"info"=>U('/home/index/index'));
+            }
+        }
+        echo json_encode($info);exit();
+            // $this->success('登录成功','index',0);
+    }
+
+    //用户登出
+    public function userLoginOut()
+    {
+        session_destroy();
+        // session('userName',null);
+        // session('userId',null);
+        redirect('index');
+    }
+
+    //用户注册页
+    public function register()
+    {
+        $userName = session('userName');
+        if (isset($userName)) {
+            redirect('index');
+        }
+        $this->display('register');
+    }
+
+    //用户输入密码页
+    public function inputPassword()
+    {
+        $userName = session('userName');
+        if (isset($userName)) {
+            redirect('index');
+        }
+        $type = I('post.type', '', 'strval');
+        $phone_num = I('post.username', '', 'strval');
+        $this->assign('username', $phone_num);
+        $this->assign('type', $type);
+        $this->display('inputPassword');
+    }
+
+    //用户注册
+    public function actRegister()
+    {
+        $user = new UserService();
+        $userName = I('post.username', '');
+        $password = I('post.password', '');
+        //过滤条件
+        $data = $user->userRegister($userName, $password);
+        if ($data){
+            $before_url = cookie('before_url');
+            if($before_url){
+                cookie('before_url',null);
+                $info = array("status"=>1,"info"=>$before_url);
+                // redirect($before_url);
+            }else{
+                $info = array("status"=>1,"info"=>U('/home/index/index'));
+            }
+        }else{
+            $info = array("status"=>0,"info"=>'注册失败');
+        }
+        echo json_encode($info);exit();
+    }
+
+    //找回密码页面
+    public function findPwd()
+    {
+        $this->display('findPwd');
+    }
+
+    //找回密码
+    public function actFindpwd()
+    {
+        $user = new UserService();
+        $userName = I('post.username', '');
+        $password = I('post.password', '');
+        //过滤条件
+        $userId = $user->checkUser($userName);
+        $data = $user->resetPasswd($userId, $password);
+        if ($data){
+            // $before_url = cookie('before_url');
+            // if($before_url){
+            //     cookie('before_url',null);
+            //     $info = array("status"=>1,"info"=>$before_url);
+            // }else{
+                $info = array("status"=>1,"info"=>U('/home/index/userLogin'));
+            // }
+            
+        }else{
+            $info = array("status"=>0,"info"=>'修改密码失败');
+        }
+        echo json_encode($info);exit();
+        // if ($data)
+        //     $this->success('修改密码成功', 'index');
+        // else
+        //     $this->error('修改密码失败', 'register');
+    }
+
+    //用户注册发送短信验证
+    public function getCode_reg()
+    {
+        $user = new UserService();
+        session('code', I('session.code', ''));
+        $phone_num = I('post.username', '', 'strval');
+        if (!preg_match('/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/', $phone_num)) {
+            echo json_encode(array("code" => 0, "msg" => "请输入合法手机号码~!"));
+            exit();
+        } else {
+            if ($user->checkUser($phone_num)) {
+                echo json_encode(array("code" => 3, "msg" => "该手机号码已注册~!"));
+                exit();
+            }
+            $code = strval(rand(1000, 9999));
+            $data = "您好,您的注册验证码是：" . $code . " 欢迎您使用点点通掌上商城,请勿将验证码告知他人!";
+            if (!I('session.send_time', '')) {
+                if (time() - session('send_time') < 60) {
+                    $again_time = 60 - (time() - session('send_time'));
+                    echo json_encode(array("code" => 0, "msg" => "请求过于频繁,请等待" . $again_time . "秒"));
+                    exit();
+                }
+            }
+            session('code', $code . "_" . $phone_num);
+            // $co = $user->sendMsgForUser($phone_num, $data);
+            // session('send_time', time());//重新赋值时间
+            // if ($co == '0') {
+                echo json_encode(array("code" => 1, "msg" => "验证码" . $code . "已发送~!"));
+                exit();
+            // }
+        }
+    }
+
+    //用户找回密码发送短信验证
+    public function getCode_findpwd()
+    {
+        $user = new UserService();
+        session('code', I('session.code', ''));
+        $phone_num = I('post.username', '', 'strval');
+        if (!preg_match('/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/', $phone_num)) {
+            echo json_encode(array("code" => 0, "msg" => "请输入合法手机号码~!"));
+            exit();
+        } else {
+            if (!$user->checkUser($phone_num)) {
+                echo json_encode(array("code" => 3, "msg" => "该手机号码未注册~!"));
+                exit();
+            }
+            $code = strval(rand(1000, 9999));
+            $data = "您好,您正在进行修改密码，验证码是：" . $code . " 欢迎您使用点点通掌上商城,请勿将验证码告知他人!";
+            if (!I('session.send_time', '')) {
+                if (time() - session('send_time') < 60) {
+                    $again_time = 60 - (time() - session('send_time'));
+                    echo json_encode(array("code" => 0, "msg" => "请求过于频繁,请等待" . $again_time . "秒"));
+                    exit();
+                }
+            }
+            session('code', $code . "_" . $phone_num);
+            // $co = $user->sendMsgForUser($phone_num, $data);
+            // session('send_time', time());//重新赋值时间
+            // if ($co == '0') {
+                echo json_encode(array("code" => 1, "msg" => "验证码" . $code . "已发送~!"));
+                exit();
+            // }
+        }
+    }
+
+    //核对验证码
+    public function checkCode()
+    {
+        $user = new UserService();
+        $phone_num = I('post.username', '', 'strval');
+        $check_code = I('post.check_code', '', 'strval');
+        echo $user->checkCode($phone_num, $check_code);
+    }
+
+    public function location()
+    {
+	    //获取微信坐标
+		require_once './ThinkPHP/Library/Vendor/WeixinJssdk/WeixinJssdk.php';
+	    $jssdk=new \WeixinJssdk();
+        $signPackage = $jssdk->GetSignPackage();
+		$this->assign('signPackage', $signPackage);
+        $this->display('location');
+    }
+	
+    public function get_ip(){
+            // echo getenv("HTTP_X_FORWARDED_FOR");exit;
+          $ip = getenv("REMOTE_ADDR");
+          echo $ip;
+
+    }
+	
+		//计算运费
+	public function ajax_get_shipping_fee(){
+	    $parent_id=I("get.parent_id",0,"intval");
+		$sendtype=I("get.sendtype",0,"intval");
+		$shipping_fee=0;
+		//循环出此批次所有订单信息
+		$orderlist=M("orders")->where("parent_id=$parent_id")->select();
+		
+		print_r($orderlist);
+		
+		foreach($orderlist as $key=>$val){
+		  //调取订单商品信息
+		  $goodsinfo = M("goods")->where("goods_id=".$val['goods_id']." and is_virtual=0")->find();
+		  if($goodsinfo){
+		    $goods_sending = M("goods_sending")->where("goods_commonid=".$goodsinfo['goods_commonid'])->find();
+		    if($sendtype==1){
+             //快递所有商品
+			  if($goods_sending){
+			     //如果是包邮
+			     if($goods_sending['type']==1){
+				   continue;
+				 //如果是收费   
+				 }else{
+				   //检查是否启用多件包邮
+				   if($goods_sending['is_free']==1&&$goods_sending['free_num']>=1){
+				      if($val['goods_num']>=$goods_sending['free_num']){
+					      continue;
+					  }
+				   }
+				   //如果多件包邮不起作用，就要进行邮费计算了
+				   $shipping_fee=$shipping_fee+$goods_sending['first_price']+($val['goods_num']-1)*$goods_sending['add_price'];
+				 }
+			  }
+			//如果是自提   
+			}elseif($sendtype==2){
+			   if($goods_sending){
+			      if($goodsinfo['is_take']==1&&$goodsinfo['take_type']>0){
+				    //总减
+				    if($goodsinfo['take_type']==1){
+					  $shipping_fee=$goodsinfo['take_num'] ;
+					  break;
+					//多件减
+					}elseif($goodsinfo['take_type']==2){
+					  $shipping_fee=$shipping_fee+$goodsinfo['take_num']*$val['goods_num'];
+					}
+				  }else{
+				    continue;
+				  }
+			   }  
+			}else{
+			  echo -1;
+			}
+		  }
+		}
+		
+		echo $shipping_fee;
+		
+	}
+
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta content="telephone=no" name="format-detection">
+	<title>关于点点通</title>
+	<link rel="stylesheet" type="text/css" href="__PUBLIC__/home/css/main.css">
+</head>
+
+<body>
+	<div id="viewport" class="viewport">
+		<div class="home_nav_huodong">
+			<div class="about_jianjie">
+				<img src="__PUBLIC__/home/images/about_jianjie.jpg">
+				　　点点通商业Wi-Fi营销联盟由西安点点通网络科技有限公司发起成立，专注于商家免费WIFI网络建设推广以及WIFI网络精准营销传媒平台运营。公司本着做有效营销传媒平台的原则，整合商家、行业、产业链上下游资源，致力于为商家提供智慧的、人性化的移动互联网广告以及营销服务。公司团队由移动互联网，软硬件系统开发，广告传媒、营销服务领域精英组成，坚持通过优质的产品及服务体验，打造一套移动互联精准营销体系。
+
+				<li class="about_lianxi"><img src="__PUBLIC__/home/images/nav_about_telephone.png"><p>029-88868428</p></li>
+				<li class="about_lianxi"><img src="__PUBLIC__/home/images/nav_about_location.png"><p>高新区唐延南路都市之门C座616</p></li>
+			</div>
+		</div>
+	</div>	  
+</body>
+</html>

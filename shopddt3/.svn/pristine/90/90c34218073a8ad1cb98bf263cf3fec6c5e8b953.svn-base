@@ -1,0 +1,238 @@
+<?php
+
+namespace Home\Controller;
+use BizService\UserService;
+
+header("Content-type:text/html;charset=utf-8");
+class IndexController extends BaseController {
+	//商城主页
+    public function index(){
+        // header('Content-Type:text/html; charset= utf-8');
+        // echo '我是Home模块';
+        $regFrom = I('get.ddt_from',''); 
+        session('regFrom',$regFrom);
+        session('proxyId',79);
+		session('sjop_id',1);
+        // var_dump($_SESSION);exit;
+		
+		//如果有坐标传来就保存到session中
+		$lat=I('location_lat')?I('location_lat'):0;
+		$lng=I('location_lng')?I('location_lng'):0;
+		if($lat&&$lng){
+		  session('lat',$lat);
+		  session('lng',$lng);
+		}
+		
+		//获取商城信息
+		$shop_proxy=get_shop_proxy();
+		$shop_id=$shop_proxy['shop_id']?$shop_proxy['shop_id']:1;
+		//搜索本商城首页信息
+		$shouye = D("Admin/temp")->getinfo(array('shop_id'=>$shop_id,'temp_type'=>1));
+	    $temp_id=$shouye['temp_id']?$shouye['temp_id']:0;
+		//获取已添加的样式
+		$item_param=array();
+		$item_param['temp_id']=$temp_id;
+		$item_param['item_is_used']=1;
+		$item_param['shop_id']=$shop_id;
+		$item_order='item_order asc ,item_id asc';
+		$item_data = D("Tempitem")->getlist($item_param,$item_order);
+		$this->assign('show',1);
+		$this->assign('item_data',$item_data);
+		$this->assign('temp_id',$temp_id);
+        $this->assign('username',session('userName'));
+		$this->display("temp_index");
+		exit;
+        $this->display('index');
+    }
+    //用户登录页
+    public function userLogin(){
+    	$userName = session('userName');
+        if(isset($userName)){
+            redirect('index');
+        }
+        $this->display('userLogin');
+    }
+    //用户登录
+    public function userActLogin(){
+        $user = new UserService();
+        $userName = I('post.username','');
+        $password = I('post.password','');
+        //过滤条件
+
+        $data = $user->userLogin($userName, $password);
+        if($data)
+            $this->error('登录失败', 'userLogin');
+        else
+            // $this->success('登录成功','index',0);
+            redirect('index');
+    }
+    //用户登出
+    public function userLoginOut(){
+        session_destroy();
+        // session('userName',null);
+        // session('userId',null);
+        redirect('index');
+    }
+
+    //用户注册页
+    public function register(){
+    	$userName = session('userName');
+        if(isset($userName)){
+            redirect('index');
+        }
+        $this->display('register');
+    }
+    //用户输入密码页
+    public function inputPassword(){
+        $userName = session('userName');
+        if(isset($userName)){
+            redirect('index');
+        }
+        $type = I('post.type','','strval');
+        $phone_num = I('post.username','','strval');
+        $this->assign('username',$phone_num);
+        $this->assign('type',$type);
+        $this->display('inputPassword');
+    }
+    //用户注册
+    public function actRegister(){
+        $user = new UserService();
+        $userName = I('post.username','');
+        $password = I('post.password','');
+         //过滤条件
+        $data = $user->userRegister($userName,$password);
+        if($data)
+            $this->success('注册成功', 'index');
+        else
+            $this->error('注册失败', 'register');
+    }
+    //找回密码页面
+    public function findPwd(){
+        $this->display('findPwd');
+    }
+    //找回密码
+    public function actFindpwd(){
+        $user = new UserService();
+        $userName = I('post.username','');
+        $password = I('post.password','');
+         //过滤条件
+        $userId = $user->checkUser($userName);
+        $data = $user->resetPasswd($userId, $password);
+        if($data)
+            $this->success('修改密码成功', 'index');
+        else
+            $this->error('修改密码失败', 'register');
+    }
+    //用户注册发送短信验证
+    public function getCode_reg(){
+        $user = new UserService();
+        session('code',I('session.code',''));
+        $phone_num = I('post.username','','strval');
+        if(!preg_match('/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/', $phone_num)){         
+               echo json_encode(array("code"=>0,"msg"=>"请输入合法手机号码~!"));exit();
+        }else{
+            if($user->checkUser($phone_num)){
+                echo json_encode(array("code"=>3,"msg"=>"该手机号码已注册~!"));exit();
+            }
+            $code = strval(rand(1000,9999));
+            $data ="您好,您的注册验证码是：" . $code . " 欢迎您使用点点通掌上商城,请勿将验证码告知他人!" ;
+            if(!I('session.send_time','')){
+                if(time()-session('send_time') < 60){
+                    $again_time = 60- (time() - session('send_time'));
+                    echo json_encode(array("code"=>0,"msg"=>"请求过于频繁,请等待" .$again_time. "秒"));exit();
+                }
+            }
+            session('code',$code . "_" . $phone_num);
+            $retdata = $user->sendMsgForUser($phone_num,$data);
+            $co = 0;
+            session('send_time',time());//重新赋值时间
+            if($co == '0'){
+                echo json_encode(array("code"=>1,"msg"=>"验证码".$retdata."已发送~!"));exit();               
+            }            
+        }
+    }
+    //用户找回密码发送短信验证
+    public function getCode_findpwd(){
+        $user = new UserService();
+        session('code',I('session.code',''));
+        $phone_num = I('post.username','','strval');
+        if(!preg_match('/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/', $phone_num)){         
+               echo json_encode(array("code"=>0,"msg"=>"请输入合法手机号码~!"));exit();
+        }else{
+            if(!$user->checkUser($phone_num)){
+                echo json_encode(array("code"=>3,"msg"=>"该手机号码未注册~!"));exit();
+            }
+            $code = strval(rand(1000,9999));
+            $data ="您好,您正在进行修改密码，验证码是：" . $code . " 欢迎您使用点点通掌上商城,请勿将验证码告知他人!" ;
+            if(!I('session.send_time','')){
+                if(time()-session('send_time') < 60){
+                    $again_time = 60- (time() - session('send_time'));
+                    echo json_encode(array("code"=>0,"msg"=>"请求过于频繁,请等待" .$again_time. "秒"));exit();
+                }
+            }
+            session('code',$code . "_" . $phone_num);
+            $retdata = $user->sendMsgForUser($phone_num,$data);
+            $co = 0;
+            session('send_time',time());//重新赋值时间
+            if($co == '0'){
+                echo json_encode(array("code"=>1,"msg"=>"验证码".$retdata."已发送~!"));exit();               
+            }            
+        }
+    }
+    //核对验证码
+    public function checkCode(){
+        $user = new UserService();
+        $phone_num = I('post.username','','strval');
+        $check_code = I('post.check_code','','strval');
+        echo $user->checkCode($phone_num,$check_code);
+    }
+
+    public function mine(){
+        $user = new UserService();
+        $userId=session('userId');
+        $queryData = array('user_name','nick_name','user_money','pay_points');
+        $userData = $user->userInfo($userId,$queryData);
+        // var_dump($userData);
+        $this->assign('userdata',$userData);
+        $this->display();
+    }
+    public function changeNickname(){
+        $user = new UserService();
+        $userId=session('userId');
+        $queryData = array('nick_name');
+        $userData = $user->userInfo($userId,$queryData);
+        $this->assign('userdata',$userData);
+        $this->display();
+    }   
+    public function changePassword(){
+        $this->display();
+    }
+    public function actChangeNickname(){
+        $user = new UserService();
+        $userId=session('userId');
+        $nickName = I('get.nickname','','strval');
+        $data = $user->changeUserData($userId,'nick_name',$nickName);
+        redirect('mine');
+    }    
+    public function actChangePassword(){
+        $user = new UserService();
+        $oldPassword = I('post.old_password','','strval');
+        $newPassword = I('post.new_password','','strval');
+        if($user->checkUser(session('userName'),$oldPassword)>0){
+            $data = $user->resetPasswd(session('userId'), $newPassword);
+            if($data){
+                echo "<script type='text/javascript'>alert('修改密码成功');window.location.href='".U('index/mine')."';</script>";
+            }else{
+                echo "<script type='text/javascript'>alert('修改密码失败');history.back();</script>";
+            }
+        }else{
+            echo "<script type='text/javascript'>alert('原密码输入错误');history.back();</script>";
+        }
+
+    }
+	
+	public function location(){
+	   $this->display('location');
+	}
+
+}

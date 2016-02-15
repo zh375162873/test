@@ -1,0 +1,56 @@
+<?php
+
+namespace Home\Controller;
+use BizService\UserService;
+
+header("Content-type:text/html;charset=utf-8");
+class UserController extends BaseController {
+    public function mine(){
+        $user = new UserService();
+        $userId=session('userId');
+        $queryData = array('user_name','nick_name','user_money','pay_points');
+        $userData = $user->userInfo($userId,$queryData);
+        // var_dump($userData);
+        $this->assign('userdata',$userData);
+        $this->display();
+    }
+    public function changeNickname(){
+        $user = new UserService();
+        $userId=session('userId');
+        $queryData = array('nick_name');
+        $userData = $user->userInfo($userId,$queryData);
+        $this->assign('userdata',$userData);
+        $this->display();
+    }   
+    public function changePassword(){
+        $this->display();
+    }
+    public function actChangeNickname(){
+        $user = new UserService();
+        $userId=session('userId');
+        $nickName = I('get.nickname','','strval');
+        $data = $user->changeUserData($userId,'nick_name',$nickName);
+        redirect('mine');
+    }    
+    public function actChangePassword(){
+        $user = new UserService();
+        $oldPassword = I('post.old_password','','strval');
+        $newPassword = I('post.new_password','','strval');
+        if($user->checkUser(session('userName'),$oldPassword)>0){
+            $data = $user->resetPasswd(session('userId'), $newPassword);
+            if($data){
+                echo "<script type='text/javascript'>alert('修改密码成功');window.location.href='".U('user/mine')."';</script>";
+            }else{
+                echo "<script type='text/javascript'>alert('修改密码失败');history.back();</script>";
+            }
+        }else{
+            echo "<script type='text/javascript'>alert('原密码输入错误');history.back();</script>";
+        }
+
+    }
+	
+	public function location(){
+	   $this->display('location');
+	}
+
+}

@@ -1,0 +1,44 @@
+<?php
+namespace Admin\Controller;
+use BizService\ExtendService;
+use BizService\GoodsService;
+use BizService\OrderService;
+use BizService\UserService;
+
+
+class CommissionController extends BaseController {
+
+    //渠道人员分成信息列表
+    public function ChannelList(){
+      
+     $this->display('ChannelList');
+    }
+	//渠道分成结算
+	public function ChannelSettlement(){
+      
+     $this->display('ChannelSettlement');
+    }
+	//渠道分成支付
+	public function ChannelPay(){
+      
+     $this->display('ChannelPay');
+    }
+	
+	
+    //渠道下的推广人员分成信息列表
+	 public function ChannelmemberList(){
+      
+     $this->display('ChannelmemberList');
+    }
+	//渠道下的推广人员分成结算
+	public function ChannelmemberSettlement(){
+      
+     $this->display('ChannelmemberSettlement');
+    }
+	//渠道下的推广人员分成支付
+	public function ChannelmemberPay(){
+	
+      $this->display('ChannelmemberPay');
+    }
+	
+}

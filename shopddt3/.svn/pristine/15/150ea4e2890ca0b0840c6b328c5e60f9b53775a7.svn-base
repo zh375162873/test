@@ -1,0 +1,72 @@
+<include file="Index/header"/>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('class/class_list')}" onclick="jumpTo(this);" class="active">所有分类</li>
+        <li data-url="{:U('class/class_add')}" onclick="jumpTo(this);">添加分类</li>
+    </ul>
+</div>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th>ID</th>
+                <th>分类名称</th>
+                <th>图标</th>
+                <th>商品数量</th>
+                <!--<th></th>-->
+                <th>排序</th>
+                <th>操作</th>
+            </tr>
+
+            <?php
+	 foreach($classdata as $val){
+	 ?>
+            <tr class="trbor">
+                <td>{$val['gc_id']}</td>
+
+                <td>{$val['gc_name']}</td>
+                <!--<td><a href="<?php echo U('class/class_add?gc_id='.$val['gc_id']);?>" data-toggle="modal" title="修改">增加子类</a></td>-->
+                <td><img src="__PUBLIC__/{$val['gc_images']}"/></td>
+                <td>
+				<?php
+				if($val['gc_name']!='随便看看'){
+				?>
+				<a href="{:U('/admin/goods/index/gc_id/'.$val['gc_id'])}">{$val['goods_num']}个商品</a>
+				<?php
+				}else{
+				?>
+				<a href="全部{:U('/admin/goods/index')}">{$val['goods_num']}个商品</a>
+				<?php
+				}
+				?>
+				</td>
+                <td><a href="<?php echo U('class/listup?gc_id='.$val['gc_id']);?>" data-toggle="modal" title="向上">向上</a>
+                    <a href="<?php echo U('class/listdown?gc_id='.$val['gc_id']);?>" data-toggle="modal"
+                       title="向下">向下</a></td>
+                <td>
+                    <!--<a href="<?php echo U('class/class_sublist?gc_id='.$val['gc_id']);?>" data-toggle="modal"  title="修改">查看子类</a>-->
+                    
+                    <a href="<?php echo U('class/class_edit?gc_id='.$val['gc_id']);?>" data-toggle="modal"
+                       title="修改">修改</a>
+        <?php
+		if($val['gc_name']!='随便看看'){
+		?>
+		           <a href="<?php echo U('class/moveclass?gc_id='.$val['gc_id']);?>" data-toggle="modal" title="转移商品">转移商品</a>
+                    <a href="<?php echo U('class/class_del?gc_id='.$val['gc_id']);?>" data-toggle="modal"
+                       title="删除">删除</a>
+                    <?php
+		}
+		?>
+                </td>
+            </tr>
+            <?php
+	 }
+	 ?>
+        </table>
+    </div>
+
+</div>
+
+<include file="Index/footer"/>

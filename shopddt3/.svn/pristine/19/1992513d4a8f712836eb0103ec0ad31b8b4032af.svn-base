@@ -1,0 +1,70 @@
+<include file="Index/header"/>
+<link href="{$uri}__PUBLIC__/temp/indexTrue.css" rel="stylesheet">
+
+              <?php
+				 switch($style_id){
+				   case 1:
+				 ?>
+			      <!--加载模板内容1-->
+				  <include file="style_item1" />
+				  <?php
+				   break;
+				   case 2:
+				  ?>
+				  <!--加载模板内容2-->
+				  <include file="style_item2" />
+				  <?php
+				   break;
+				   case 3:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item3" />
+				  <?php
+				   break;
+				   case 4:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item4" />
+				  <?php
+				   break;
+				   case 5:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item5" />
+				  <?php
+				   break;
+				   case 6:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item6" />
+				  <?php
+				   break;
+				   case 7:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item7" />
+				  <?php
+				   break;
+				   case 61:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item61" />
+				  <?php
+				   break;
+				   case 62:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item62" />
+				  <?php
+				   break;
+				   case 63:
+				  ?>
+				  <!--加载模板内容-->
+				  <include file="style_item63" />
+				  <?php
+				   }
+				  ?>
+
+
+
+<include file="Index/footer"/>

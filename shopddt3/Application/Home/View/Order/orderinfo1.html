@@ -1,0 +1,43 @@
+
+<section class="og_desc order_dhm">
+    <h3>兑换码:</h3>
+    <volist name="dhm" id="vo">
+	   <section>
+			<div class="dhm"><span class="format_code">{$vo.dhm_code}</span>
+                <strong class="order_status colorC4">
+                   <if condition="($vo.status eq 0) AND ($vo.refund_status eq 0)">未消费
+                   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 1)" />退款中
+                   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 2)" />退款完成
+                   <elseif condition="($vo.status eq 0) AND ($vo.refund_status eq 3)" />退款申请驳回
+                   <elseif condition="($vo.status eq 1)" />已消费
+                   </if>
+                </strong>
+			</div>
+            <div class="btn_div">
+                <if condition="($orderinfo['order_status'] eq 2) and ($orderinfo['evaluation_state'] eq 0)">
+                    <a  href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">评价</a>
+                </if>
+                <if condition="($orderinfo['order_status'] eq 2) and ($orderinfo['evaluation_state'] eq 1)">
+                    <a  href="{:U('order/pinglun',array('id'=>$orderinfo['order_id']))}">已评价</a>    
+                </if>
+            </div>    
+			<div class="btn_div" id="refund_qx">
+			<if condition="($vo.status eq 0) AND ($vo.refund_status eq 0)">
+				<a class="tk" href="{:U('order/refund_order',array('id'=>$orderinfo['order_id'],'dhm_id'=>$vo['id']))}">退款</a>
+				<if condition="$vo['zs_status'] eq 0">
+				<a class="zs" href="{:U('Zsonghy/donation',array('dhm_id'=>$vo['id']))}">赠送好友</a>
+				<else />
+				<a class="zs" href="{:U('Zsonghy/donation',array('dhm_id'=>$vo['id']))}">再次赠送</a>
+				</if>
+			<elseif condition="($vo.status eq 0 ) AND ($vo.refund_status eq 1)" />
+				<a class="tk" href="#" onClick="refund_qx({$orderinfo.order_id},{$vo.id});">取消退款</a>
+			</if>
+			</div>
+		</section>
+       </volist>
+         <section>
+            <div>有效期：</div>
+            <div>{$start_time}至{$end_time}(周末，法定节假日通用)</div>
+
+        </section>
+</section>

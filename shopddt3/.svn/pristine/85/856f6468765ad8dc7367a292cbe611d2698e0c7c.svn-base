@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta content="telephone=no" name="format-detection">
+        <title>注册用户-点点通闪购平台</title>
+        <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+        <script src="__PUBLIC__/home/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/jquery.validate.min.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/common.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/general.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/bootstrap-datepicker.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+    </head>
+    <body>
+    <script type="text/javascript">
+        function submit(obj){
+            obj.submit();
+        }
+        function Isyx(yx){
+         var reyx= /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+         return(reyx.test(yx));
+        }
+        function checkMobile(sMobile){ 
+            var telReg = !!sMobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+            //如果手机号码不能通过验证
+            if(telReg == false){
+             return false;
+            }        
+        }
+        function check(theForm){
+            var _url = '__APP__/home/index/checkCode';
+            var phoneNum = theForm.username.value;
+            var check_code = theForm.check_code.value;
+            if(checkMobile(theForm.username.value) == false){ 
+                alert("请输入正确的手机号码!");theForm.username.focus();return false; 
+            }
+            if(theForm.check_code.value == "" || theForm.check_code.value.replace(/[ ]/g,"").length !== 4){
+                alert("请输入短信验证码!");theForm.check_code.focus();return false;
+            }
+            if(theForm.agreement.getAttribute('checked') != "checked"){
+                alert("请阅读并勾选用户协议");theForm.agreement.focus();return false;
+            }
+            $.post(_url,{username:phoneNum,check_code:check_code},
+            function(data){
+                if(data.code==1){
+                    theForm.submit();
+                }else{
+                    alert(data.msg);
+                }
+            },"json");
+        }
+    </script>
+    <script type="text/javascript">
+    var InterValObj; //timer变量，控制时间
+    var count = 60; //间隔函数，1秒执行
+    var curCount;//当前剩余秒数
+
+    function sendMessage() {
+      　curCount = count;
+        var _url = '__APP__/home/index/getCode_reg';
+        var phoneNum = $("#username").val();
+            if(checkMobile(phoneNum) == false){
+                alert("请输入正确的手机号码!");$("#username").focus();return false; 
+            };
+            $.post(_url,{username:phoneNum},
+                function(data){
+                    if(data.code == 1){
+                        alert(data.msg);
+                        $("#check_code").focus();
+                        //设置button效果，开始计时
+                         $("#btnSendCode").attr("disabled", "true");
+                         $("#btnSendCode").html(curCount + "秒后重新获取");
+                         InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+                        return false;
+                    }else if(data.code == 0){
+                        alert(data.msg);return false;
+                    }else if(data.code == 2){
+                        alert(data.msg);return false;
+                    }else if(data.code == 3){
+                        alert(data.msg);return false;
+                    }           
+                },"json");
+    }
+
+    //timer处理函数
+    function SetRemainTime() {
+                if (curCount == 0) {                
+                    window.clearInterval(InterValObj);//停止计时器
+                    $("#btnSendCode").removeAttr("disabled");//启用按钮
+                    $("#btnSendCode").html("重新发送验证码");
+                }
+                else {
+                    curCount--;
+                    $("#btnSendCode").html(curCount + "秒后重新获取");
+                }
+            }
+    </script>
+        <div id="viewport" class="viewport">
+            <div class="logo"><img src="{$uri}__PUBLIC__/home/images/logo_ddsg.png"></div>
+            <div class="login">
+                <form  action="__APP__/home/index/inputPassword" method="post" name="formUser" id="formUser">
+                    <input type="hidden" value="register" name="type">
+                    <div class="item item-username">
+                        <input class="txt-input txt-username" type="text" maxlength="11" placeholder="请输入手机号码" name="username" id="username">
+                    </div>
+                    <div class="item item-username">
+                        <input class="txt-input txt-username" type="text" maxlength="8" placeholder="请输入验证码" id="check_code">
+                        <button id="btnSendCode" type="button" class="btn-zc" maxlength="4" onclick="sendMessage()">发送验证码</button>
+                    </div>
+                    <div class="item item-btns" onclick="javascript:return check(formUser);">
+                        <a class="btn-login btn-disabled" >下一步 </a>
+                    </div>   
+                 <!--    <div class="login_option">
+                        <input type="checkbox" name="agreement" id="agreement" checked="checked" value="agree" />
+                        <span class="ddt-agreement">我已阅读并同意
+                            <a href="#">《点点通商城用户协议》</a>
+                        </span>
+                    </div> -->
+                </form>
+            </div>
+        </div>	  
+    </body>
+</html>

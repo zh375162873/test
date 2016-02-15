@@ -1,0 +1,28 @@
+<?php
+
+namespace Home\Controller;
+use BizService\FavoriteService;
+class FavoriteController extends BaseController {
+    /**
+     * 收藏列表
+     */
+    public function index(){
+        $fav_type = I('fav_type',0,'intval');
+        $fav = new FavoriteService();
+        $fav_list = $fav->getFavorites(session('userId'),$fav_type);
+        $this->assign("fav_list",$fav_list);
+        $this->display('index');
+    }
+
+    /**
+     * 删除收藏
+     */
+    public function delfavorite(){
+        if(IS_POST){
+            $fav_type = I('fav_type',0,'intval');
+            $fav_id = I('fav_id',0,'intval');
+            $fav = new FavoriteService();
+            $this->ajaxReturn($fav->delFavorite(session('userId'),$fav_id,$fav_type));
+        }
+    }
+}

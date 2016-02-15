@@ -1,0 +1,263 @@
+<layout name="Extend/layout"/>
+<div class="container">
+	<div class="secondaryMenu" style="border-bottom:1px solid #d6e1ee;">
+    	<ul class="nav nav-tabs">
+<!-- 		   <li><a href="__APP__/admin/extend/index" style="color:black">所有渠道</a></li>
+		   <li  class="active"><a href="__APP__/admin/extend/memberList" style="color:red">所有人员</a></li> -->
+			<li><span>
+			<a class="btn btn-success btn-sm" href="__APP__/admin/extend/memberList">返回推广列表</a>
+			
+		    	<!-- 按钮触发增加推广优惠模态框 -->
+				<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addextendgoods">增加推广优惠</button>
+			</span>
+				
+				<!-- 增加推广优惠模态框（Modal） -->
+				<div class="modal fade" id="addextendgoods" tabindex="-1" role="dialog" 
+				   aria-labelledby="myModalLabel" aria-hidden="true">
+				   	<div class="modal-dialog">
+				      	<div class="modal-content">
+				         	<div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					            <h4 class="modal-title" id="myModalLabel">增加推广优惠</h4>
+				         	</div>
+
+				         	<div class="modal-body">
+			         	      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">商品编号：</span>
+						         	<input name="goods_sn" type="text" class="form-control" placeholder="请输入商品货号">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">折扣率：</span>
+						         	<input name="discount" type="text" class="form-control" placeholder="请输入折扣率">
+						      	</div>
+						      	<div class="input-group">
+				                	<span class="input-group-addon" style="width:125px">优惠开始时间：</span>
+				                    <input id="begin_time" name="begin_time" style="width:180px" type="date" class="form-control datepicker" value="" data-msg="不是日期">
+				                </div>
+				                <div class="input-group">
+				                	<span class="input-group-addon" style="width:125px">优惠结束时间：</span>
+				                    <input id="end_time" name="end_time" style="width:180px" type="date" class="form-control datepicker" value="" data-msg="不是日期">
+				                </div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">优惠数量：</span>
+						         	<input name="quantity" type="text" class="form-control" placeholder="请输入优惠数量">
+						      	</div>
+				         	</div>
+				         	<div class="modal-footer">
+					            <button type="button" onclick="addExtendGoods()" class="btn btn-primary">增加推广优惠</button>
+					            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				         	</div>
+				      	</div><!-- /.modal-content -->
+					</div><!-- /.modal -->
+				</div>
+
+			</li>
+			<li style="float:right"><span>共{$count}个推广优惠商品</span></li>
+		</ul>
+    </div>
+
+	<form class="input-group" name="searchForm" style="width:500px" method="get" action="__APP__/admin/extend/extendGoodsList"	>
+<!-- 		<span class="input-group-btn" style="width:150px">
+			<select name="channelid" class="form-control">
+			<option {$search_form['channelid'] == -1?'selected="selected"':''} value="-1">所有人员</option>
+			<foreach name="channel_list" item="channel" >
+				<option {$search_form['channelid'] == $channel['id']?'selected="selected"':''} value="{$channel.id}">{$channel.name}</option>
+			</foreach>
+		</select>
+       	</span>
+		<span class="input-group-btn" style="width:300px">
+			<input class="form-control" type="text" maxlength="11" value="{$search_form['username']}" placeholder="输入姓名或手机号码查询人员" name="username"/>
+       	</span> -->
+       		<input name="extendId" type="hidden" value="{$extendid}" />
+       		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+       		<input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+	<!-- 	<span class="input-group-btn">
+			<button class="btn btn-info btn-sm" onclick="submit()">查询</button>
+       	</span> -->
+	</form>
+
+    <div class="biaoge">
+        <table class="table table-hover">
+            <thead class="biaoti">
+         		<th name="id" onclick="changeOrder(this)">编号</th>
+         		<th name="goods_sn" onclick="changeOrder(this)">商品编号</th>
+         		<th name="goods_name" onclick="changeOrder(this)">商品名称</th>
+         		<th name="goods_price" onclick="changeOrder(this)">价格</th>
+                <th name="discount" onclick="changeOrder(this)">折扣率</th>
+                <th name="extend_price" onclick="changeOrder(this)">优惠价格</th>
+                <th name="goods_state" onclick="changeOrder(this)">上架</th>
+                <th name="goods_storage" onclick="changeOrder(this)">商品库存</th>
+                <th name="quantity" onclick="changeOrder(this)">优惠数量</th>
+                <th name="begin_time" onclick="changeOrder(this)">优惠开始时间</th>
+                <th name="end_time" onclick="changeOrder(this)">优惠结束时间</th>
+                <th name="buy_count" onclick="changeOrder(this)">已优惠购买</th>
+                <th name="addtime" onclick="changeOrder(this)">添加时间</th>
+                <th>操作</th>
+            </thead>
+            <tbody>
+            	<foreach name="goods_list" item="goods" >
+		           <tr class="trbor" style="background: rgb(237, 244, 253);">
+		                <td>{$goods.id}</td>
+		                <td>{$goods.goods_sn}</td>
+		                <td>{$goods.goods_name}</td>
+		                <td>{$goods.goods_price}</td>
+		                <td>{$goods.discount}</td>
+		                <td>{$goods.extend_price}</td>
+		                <td>{$goods.goods_state}</td>
+		                <td>{$goods.goods_storage}</td>
+		                <td>{$goods.quantity}</td>
+		                <td>{$goods.begin_time}</td>
+		                <td>{$goods.end_time}</td>
+		                <td><a href="__APP__/admin/extend/extendGoodsOrder?extendid={$extendid}&goodsid={$goods.goods_id}"><u>{$goods.buy_count}</u></a></td>
+		                <td>{$goods.addtime|date="Y-m-d H:i",###}</td>
+		                <td>
+		                	<a  data-toggle="modal" data-target="#editextendgoods{$goods.id}"><u>编辑</u></a>&nbsp;
+		                	<a href="javascript:void(0)" onclick="deleteExtendGoods({$goods.id},'{$goods.goods_name}')"><u>删除</u></a>
+	                	</td>
+	                	<div class="modal fade" id="editextendgoods{$goods.id}" tabindex="-1" role="dialog" 
+						   aria-labelledby="myModalLabel" aria-hidden="true">
+						   	<div class="modal-dialog">
+						      	<div class="modal-content">
+						         	<div class="modal-header">
+							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							            <h4 class="modal-title" id="myModalLabel">修改推广优惠</h4>
+						         	</div>
+
+						         	<div class="modal-body">
+					         	      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">商品编号：</span>
+								         	<p name="goods_sn{$goods.id}" class="form-control" >{$goods.goods_sn}(不可修改)</p>
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">折扣率：</span>
+								         	<input name="discount{$goods.id}" type="text" class="form-control" placeholder="请输入折扣率" value="{$goods.discount}">
+								      	</div>
+		  						      	<div class="input-group">
+						                	<span class="input-group-addon" style="width:125px">优惠开始时间：</span>
+						                    <input name="begin_time{$goods.id}" style="width:180px" type="date" class="form-control datepicker" value="{$goods.begin_time}"
+						                           data-msg="不是日期">
+						                </div>
+						                <div class="input-group">
+						                	<span class="input-group-addon" style="width:125px">优惠结束时间：</span>
+						                    <input name="end_time{$goods.id}" style="width:180px" type="date" class="form-control datepicker" value="{$goods.end_time}"
+						                           data-msg="不是日期">
+						                </div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">优惠数量：</span>
+								         	<input name="quantity{$goods.id}" type="text" class="form-control" placeholder="请输入优惠数量" value="{$goods.quantity}">
+								      	</div>
+						         	</div>
+						         	<div class="modal-footer">
+							            <button type="button" onclick="editExtendGoods({$goods.id})" class="btn btn-primary">修改推广优惠</button>
+							            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						         	</div>
+						      	</div><!-- /.modal-content -->
+							</div><!-- /.modal -->
+						</div>
+	                	
+		            </tr>
+	            </foreach>
+            </tbody>
+        </table>
+    </div>
+    <div style="float:right">
+    	{$page}
+    </div>
+</div>
+
+<script type="text/javascript">
+	//页面加载时执行函数
+    $(function(){
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+    });
+    function addExtendGoods(){
+    	var _url='__APP__/admin/extend/addExtendGoods?extendid={$extendid}';
+    	_goodsData = new Object();
+    	_goodsData.goods_sn = $("input[name='goods_sn']").val();
+    	_goodsData.discount = $("input[name='discount']").val();
+    	_goodsData.quantity = $("input[name='quantity']").val();
+    	_goodsData.begin_time = $("input[name='begin_time']").val();
+    	_goodsData.end_time = $("input[name='end_time']").val();
+    	if((new Date(_goodsData.begin_time.replace(/-/g,"\/"))) > (new Date(_goodsData.end_time.replace(/-/g,"\/")))){
+    		alert('优惠开始时间不得大于优惠结束时间');return false;
+    	}
+    	// Date()
+    	// alert(_begin_time);return false;
+	    var confirm_alert = window.confirm('确认增加该优惠商品吗？');
+	    if(confirm_alert){
+	        $.post(_url,{goodsData:_goodsData},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+    function editExtendGoods(_id){
+    	var _url='__APP__/admin/extend/editExtendGoods';
+    	_goodsData = new Object();
+    	_goodsData.discount = $('input[name="discount'+_id+'"]').val();
+    	_goodsData.quantity = $('input[name="quantity'+_id+'"]').val();
+    	_goodsData.begin_time = $('input[name="begin_time'+_id+'"]').val();
+    	_goodsData.end_time = $('input[name="end_time'+_id+'"]').val();
+		if((new Date(_goodsData.begin_time.replace(/-/g,"\/"))) > (new Date(_goodsData.end_time.replace(/-/g,"\/")))){
+    		alert('优惠开始时间不得大于优惠结束时间');return false;
+    	}
+	    var confirm_alert = window.confirm('确认修改该优惠商品吗？');
+	    if(confirm_alert){
+	        $.post(_url,{id:_id,goodsData:_goodsData},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+
+	function deleteExtendGoods(_id,_goods_name){
+    	var _url='__APP__/admin/extend/deleteExtendGoods';
+	    var confirm_alert = window.confirm('确认删除推广优惠商品'+_goods_name+'吗？');
+	    if(confirm_alert){
+	        $.post(_url,{id:_id},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+	function changeOrder(obj){
+		var data = $(obj).attr('name');
+		var ordername = $('input[name="ordername"]').val();
+		var ordertype = $('input[name="ordertype"]').val();
+		if(data==ordername){
+			if(ordertype!='DESC')
+			$('input[name="ordertype"]').val('DESC');
+			else
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}else{
+			$('input[name="ordername"]').val(data);
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}
+		// alert(data);
+	}
+</script>
+
+
+
+

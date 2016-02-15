@@ -1,0 +1,292 @@
+<layout name="layout"/>
+<div class="myContainer_uc container">
+    <h3 style="border-bottom:1px solid #d6e1ee;">用户中心</h3>
+    <form name="searchForm" class="form-inline" method="get" action="__APP__/core/userscenter/index">
+        <div class="form-group">
+            <div class="input-group">
+                <label class="input-group-addon">用户名：</label><input name="username" type="text" class="form-control" value="{$search_form['username']}" placeholder="请输入用户名或昵称">
+                <label class="input-group-addon">归属地：</label>
+                <select name="region" class="form-control" >
+                    <option value="">全部</option>
+                    <option>归属地1</option>
+                    <option>归属地2</option>
+                    <option>归属地3</option>
+                </select>
+
+                <label class="input-group-addon">用户来源：</label>
+                <select name="come_from" class="form-control">
+                    <option {$search_form['come_from'] == ""?'selected="selected"':''} value="">全部</option>
+                    <option {$search_form['come_from'] == "striaght"?'selected="selected"':''} value="striaght">直接访问</option>
+                    <option {$search_form['come_from'] == "wifi"?'selected="selected"':''} value="wifi">wifi</option>
+                    <option {$search_form['come_from'] == "extend"?'selected="selected"':''} value="extend">渠道推荐</option>
+                    <option {$search_form['come_from'] == "user"?'selected="selected"':''} value="user">用户推荐</option>
+                </select>
+                <label class="input-group-addon">用户状态：</label>
+                <select name="status" class="form-control">
+                    <option {$search_form['status'] == ""?'selected="selected"':''} value="">全部</option>
+                    <option {$search_form['status'] == "0"?'selected="selected"':''} value="0">正常</option>
+                    <option {$search_form['status'] == "1"?'selected="selected"':''} value="1">禁用</option>
+                </select>
+                <label class="input-group-addon">购买活动：</label>
+                <select name="bought" class="form-control">
+                    <option {$search_form['bought'] == ""?'selected="selected"':''} value="">全部</option>
+                    <option {$search_form['bought'] == "exist"?'selected="selected"':''} value="exist">有购买</option>
+                    <option {$search_form['bought'] == "none"?'selected="selected"':''} value="none">无购买</option>
+                </select>
+            </div>
+
+            <p></p>
+
+            <div class="input-group">
+                <label class="input-group-addon">起始时间：</label>
+                <input name="begin_time" style="width:180px" type="date" class="form-control datepicker" value="{$search_form['begin_time']}" data-msg="不是日期"> 
+                <label class="input-group-addon">结束时间：</label>         
+                <input name="end_time" style="width:180px" type="date" class="form-control datepicker" value="{$search_form['end_time']}" data-msg="不是日期">
+           		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+           		<input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+                </div>
+            <button class="btn btn-default" type="submit">筛选</button>
+            <button class="btn btn-default" onclick="javascript:window.location.href='__APP__/core/userscenter/index'">重置</button>
+
+            </div>
+        </div>
+        <p><!--需要换行时用p元素包裹-->
+     	</p>
+    </form>
+    <div class="biaoge">
+        <table class="table table-hover">
+            <thead class="biaoti">
+                <th name="user_id" onclick="changeOrder(this)">用户ID</th>
+                <th name="user_name" onclick="changeOrder(this)">用户名</th>
+                <th name="user_name" onclick="changeOrder(this)">昵称</th>
+                <th name="reg_time" onclick="changeOrder(this)">注册信息</th>
+                <!-- <th><a href="javascript:void(0);" onclick="orderForm('tuvcount desc')">是否为渠道人员</a></th> -->
+                <th name="visit_count" onclick="changeOrder(this)">登录次数</th>
+                <th name="last_login" onclick="changeOrder(this)">最后登录</th>
+                <th name="order_num" onclick="changeOrder(this)">订单数</th>
+                <th name="order_money" onclick="changeOrder(this)">购物金额</th>
+                <th name="user_money" onclick="changeOrder(this)">预存款</th>
+                <th name="pay_points" onclick="changeOrder(this)">积分</th>
+                <th name="pay_points" onclick="changeOrder(this)">积分兑换数</th>
+                <th name="pay_points" onclick="changeOrder(this)">抽奖次数</th>
+                <th name="pay_points" onclick="changeOrder(this)">中奖次数</th>
+                <th name="rank_points" onclick="changeOrder(this)">经验值</th>
+                <th name="is_validated" onclick="changeOrder(this)">当前状态</th>
+                <th>用户操作</th>
+            </thead>
+            <tbody>
+            	<foreach name="userslist" item="user" >
+		            <tr class="trbor" style="background: rgb(237, 244, 253);">
+		                <td>{$user.user_id}</td>
+		                <td><u>{$user.user_name}</u></td>
+		                <td><u>{$user.nick_name}</u></td>
+		                <td>{$user.reg_time|date="Y-m-d  H:i",###}<br />{$user['reg_from']}</td>
+		                <td>{$user.visit_count}次</td>
+		                <td>
+		                	<if condition="$user.last_login eq 0">未登录
+		                	<else />{$user.last_login|date="Y-m-d H:i:s",###}
+		                	<br>最后登录IP：{$user.last_ip}</if>
+	                	</td>
+		                <td><if condition="$user.order_num gt 0"><a href="__APP__/core/userscenter/userOrderList?user_id={$user.user_id}"><u>{$user.order_num}</u></a></if></td>
+		                <td>{$user.order_money}</td>
+		                <td><span style="color:red;">{$user.user_money}</span>元<br>
+		                	<span style="color:blue;">{$user.frozen_money}</span>元</td>
+		                <td>{$user.pay_points}</td>
+		                <td>积分兑换数</td>
+		                <td>抽奖次数</td>
+		                <td>中奖次数</td>
+		                <td>{$user.rank_points}</td>
+		                <td>
+		                	<if condition="$user.is_validated eq 0"><span style="color:green;">正常</span>
+		                	<else /><span style="color:red;">禁用</span></if>
+		                	</td>
+		                <td>
+		                    <div class="btn-group" style="margin: 0px;">
+		                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">操作 <span class="caret"></span>
+		                        </button>
+		                        <ul class="dropdown-menu">
+		                        	<li><a onclick="changeState('__APP__/core/userscenter/changeState',{$user.user_id},{$user.is_validated})" href="javascript:void(0);"><if condition="$user.is_validated eq 0">禁用<else />启用</if></a></li>
+		                        	<li><a onclick="resetPasswd('__APP__/core/userscenter/resetPasswd',{$user.user_id},{$user.user_name})" href="javascript:void(0);">重置密码</a></li>
+		                        	<li><a onclick="changeUserMoneyModal({$user.user_id},{$user.user_name},{$user.user_money})" href="javascript:void(0);">修改资金账户</a></li>
+		                        	<li><a onclick="deleteUser('__APP__/core/userscenter/deleteUser',{$user.user_id},{$user.user_name})" href="javascript:void(0);">删除用户</a></li>
+		                        </ul>
+		                    </div>
+		                </td>
+		            </tr>
+	            </foreach>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="editMember" tabindex="-1" role="dialog" 
+        aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" 
+                       data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">修改资金账户</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="input-group">
+                        <span class="input-group-addon" style="width:125px">关联账号：</span>
+                        <input name="m_userid" type="hidden" value="" />
+                        <p name="m_username" class="form-control" style="width:125px" ></p>
+                        <span class="input-group-addon" style="width:125px">现有金额：</span>
+                        <p name="m_nowmoney" class="form-control" style="width:90px" ></p>
+                        <span class="input-group-addon" style="width:20px">元</span>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon" style="width:125px">修改方向：</span>
+                        <p class="form-control" style="width:125px">
+                            <label style="cursor:pointer" for="increase">
+                                <input type="radio"  name="m_changeMoney" id="increase" value="increase" checked>增加
+                            </label>  
+                            <label style="cursor:pointer" for="decrease">
+                                <input type="radio"  name="m_changeMoney" id="decrease" value="decrease">减少
+                            </label>  
+                        </p>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon" style="width:125px">修改金额：</span>
+                        <input name="m_changeNum" style="width:90px" type="text" class="form-control">
+                        <span class="input-group-addon" style="width:20px">元</span>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon" style="width:125px">修改原因：</span>
+                        <textarea class="form-control" rows="3" name="m_changeReason" style="width: 400px; height: 100px;resize:none;"></textarea>
+                    </div> 
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="changeUserMoney()" class="btn btn-primary">修改资金账户</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+
+    <div style="float:right" class="pagination-right">
+    	{$page}
+    </div>
+
+</div>
+    
+
+<script type="text/javascript">
+    $(function(){
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            daysOfWeekDisabled: "0",
+            todayHighlight: true
+        });
+    });
+
+	function changeOrder(obj){
+		var data = $(obj).attr('name');
+		var ordername = $('input[name="ordername"]').val();
+		var ordertype = $('input[name="ordertype"]').val();
+		if(data==ordername){
+			if(ordertype!='DESC')
+			$('input[name="ordertype"]').val('DESC');
+			else
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}else{
+			$('input[name="ordername"]').val(data);
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}
+		// alert(data);
+	}
+    function changeUserMoneyModal(_userid,_username,_usermoney){
+        $('p[name="m_username"]').html(_username);
+        $('p[name="m_nowmoney"]').html(_usermoney);
+        $('input[name="m_userid"]').val(_userid);
+        $('#editMember').modal('show');
+    }
+
+    function changeUserMoney(){
+        var _url='__APP__/core/userscenter/changeUserMoney';
+        var _userid = $('input[name="m_userid"]').val();
+        var _username = $('p[name="m_username"]').html();
+        var _type = $('input[name="m_changeMoney"]:checked').val();
+        var _nowmoney = $('p[name="m_nowmoney"]').html();
+        var _change = $('input[name="m_changeNum"]').val();
+        var _reason = $('textarea[name="m_changeReason"]').val();
+
+        if(isNaN(_change)||_change.length==0){
+            alert('修改金额不是数字！');return false;
+        }
+        if(_reason.length<5){
+            alert('修改原因描述不能少于5个字！');return false;
+        }
+        if(_type=='decrease'){
+            _change=0-_change;
+        }
+        var _donemoney = parseFloat(_nowmoney)+parseFloat(_change);
+        var confirm_alert = window.confirm('修改后金额为'+_donemoney+'元,确认修改会员'+_username+'资金账户吗？');
+        if(confirm_alert){
+            $.post(_url,{id:_userid,change:_change,content:_reason},
+            function(data){
+                // if(data.code)
+                alert(data.msg);
+                location.reload();
+            },'json');
+        }
+    }
+    function changeState(_url,_id,_status){
+        var _msg=_status?'启用':'禁用';
+        var confirm_alert = window.confirm('确认'+_msg+'该会员账号吗？');
+        if(confirm_alert){
+            $.post(_url,{id:_id,status:_status},
+            function(data){
+                // alert(data);
+                location.reload();
+            });
+        }
+    }
+    function resetPasswd(_url,_id,_username){
+        var _msg = '请输入用户 '+_username+' 的密码';
+        var _passwd = prompt(_msg,"");
+        while(_passwd.length < 6){
+            _msg = '请重新输入大于6位的密码';
+            _passwd = prompt(_msg,_passwd);
+        };
+        var confirm_alert = window.confirm('确认修改该会员密码吗？');
+        if(confirm_alert){
+            $.post(_url,{id:_id,passwd:_passwd},
+            function(data){
+                alert(data);
+                location.reload();
+            });
+        }
+    }
+    function deleteUser(_url,_id,_username){
+        var confirm_alert = window.confirm('确认删除会员'+_username+'账号吗？');
+        if(confirm_alert){
+            $.post(_url,{id:_id},
+            function(data){
+                alert(data);
+                location.reload();
+            });
+        }
+    }
+
+</script>
+	
+	

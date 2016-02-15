@@ -1,0 +1,35 @@
+<?php
+
+namespace Home\Controller;
+
+use Think\Controller;
+
+/**
+ * Class 分站切换
+ * @package Home\Controller
+ */
+class CityController extends Controller
+{
+    public function index()
+    {
+        $city = I("city", 'xian');
+        //todo 后期考虑加缓存
+        $shop_service = new \BizService\ShopService();
+        $shop_info = $shop_service->get_shop_info_by_domain($city, array('shop_id', 'shop_title', 'member_id', 'shop_company_name', 'shop_keywords'));
+        if ($shop_info) {
+            cookie("city", $city);
+            //禁用cookie验证,获取不到cookie一概视为cookie禁用
+            $cookie_flag = cookie("city");
+            if (empty($cookie_flag)) {
+                $this->display("index/index");
+            }
+            session('proxyId', $shop_info[0]['member_id']);//代理ID
+            session('shopId', $shop_info[0]['shop_id']);//商城ID
+            session('city', $city);//城市分站
+            redirect(U('Index/index'));
+        } else {
+            $this->error("很抱歉，该城市暂未开通！");
+        }
+
+    }
+}

@@ -1,0 +1,265 @@
+<include file="Index/header"/>
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+<style>
+li{display:inline;margin-left:20px;}
+</style>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('order/order_list')}" onclick="jumpTo(this);" class="active">所有订单</li>
+    </ul>
+</div>
+
+<form class="form-inline" id="" action="<?php echo U('order/order_list'); ?>" style="margin-bottom:20px;" method="get">
+		<div class="form-group">
+			<!-- <select class="form-control" name="goodsclass">
+				<option value="0">所有分类</option>
+				<option value="1">现金购买</option>
+				<option value="2">积分订单</option>
+				<option value="3">抽奖订单</option>
+			</select> -->
+			<select class="form-control" name="orderstatus">
+				<option  value="0" >发货状态</option>
+				<option  value="1" <if condition="$orderstatus eq 1">selected = "selected"</if>>待发货</option>
+				<option  value="2" <if condition="$orderstatus eq 2">selected = "selected"</if>>已发货</option>
+				<option  value="3" <if condition="$orderstatus eq 3">selected = "selected"</if>>已收货</option>
+			</select>
+		</div>
+		<div class="form-group" style="padding-top:5px;">
+			<label>开始日期:</label>
+			<input id="begin_time" name="begin_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$begin_time}">
+			<label>结束日期:</label>
+			<input id="end_time" name="end_time" type="text" class="form-control datepicker" style="width: 120px;" value="{$end_time}">
+			<label>关键字:</label>  <input type="text" class="form-control" style="width:250px" name="order_sn" value="{$order_sn}" placeholder="输入订单号,账号,昵称,商品名称,编号">
+		</div>
+		<button class="btn btn-default" type="submit">筛选</button>
+		<a href="{:U('Order/orderlist_exe')}">导出报表</a>  
+	</form>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th style="border-right:1px solid #CCCCCC">订单编号</th>
+                <th style="border-right:1px solid #CCCCCC">商品名称</th>
+                <th style="border-right:1px solid #CCCCCC">昵称&账号</th>
+                <th style="border-right:1px solid #CCCCCC">单价</th>
+                <th style="border-right:1px solid #CCCCCC">数量</th>
+                <th style="border-right:1px solid #CCCCCC">运费</th>
+                <th style="border-right:1px solid #CCCCCC">总价</th>
+                <th style="border-right:1px solid #CCCCCC">发货状态</th>
+                <th style="border-right:1px solid #CCCCCC">支付时间</th>
+                <th style="border-right:1px solid #CCCCCC">发货/收货时间</th>
+                <th style="border-right:1px solid #CCCCCC">发货备注</th>
+                <th style="border-right:1px solid #CCCCCC">操作</th>
+            </tr>
+            <volist name="orderlist" id="vo">
+                <tr class="trbor">
+                    <td id="{$vo.order_id}">{$vo.order_sn}</td>
+                    <td>{$vo.goods_name}</td>
+                    <td>{$vo.buyer_nickname}&nbsp;&nbsp;{$vo.buyer_name}</td>
+                    <td style="text-align:right">{$vo.goods_price}</td>
+                    <td style="text-align:right">{$vo.goods_num}</td>
+                    <td>XXX元</td>
+                    <td style="text-align:right">{$vo.order_amount}</td>
+                    <td>{$vo['delivery_status']?'已发货':'未发货'}</td>
+                    <td>{$vo.payment_time}</td>
+                    <td>{$vo.finnshed_time}</td>
+                    <td>备注。。。</td>
+                    <td>
+                        <a href="<?php echo U('order/orderinfo',array('id'=>$vo['order_id'])); ?>"><button class="btn btn-primary btn-sm">查看详情</button></a>
+                        <if condition="$vo.delivery_status eq 0">
+                        <button class="btn btn-primary btn-sm" onclick="changeDeliveryModal('{$vo.order_id}','{$vo.order_sn}','{$vo.goods_name}','{$vo.goods_num}','地址')" href="javascript:void(0);">发货</button>
+                        <elseif condition="$vo.delivery_status eq 1"/>
+                        <button class="btn btn-primary btn-sm" onclick="DeliveryInfo('{$vo.delivery_id}','{$vo.order_sn}','{$vo.goods_name}','{$vo.goods_num}','地址')" href="javascript:void(0);">物流信息</button>
+                        </if>
+                    </td>
+                </tr>
+            </volist>
+            <!-- 按钮触发增加渠道模态框 -->
+            
+            <!-- 增加渠道模态框（Modal） -->
+            <div class="modal fade" id="act_delivery" tabindex="-1" role="dialog" 
+               aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="act_deliveryLabel">发货</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="input-group">
+                                <span>订单号:</span><span name='modal_order_sn'></span>
+                            </div>
+                            <div class="input-group">
+                                <span>商品:</span><span name='modal_goods_name'>兔子兔子</span>&nbsp;&nbsp;&nbsp;&nbsp;<span>数量:</span><span name='modal_goods_num'>6</span>
+                            </div>
+                            <div class="input-group">
+                                <span>收货地址:</span><span name='modal_address'>小明，156487654847，去哪儿</span>
+                            </div>
+                            <HR style="FILTER: alpha(opacity=100,finishopacity=0,style=2)" width="80%" color="#987cb9">
+                                <input name="delivery_order_id" type="hidden" value="">
+                            <div class="input-group">
+                                <span class="input-group-addon" style="width:125px">快递类型</span>
+                                <input name="delivery_type" type="text" class="form-control" placeholder="请输入快递类型" style="width:360px">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="width:125px">快递单号</span>
+                                <input name="delivery_sn" type="text" class="form-control" placeholder="请输入快递单号" style="width:360px">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-addon" style="width:125px">发货备注</span>
+                                <textarea class="form-control" rows="3" name="delivery_remark" style="width: 360px; height: 100px;resize:none;" placeholder="请输入发货备注"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" onclick="DeliveryAdd()" class="btn btn-primary" style="width:150px">发货</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" style="width:150px">取消</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal -->
+            </div>
+            <!-- 增加渠道模态框（Modal） -->
+            <div class="modal fade" id="delivery_info" tabindex="-1" role="dialog" 
+               aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="delivery_infoLabel">发货</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <input name="delivery_id" type="hidden" value="">
+                            <div class="input-group">
+                                <span>订单号:</span><span name='modal_order_sn'></span>
+                            </div>
+                            <div class="input-group">
+                                <span>商品:</span><span name='modal_goods_name'></span>&nbsp;&nbsp;&nbsp;&nbsp;<span>数量:</span><span name='modal_goods_num'></span>
+                            </div>
+                            <div class="input-group">
+                                <span>收货地址:</span><span name='modal_address'></span>
+                            </div>
+                            <HR style="FILTER: alpha(opacity=50,finishopacity=0,style=1)" width="80%" color="#987cb9">
+                            <div class="input-group">
+                                <span>快递类型:</span><span name='modal_delivery_name'></span>
+                            </div>
+                            <div class="input-group">
+                                <span>快递单号:</span><span name='modal_delivery_sn'></span>
+                            </div>
+                            <div class="input-group">
+                                <span>发货备注:</span><span name='modal_delivery_remark'></span>
+                            </div>
+                            <div class="input-group">
+                                <span>发货时间:</span><span name='modal_delivery_time'></span>
+                            </div>
+                            <HR style="FILTER: alpha(opacity=50,finishopacity=0,style=1)" width="80%" color="#987cb9">
+                            <div id="update_info_div" class="" style="width:90%; height:100px; overflow-y:auto;">
+                                <span>2015-12-19&nbsp;14:25</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <span name='text'>商品已打包</span><br/>
+                            </div>
+
+                            <HR style="FILTER: alpha(opacity=50,finishopacity=0,style=1)" width="80%" color="#987cb9">
+                            <div class="input-group">
+                                <input name="delivery_update" type="text" class="form-control" placeholder="请输入物流更新状态" style="width:400px">
+                                <button type="button" onclick="updateDeliveryInfo()" class="btn btn-primary" style="width:100px">添加状态</button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" style="width:150px">取消</button>
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal -->
+            </div>
+            <tr>
+                <td colspan="12" align="right"><span>{$page}</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<include file="Index/footer"/>
+<script>
+    $(function () {
+        /*初始化时间控件*/
+        $('#begin_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+        $('#end_time').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+            todayHighlight: true
+        });
+    });
+    function changeDeliveryModal(_id,_order_sn,_goods_name,_goods_num,_address){
+        $('span[name="modal_order_sn"]').html(_order_sn);
+        $('span[name="modal_goods_name"]').html(_goods_name);
+        $('span[name="modal_goods_num"]').html(_goods_num);
+        $('span[name="modal_address"]').html(_goods_name+_address);
+        $('input[name="delivery_order_id"]').val(_id);
+        $('#act_delivery').modal('show');
+    }
+    function DeliveryInfo(_delivery_id,_order_sn,_goods_name,_goods_num,_address){
+        var _url = '__APP__/Admin/Delivery/getDeliveryInfo';
+        $.post(_url,{delivery_id:_delivery_id},
+            function(data){
+                logInfo = data['log'];
+                $('span[name="modal_order_sn"]').html(_order_sn);
+                $('span[name="modal_goods_name"]').html(_goods_name);
+                $('span[name="modal_goods_num"]').html(_goods_num);
+                $('span[name="modal_address"]').html(_goods_name+_address);
+
+                $('span[name="modal_delivery_name"]').html(data['shipping_name']);
+                $('span[name="modal_delivery_sn"]').html(data['delivery_sn']);
+                $('span[name="modal_delivery_remark"]').html(data['remark']);
+                $('span[name="modal_delivery_time"]').html(data['add_time']);
+                $('input[name="delivery_id"]').val(_delivery_id);
+                // alert();
+                // alert(logInfo[0]['add_time']);
+                for (var i = 0; i <= logInfo.length - 1; i++) {
+                    var _html = "<span>"+logInfo[i]['add_time']+"</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+                    +"<span name='text'>"+logInfo[i]['log_text']+"</span><br/>";
+                    $("#update_info_div").append(_html);
+                };
+            },'json');
+
+        $('#delivery_info').modal('show');
+    }
+    function updateDeliveryInfo(){
+        var _url = '__APP__/Admin/Delivery/updateDeliveryInfo';
+        var _delivery_id = $('input[name="delivery_id"]').val();
+        var _delivery_update = $('input[name="delivery_update"]').val();
+
+        $.post(_url,{delivery_id:_delivery_id,info_text:_delivery_update},
+            function(data){
+                alert(data.msg);
+                $('input[name="delivery_update"]').val("");
+            },'json');
+
+    }    
+    function DeliveryAdd(){
+        var _url = '__APP__/Admin/Delivery/addDelivery';
+        var _order_id = $('input[name="delivery_order_id"]').val();
+        var _delivery_type = $('input[name="delivery_type"]').val();
+        var _delivery_sn = $('input[name="delivery_sn"]').val();
+        var _delivery_remark = $('input[name="delivery_remark"]').val();
+
+        $.post(_url,{order_id:_order_id,delivery_type:_delivery_type,delivery_sn:_delivery_sn,delivery_remark:_delivery_remark},
+            function(data){
+                alert(data.msg);
+                window.location.reload()
+            },'json');
+
+    }
+</script>
+

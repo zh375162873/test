@@ -1,0 +1,28 @@
+<?php
+
+namespace Home\Controller;
+
+use BizService\GeohashService;
+
+header("Content-type:text/html;charset=utf-8");
+
+class CommissionorderController extends BaseController
+{
+    public $commission_order_db;
+    public function _initialize(){
+        parent::_initialize();
+        $this->commission_order_db = D("CommissionOrder");
+    }
+    
+    //推广人首页
+    public function tgrindex(){
+        
+    }
+    
+    //推广人订单统计列表
+    public function tgrordercount(){
+        
+    }
+    
+    
+}

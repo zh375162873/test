@@ -1,0 +1,38 @@
+﻿一、目录结构
+Application
+    --Core	    核心平台管理模块
+    --Admin         商城后台(代理商)管理模块
+    --BizService    业务类存放目录
+    --Common
+        --Common    公共函数，类库存放地址
+        --Conf      公共项目配置
+    --Home          商城前端模块
+Public              静态文件存放目录
+    --Admin         后台
+    --Home          前台
+ThinkPHP            ThinkPHP框架
+Uploads             上传目录（具体存放目录根据业务动态制定）
+
+
+二、Controller控制器命名规则
+
+由于系统开启了不区分URL大小写后，如果我们要访问类似UserTypeController的控制器，那么正确的URL访问应该是：
+
+// 正确的访问地址
+http://serverName/index.php/home/user_type/index
+// 错误的访问地址（linux环境下）
+http://serverName/index.php/home/usertype/index
+利用系统提供的U方法可以为你自动生成相关的URL地址。
+
+所以为了避免出现下划线的出现，所有Controller命令格式为：单词首字母大写+第二个词全小写+Controller.class.php
+如：
+UsertypeController.class.php    OrderlistController.class.php
+
+三、数据库命名
+
+1.统一为ddt_+表明称
+2.表明称命名规则依照相同功能表前缀保持一致原则，如：
+    ddt_order 订单表
+    ddt_order_goods 订单商品表
+    ddt_goods 商品表
+    ddt_goods_common 基础商品表

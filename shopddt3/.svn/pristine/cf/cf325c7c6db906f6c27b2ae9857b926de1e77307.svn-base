@@ -1,0 +1,577 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="{$uri}__PUBLIC__/temp/js/jquery-2.1.4.min.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/temp/indexTrue.js" type="text/javascript"></script>
+<title>编辑页面</title>
+<style>
+        /*前台展示----------------------------------------------------------------------*/
+        /*公用----------------------------*/
+        body{
+            margin:0;
+            padding:0;
+            font-size:100%;
+            margin:0 auto;
+            color:#555;
+            font-family:arial,sans-serif;font:16px/1.5 "Microsoft YaHei",\5fae\8f6f\96c5\9ed1,arial,\5b8b\4f53;
+            outline:0;
+            background-color:#F3F3F3;
+        }
+        ul{
+            list-style:none;
+            margin:0;
+            padding:0;
+        }
+        a{
+            text-decoration:none;
+            color:#555;
+        }
+        .ddt_block{
+            overflow:hidden;
+        }
+        img{
+            vertical-align:top;
+            border:none;
+            outline:none;
+        }
+        b { font-family:arial,sans-serif;font:16px/1.5 "Microsoft YaHei",\5fae\8f6f\96c5\9ed1,arial,\5b8b\4f53;}
+        /**font-color*/
+        .colorC3{color:#e1544f;}
+        .color54{color:#545454;}
+        .colorDb{color:#db5e3b;}
+        .colorE7{color:#e7c151;}
+        .colorBb{color:#bbe196;}
+        .colorC6{color:#c680b8;}
+        .colorAe{color:#aeaeae;}
+        .color35{color:#313131;}
+        .color7d{color:#7d7d7d;}
+        .colorD5{color:#d14042;}
+        /*结束----公用------------------------*/
+
+        /**--------顶部定位-------------------*/
+        .home_lbs{
+            position:absolute;
+            top:0.3125em;
+            left:0.625em;
+            z-index:999;
+            font-size:12px;
+        }
+        .home_lbs a{
+            background:rgba(255,255,255,0.8);
+            padding:0.625em;
+            border-radius:0 0 0.8em 0.8em;
+        }
+        .home_lbs a img{
+            width:18%;
+        }
+        .home_lbs a b{
+            margin-left:5px;
+            font-size:14px;
+        }
+        /**结束---------顶部定位------------------*/
+
+        /**--------轮播图和分类区域-------------------*/
+        .focus{max-width:100%;height:auto;margin:0 auto;position:relative;overflow:hidden;}
+        .focus .hd,.focus .nav_hd{width:100%;height:11px;position:absolute;z-index:1;bottom:10px;text-align:center;}
+        .focus .nav_hd{bottom:0.1px;}
+        .focus .hd ul,.focus .nav_hd ul{display:inline-block;height:5px;padding:3px 5px;font-size:0;vertical-align:top;}
+        .focus .hd ul li,.focus .nav_hd ul li{display:inline-block;width:7px;height:7px;background:rgba(255,255,255,0.5);margin:0 5px;vertical-align:top;overflow:hidden;border-radius:50%;}
+        .focus .hd ul .on,.focus .nav_hd ul .on{background:#f79c5c;}
+        .focus .bd,.focus .nav_bd{position:relative;z-index:0;text-align:center;}
+        .focus .bd li img{width:100%;background:url(./images/index/loading.gif) center center no-repeat;}
+        .focus .bd li a,.focus .nav_bd li a{
+		  -webkit-tap-highlight-color : rgba(0, 0, 0, 0); 
+		 }
+
+        .home_sort{
+            padding:0;
+            margin:0;
+            
+            overflow:hidden;
+        }
+        .home_sort li a{
+            display:block;
+            width:100%;
+            overflow:hidden;
+        }
+        .home_sort li a img{
+            margin:7px 0 0 0;
+            width:60%;
+        }
+        .home_sort li a p{
+            margin:0;
+            padding:0;
+            text-align:center;
+            font-size:12px;
+        }
+        .home_sort li{
+            float: left;
+            display:block;
+            width:25%;
+            min-height:80px;
+            text-align:center;
+            overflow:hidden;
+        }
+        /**结束--------轮播图和分类区域-------------------*/
+        /**--------活动区域-------------------*/
+        .home_nav_huodong{
+            position:relative;
+            margin:8px 8px 0 8px;
+            background:#fff;
+            border-radius:5px;
+            overflow:hidden;
+            box-shadow:1px 3px 5px #d8d7d7;
+        }
+        .home_nav_huodong ul li{
+            float:left;
+            display:block;
+            width:50%;
+            -webkit-box-sizing:border-box;
+            box-sizing:border-box;
+        }
+        .home_nav_huodong ul li a{
+            display:block;
+            overflow:hidden;
+        }
+        .borderBm{
+            border-bottom:1px solid #f3f3f3;
+        }
+        .borderRt{
+            border-right:1px solid #f3f3f3;
+        }
+        .huodong_title{
+            float:left;
+            margin:10px 0 5px 11px;
+        }
+        .huodong_title span{
+            display:block;
+            font-size:16px;
+        }
+        .huodong_title small{
+            color:#aeaeae;
+            font-size:12px;
+        }
+        .huodong_img{
+            float:right;
+            height:49px;
+            width:auto;
+        }
+
+        .home_nav_huodong1{
+            margin:8px 8px 0 8px;
+            background:#fff;
+            border-radius:5px;
+            overflow:hidden;
+            box-shadow:1px 3px 5px #d8d7d7;
+        }
+        .home_nav_huodong1 ul li{
+            float:left;
+            display:block;
+            width:50%;
+            text-align:center;
+            -webkit-box-sizing:border-box;
+            box-sizing:border-box;
+        }
+        .home_nav_huodong1 ul li a{
+            display:block;
+            overflow:hidden;
+        }
+        .huodong_title1{
+            padding:10px 0 5px 11px;
+            text-align:center;
+        }
+        .huodong_title1 span{
+            display:block;
+            font-size:16px;
+            text-align:center;
+        }
+        .huodong_title1 small{
+            color:#aeaeae;
+            font-size:12px;
+        }
+        .huodong_img1{
+            height:60px;
+            width:auto;
+            max-width:100%;
+        }
+
+        .home_nav_huodong2{
+            margin:8px 8px 0 8px;
+            background:#fff;
+            border-radius:5px;
+            overflow:hidden;
+            box-shadow:1px 3px 5px #d8d7d7;
+        }
+        .home_nav_huodong2 ul li{
+            float:left;
+            display:block;
+            width:50%;
+            -webkit-box-sizing:border-box;
+            box-sizing:border-box;
+        }
+        .home_nav_huodong2 ul li a{
+            display:block;
+            overflow:hidden;
+        }
+        .huodong_title2{
+            padding:10px 0 5px 11px;
+            text-align:center;
+        }
+        .huodong_title2 span{
+            display:block;
+            font-size:16px;
+        }
+        .liOne .huodong_title2{
+            padding:10px 0 5px 11px;
+            text-align:center;
+        }
+        .liOne .huodong_title2 span{
+            display:block;
+            font-size:16px;
+            text-align:center;
+        }
+        .huodong_title2 small{
+            color:#aeaeae;
+            font-size:12px;
+        }
+        .liOne{
+            text-align:center;
+        }
+        .liOne .huodong_img2{
+            height:60px;
+            width:auto;
+            max-width:100%;
+        }
+        /**结束--------活动区域-------------------*/
+        /**--------商品列表区域-------------------*/
+        .home_list{
+            margin:10px 8px 0 8px;
+            background:#fff;
+            border-radius:5px;
+            overflow:hidden;
+            box-shadow:1px 3px 5px #d8d7d7;
+        }
+        .home_list section{
+            overflow:hidden;
+            border-bottom:1px solid #f3f3f3;
+        }
+        .list_nav_title{
+            display:inline-block;
+            padding:9px 6px;
+            margin-left: 3px;
+        }
+        .list_nav_img{
+            float:right;
+            height:43px;
+            width:auto;
+        }
+        .goods_content{
+            display: block;
+            padding: 12px 6px 12px 0;
+            margin-left: 9px;
+            text-decoration: none;
+        }
+        .goodImg{
+            float: left;
+            position: relative;
+            width: 85px;
+            overflow: hidden;
+            /*background:url(./res/bg.png) no-repeat;*/
+            background-size: 100% 100%;
+        }
+        .goodImg img{
+            display: block;
+            width: 85px;
+        }
+        .goodInfo{
+            position:relative;
+            margin-left:100px;
+        }
+        .title_line{
+            line-height: 16px;
+            height: 16px;
+            overflow: hidden;
+            margin-top:4px;
+        }
+        .title_line .title{
+            float:left;
+            height:16px;
+            line-height:16px;
+            max-width:100%;
+        }
+        .title_line .title .item_name{
+            max-width: 100%;
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin:0;
+            padding:0;
+        }
+        .title_line .wz{
+            display:none;
+            float: right;
+            font-size: 12px;
+        }
+        .goodInfo .desc{
+            line-height: 16px;
+            height: 32px;
+            margin: 8px 0;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size: 12px;
+        }
+        .price_line{
+            line-height: 16px;
+            height: 16px;
+            font-size: 0;
+            overflow: hidden;
+        }
+        .price_line ins{
+            margin-right: 5px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .price_line del{
+            margin-right: 5px;
+            font-size: 12px;
+        }
+        .price_line span{
+            float: right;
+            margin-left: 16px;
+            font-size: 12px;
+        }
+        /**结束--------商品列表区域-------------------*/
+        /**------------底部按钮区域--------------------------*/
+        .home_footer{
+            position:fixed;
+            height:55px;
+            z-index: 999;
+            left:0;
+            bottom:0;
+            overflow:hidden;
+            width:100%;
+            text-align:center;
+        }
+        .home_footer ul{
+            width:100%;
+            height:55px;
+        }
+        .home_footer ul li{
+            margin-top:15px;
+            float: left;
+            display:block;
+            width:30%;
+            height:40px;
+            background: rgba(255,255,255,0.7);
+            text-align:center;
+            line-height:40px;
+            font-size:16px;
+        }
+        .home_footer ul li a{
+            width:100%;
+            height:100%;
+            display:block;
+        }
+        .home_footer ul li:first-child,.home_footer ul li:last-child{
+            width:35%;
+        }
+        .home_footer ul li:first-child img,.home_footer ul li:last-child img{
+            width:25px;
+            height:25px;
+            margin:7px 5px;
+        }
+        .home_footer_hd{
+            width:55px;
+            height:55px;
+            margin-top:-15px;
+        }
+        /**结束------------底部按钮区域--------------------------*/
+        .home_list_end{
+            margin-bottom:50px;
+        }
+        /*--展示区结束---------------------------------------------------------------------------*/
+
+        /*--后台模板定制--------------------------------------------------*/
+        .unusable {
+            filter: alpha(opacity=50);
+            -moz-opacity: 0.5;
+            opacity: 0.5;
+        }
+        .home_block{
+            position:relative;
+            min-height:60px;
+        }
+        .home_block:hover .footerEdit,.home_block:hover .headerEdit{
+            display:block;
+        }
+        .footerEdit{
+            position:absolute;
+            left:0;
+            bottom:0;
+            width:100%;
+            height:30px;
+            z-index:1000;
+            background: rgba(84,193,235,0.85);
+            display:none;
+            text-align:right;
+            font-size:14px;
+            line-height:30px;
+        }
+        .headerEdit{
+            position:absolute;
+            left:0;
+            top:0;
+            width:100%;
+            height:30px;
+            z-index:1000;
+            background: rgba(84,193,235,0.85);
+            display:none;
+            text-align:left;
+            font-size:14px;
+            line-height:30px;
+            color:#fff;
+            -moz-box-sizing:border-box;
+            -webkit-box-sizing:border-box;
+            box-sizing:border-box;
+            padding-left:15px;
+        }
+        .footerEdit a{
+            margin-right:7px;
+            display:inline-block;
+            width:53px;
+            height:100%;
+            text-align:left;
+            color:#fff;
+        }
+        .footerEdit a i{
+            margin-right:5px;
+        }
+        /*--后台模板定制结束--------------------------------------------------*/
+    </style>
+</head>
+<body>
+<div class="home_lbs"><a  class="colorC3" href="location.html"><img src="{$uri}__PUBLIC__/home/images/index/nav_place.png"><b>西安市</b></a></div>
+		  <?php
+		foreach($item_data as $val){
+			 $item_id=$val['item_id'];
+			 $style_id=$val['style_id'];
+			 switch($style_id){
+			   case 1:
+			 ?>
+			  <!--加载模板内容1-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp1.html" />
+			  <?php
+			   break;
+			   case 2:
+			  ?>
+			  <!--加载模板内容2-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp2.html" />
+			  <?php
+			   break;
+			   case 3:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp3.html" />
+			  <?php
+			   break;
+			   case 4:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp4.html" />
+			  <?php
+			   break;
+			   case 5:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp5.html" />
+			  <?php
+			   break;
+			   case 6:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp6.html" />
+			  <?php
+			   break;
+			   case 7:
+			  ?>
+			  <!--加载模板内容-->
+			  <include file="./Application/Admin/View/Tempstyle/style_temp7.html" />
+			  <?php
+			   }
+		}
+		?>
+<div class="home_list_end">
+</div>
+<footer class="home_footer">
+    <ul>
+        <li><a href="#"><b class="colorD5">首页</b><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_sy.png"></a></li>
+        <li><a href="#"><img class="home_footer_hd" src="{$uri}__PUBLIC__/home/images/index/nav_fixed_yiy.png"></a></li>
+        <li><a href="mine.html"><img src="{$uri}__PUBLIC__/home/images/index/nav_fixed_wd.png"><b class="color54">我的</b></a></li>
+    </ul>
+</footer>
+
+</body>
+</html>
+<script>
+$(function(){
+    $("body").on("click","[data-type='btn_move_up']",function(){
+        var $curDom = $(this).parent().parent();
+        var $prev = $curDom.prev();
+        if($prev.length>0){
+            $prev.before($curDom);
+            updateSort();
+        }else{
+            return;
+        }
+    });
+
+    $("body").on("click","[data-type='btn_move_down']",function(){
+        var $curDom = $(this).parent().parent();
+        var $next = $curDom.next();
+        if($next.length>0){
+            $next.after($curDom);
+            updateSort();
+        }else{
+            return;
+        }
+    });
+
+    $("body").on("click","[data-type='btn_usable']",function(){
+        if($(this).parent().parent().hasClass("unusable")){
+            $(this).html('<i class="icon-off"></i>禁用');
+            $(this).parent().parent().removeClass("unusable").addClass("usable");
+        }else{
+            $(this).html('<i class="icon-off"></i>启用');
+            $(this).parent().parent().removeClass("usable").addClass("unusable");
+        }
+    });
+
+    /*$(".item-list").on("click","[data-type='btn_edit_item']",function(){
+     var opId = $(this).parents('[data-type="special_item"]').attr("data-item-id");
+     window.open("./edit.html?opId="+opId);
+     });*/
+
+    $("body").on("click","[data-type='btn_del_item']",function(){
+        var bl = confirm("确认删除!");
+        if(bl){
+            $(this).parent().parent().remove();
+        }
+    });
+});
+
+function updateSort(){
+    var list = $(".home_block");
+    var arrs = [];
+    list.each(function(index,item){
+        arrs.push($(item).attr("data-item-id"));
+    });
+    //alert(arrs.join(","));
+}
+</script>

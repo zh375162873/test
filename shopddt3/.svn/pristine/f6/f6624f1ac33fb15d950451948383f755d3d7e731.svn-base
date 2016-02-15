@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>待支付明细-我的</title>
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+    <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/tuiguang.css">
+</head>
+<body>
+<div class="tg_content">
+    <div class="tggl_com dzf">
+        <ul class="ul3">
+            <li>
+                <h4>已结算</h4>
+                <div>¥{$money.yjs}</div>
+            </li>
+            <li>
+                <h4>待结算</h4>
+                <div>¥{$money.djs}</div>
+            </li>
+            <li>
+                <h4>待确认</h4>
+                <div>¥{$money.dqr}</div>
+            </li>
+        </ul>
+        <section class="zfTips">
+            <section class="title">支付说明</section>
+            <p>1.您推广的用户购买并成功消费确认后，订单产生的佣金即计入已确认收益</p>
+            <p>2.已确认收益满XX元后系统会在X-X个工作日向您支付，请正确<a href="{:U('Commissionorder/tgrdzf')}">设置我的收益账号</a></p>
+            <p>3.由财务结算周期，支付金额会在显示已支付后的X-X个工作日到账</p>
+        </section>
+    </div>
+    <div style="height:50px;"></div>
+</div>
+</body>
+</html>

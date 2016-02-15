@@ -1,0 +1,102 @@
+<?php
+namespace BizService;
+use BizService\OrderService;
+
+/**
+ * 分销
+ *
+ * @author 张辉
+ */ 
+class CommissionService extends BaseService { 
+
+	/**
+	 * 获取列表（后台）
+	 * @todo 未进行条件查询
+	 * @param array $param
+	 * @param int $ispagenation
+	 * @return array
+	 */
+	public function channel_list($param=array(),$ispagenation=true){
+	    $query = $this->	channellistsql($param);
+		if($ispagenation){
+		    $count = count(M()->query($query));
+			
+			$data=mypage($count,$query);
+			foreach($data['list'] as $key=>$val){
+			  $data['list'][$key]=D("goodscommon")->where('goods_commonid='.$val['goods_commonid'])->find();
+			}
+			return $data;
+		}else{
+	        $data=	M()->query($query);
+		    foreach($data as $key=>$val){
+			  $data[$key]=D("goodscommon")->where('goods_commonid='.$val['goods_commonid'])->find();
+			}
+			return $data;
+		}
+	}
+	
+
+	
+	/**
+	 * 获取渠道分成列表的sql语句（后台）
+	 * @param array $data
+	 * @return array
+	 */
+	public  function channellistsql($data){
+		//搜索字段
+		$array=$data;
+		//排序
+		$order =$data['order']; 
+		//分页数据
+		$limit =$data['limit'] == '' ? '' : '  limit '.$data['limit'];
+		//分组
+        $group = " GROUP BY id";
+		$where="";
+		//构造sql子查询语句
+		$sql_select = "  a.id   ";
+		$sql_table = " ddt_commission_qd_money a  "; 
+	    $sql_where = "   a.shop_id=".$data['shop_id'];
+		$sql_group = "  a.id   ";
+		$sql_order = "  a.id  desc ";  
+		
+		//排序
+		switch($order){
+		  case 1:
+		    //产品编号降序
+			$sql_order= "a.goods_serial asc ,".$sql_order;
+			break;
+		  case 2:
+		    //产品编号升序
+			$sql_order= "a.goods_serial desc ,".$sql_order;
+			/*$sql_table.=",mdd_yp_product b ";
+			$sql_select.=",b.price"; 
+			$sql_where.=" and a.infoid=b.id";
+			$sql_order = " b.price desc,".$sql_order; */
+			break;	
+		}
+		
+		//关键词搜索
+		$keyword=$data['key'];
+		//如果传来keyword
+		if($keyword){
+			  $sql_where.="  and ( a.pay_title like '%$keyword%'  ) "; 
+		}
+		
+		
+		//渠道
+		if($array['channel_id']){
+		  $sql_where.=" and a.channel_id =".$array['channel_id'];
+		}
+		
+
+	   $sql=" SELECT ".$sql_select." FROM ".$sql_table." where ".$sql_where.$group." order by ".$sql_order.$limit;
+	   
+	   echo $sql;
+	   
+	   return $sql ; 
+	}
+	
+
+	
+
+}

@@ -1,0 +1,9 @@
+<?php
+/*
+ * 订单支付模型
+ */
+namespace Home\model;
+use Think\Model;
+class CommissionOrderModel extends Model {
+
+}

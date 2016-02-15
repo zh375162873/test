@@ -1,0 +1,106 @@
+<?php
+/**
+ * Created by ddt.
+ * User: 张辉
+ * Description:后台产品管理类，提供后台产品管理所需的操作方法
+ */
+ 
+namespace Admin\Controller;
+use BizService\UserService;
+use Think\Controller;
+use Think\Model;
+use BizService\GoodsService;
+use BizService\GoodsstoreService;
+use BizService\ExtendService;
+use BizService\Geohash;
+use BizService\ShopService;
+use BizService\ExeclService;
+use BizService\OthershareService;
+class DhcodeController extends BaseController {
+	public function _initialize(){
+
+		parent::_initialize();
+	    //获取商城信息
+		$shop_info=get_shop_proxy();
+		$shop_id=$shop_info['shop_id']?$shop_info['shop_id']:0;
+		if($shop_id==0){
+		  exit('请先登录！');
+		}
+	}
+    public function index(){
+    	// $arr = session();
+
+		$searchForm = array();
+    	    $searchForm['codestatus'] = empty($_GET['codestatus'])?'':trim($_GET['codestatus']);//核销码状态
+    	    $searchForm['string_type'] = empty($_GET['string_type'])?'':trim($_GET['string_type']);//核销码状态
+    	    $searchForm['time_type'] = empty($_GET['time_type'])?'add_time':trim($_GET['time_type']);//搜索时间类型
+    	    $searchForm['begin_time'] = empty($_GET['begin_time'])?'':trim($_GET['begin_time']);
+    	    $searchForm['end_time'] = empty($_GET['end_time'])?'':trim($_GET['end_time']);
+    	    $searchForm['keywords'] =empty($_GET['keywords'])?'':trim($_GET['keywords']);
+            $sub_search = empty($_GET['sub_search'])?0:intval($_GET['sub_search']);//按钮分类
+    	    if($searchForm['codestatus']){
+    	    	$codestatus = ($searchForm['codestatus']=='unused'?0:1);
+    	    }
+		// var_dump($searchForm);exit;
+    	    
+	    	// var_dump(I('get.act','','strval'));exit;
+	    if($sub_search){
+			$this->dhcode_list_excel($searchForm);
+		}
+		$arr_temp = $this->dhcode_list($searchForm);
+
+		$pageList = array_page($arr_temp);
+        $this->assign('search_form',$searchForm);
+        $this->assign('order_list',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+		$this->display("list");
+    }
+	
+/**
+ *产品公共列表
+ */ 
+	public function dhcode_list($searchForm){
+		$proxyId = session('proxyId');
+		$otherShare = new OthershareService();
+		$user = new UserService();
+		$dhcodeList = json_decode($otherShare->dhm_shop_list($proxyId),true);
+
+    	    $string_type=$searchForm['string_type'];
+    	    $time_type=$searchForm['time_type'];
+
+		foreach ($dhcodeList['info'] as $key => $value) {
+			$dhcodeList['info'][$key]['user_name'] = D('Admin/Users')->findUserNameById($value['buyer_id']);
+			// $dhcodeList['info'][$key]['goods_name'] = $value['goods_name'];
+			// $dhcodeList['info'][$key]['goods_price'] = $value['goods_price'];
+			$dhcodeList['info'][$key]['order_sn'] = $value['order_sn'].' ';
+			$dhcodeList['info'][$key]['dhm_code'] = $value['dhm_code'].' ';
+		}
+
+		$arr_temp = array();
+		foreach ($dhcodeList['info'] as $key => $value) {
+			if(($searchForm['string_type']&&strstr($value[$string_type], $searchForm['keywords']))||!$searchForm['keywords']){
+				if(($searchForm['begin_time']&&(substr($value[$time_type],0,10) >= strtotime($searchForm['begin_time'])))||!$searchForm['begin_time']){
+					if(($searchForm['end_time']&&(substr($value[$time_type],0,10) <= strtotime($searchForm['end_time'])))||!$searchForm['end_time']){
+						if(!$searchForm['codestatus']||$codestatus=$value['status']){
+							$dhcodeList['info'][$key]['status_text'] = $value['status']?'已消费':'未消费';
+							$dhcodeList['info'][$key]['add_time'] = date('Y-m-d  H:i',$value['add_time']);
+							$dhcodeList['info'][$key]['dh_time'] = $value['dh_time']?date('Y-m-d  H:i',$value['dh_time']):'无';
+
+							$arr_temp[] = $dhcodeList['info'][$key];
+						}
+					}
+				}
+			}
+		}
+		// var_dump($arr_temp);
+		return $arr_temp;
+    }
+      //导出excel订单列表
+    public function  dhcode_list_excel($searchForm){
+		// var_dump($searchForm);exit;
+		$arr_temp = $this->dhcode_list($searchForm);
+        $ExeclService = new ExeclService(); 
+        $ExeclService->downMoreColumnDateToExel($arr_temp,"兑换码列表信息",array('order_sn','goods_name','goods_serial','goods_price','dhm_code','add_time','status_text','dh_time','user_name'),array('订单号','商品名称','货号','商品价格','核销码','购买时间','状态','使用时间','用户名','备注'),array(20,20,20,10,25,25,20,25,25),180);
+    }  
+}

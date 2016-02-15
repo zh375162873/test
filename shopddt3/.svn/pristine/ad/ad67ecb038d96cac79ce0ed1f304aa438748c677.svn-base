@@ -1,0 +1,400 @@
+<?php
+
+namespace BizService;
+/**
+ * 订单流程Service
+ *
+ * @author 王春一
+ */
+class OrderService extends BaseService {
+    
+    public function __construct(){
+        header("Content-type:text/html;charset=utf-8");
+    }
+	/**
+	 * 自动生成订单号
+	 */
+	public function create_ordersn(){
+		return date('Ymd').substr(implode(NULL,array_map('ord',str_split(substr(uniqid(),7,13),1))),0,8);
+	}
+	
+	function CreateExchangeCode(){
+		$order_sn = substr(implode(NULL,array_map('ord',str_split(substr(uniqid(),7,13),1))),0,8).sprintf('%04d',rand(0,9999));
+		return  $order_sn;
+	}
+
+	/**
+	 * 生成支付方式(支付宝支付)
+	 */
+	public function  online_pay($data){
+	 vendor('Alipay.Corefunction');
+	 vendor('Alipay.Md5function');
+	 vendor('Alipay.Notify');
+	 vendor('Alipay.Submit');
+	//配置文件
+     $alipay_config = C("ALIPAY_CONFIG");
+	
+     /**************************请求参数**************************/
+     $payment_type = "1"; //支付类型 //必填，不能修改
+     $notify_url = "http://".$_SERVER['HTTP_HOST']."/index.php?m=Home&c=PayReturn&a=alipay_notiy_do"; //服务器异步通知页面路径
+     $return_url = "http://".$_SERVER['HTTP_HOST']."/index.php?m=Home&c=PayReturn&a=alipay_return_do"; //页面跳转同步通知页面路径
+     $seller_email = C('ALIPAY.seller_email');//卖家支付宝帐户必填
+     $out_trade_no = $data['order_sn'];//商户订单号 通过支付页面的表单进行传递，注意要唯一！
+     $subject = $data['goods']['goods_name'];  //订单名称 //必填 通过支付页面的表单进行传递
+     $total_fee = $data['online_paymoney'];   //付款金额  //必填 通过支付页面的表单进行传递
+     $body = "购买".$data['goods_name']."在线支付".$data['online_paymoney'];  //订单描述 通过支付页面的表单进行传递
+     $show_url = U("Home/Goods/info",array("goods_id"=>$data['goods_id']));  //商品展示地址 通过支付页面的表单进行传递
+     $anti_phishing_key = "";//防钓鱼时间戳 //若要使用请调用类文件submit中的query_timestamp函数
+     $exter_invoke_ip = get_client_ip(); //客户端的IP地址
+     /************************************************************/
+     
+     
+     
+	//构造要请求的参数数组，无需改动
+	 $parameter = array(
+			"service" => "create_direct_pay_by_user",
+			"partner" => trim($alipay_config['partner']),
+			"payment_type"	=> '1',
+			"notify_url"	=> $notify_url,
+			"return_url"	=> $return_url,
+			"seller_email"	=> $seller_email,
+			"out_trade_no"	=> $out_trade_no,
+			"subject"	=> $subject,
+			"total_fee"	=> $total_fee,
+			"body"	=> $body,
+			"show_url"	=> $show_url,
+			"anti_phishing_key"	=> $anti_phishing_key,
+			"exter_invoke_ip"	=> $exter_invoke_ip,
+			"_input_charset"	=> trim(strtolower($alipay_config['input_charset']))
+	 );
+   
+	 //echo "<pre>";print_r($parameter);exit();
+	//建立请求
+	 $alipaySubmit = new \AlipaySubmit($alipay_config);
+	 $html_text = $alipaySubmit->buildRequestForm($parameter,"get", "支付宝支付");
+	 return $html_text;
+}
+
+ /* 
+  * wap支付宝方式
+  */   
+
+// public function wap_online_pay($data){}
+
+
+    //微信支付
+     public function wxpay($data){
+         vendor("WxPayPubHelper.WxPayPubHelper");
+         $wxconfig = C("WXPAY");
+        
+         //使用jsapi接口
+         $jsApi = new \JsApi_pub();
+        
+         //=========步骤1：网页授权获取用户openid============
+         //通过code获得openid
+         if (!isset($_GET['code']))
+         {
+             //触发微信返回code码
+             $url = $jsApi->createOauthUrlForCode($wxconfig['JS_API_CALL_URL']);
+             
+             Header("Location: $url");
+         }else
+         {
+             //获取code码，以获取openid
+             $code = $_GET['code'];
+             $jsApi->setCode($code);
+             $openid = $jsApi->getOpenId();
+         }
+         
+         //=========步骤2：使用统一支付接口，获取prepay_id============
+         //使用统一支付接口
+         $unifiedOrder = new \UnifiedOrder_pub();
+         
+         //设置统一支付接口参数
+         //设置必填参数
+         //appid已填,商户无需重复填写
+         //mch_id已填,商户无需重复填写
+         //noncestr已填,商户无需重复填写
+         //spbill_create_ip已填,商户无需重复填写
+         //sign已填,商户无需重复填写
+         $unifiedOrder->setParameter("openid","$openid");//商品描述
+         $unifiedOrder->setParameter("body","购买".$data['goods_name']."在线支付".$data['online_paymoney']);//商品描述
+         //自定义订单号，此处仅作举例
+         //$timeStamp = time();
+         $out_trade_no = $data['order_sn'];
+         $unifiedOrder->setParameter("out_trade_no","$out_trade_no");//商户订单号
+         $unifiedOrder->setParameter("total_fee",$data['online_paymoney']);//总金额
+         $unifiedOrder->setParameter("notify_url",U("Home/PayReturn/wx_notiy_do",array("type"=>1)));//通知地址
+         $unifiedOrder->setParameter("trade_type","NATIVE");//交易类型
+         //非必填参数，商户可根据实际情况选填
+         //$unifiedOrder->setParameter("sub_mch_id","XXXX");//子商户号
+         //$unifiedOrder->setParameter("device_info","XXXX");//设备号
+         //$unifiedOrder->setParameter("attach","XXXX");//附加数据
+         //$unifiedOrder->setParameter("time_start","XXXX");//交易起始时间
+         //$unifiedOrder->setParameter("time_expire","XXXX");//交易结束时间
+         //$unifiedOrder->setParameter("goods_tag","XXXX");//商品标记
+         //$unifiedOrder->setParameter("openid","XXXX");//用户标识
+         //$unifiedOrder->setParameter("product_id","XXXX");//商品ID
+         
+         $prepay_id = $unifiedOrder->getPrepayId();
+         //=========步骤3：使用jsapi调起支付============
+         $jsApi->setPrepayId($prepay_id);
+         
+         $jsApiParameters = $jsApi->getParameters();
+         //echo $jsApiParameters;
+         
+         $html_info .= "<html><head><meta http-equiv='content-type' content='text/html;charset=utf-8'/><title>微信安全支付</title>";
+         $html_info .= "<script type='text/javascript'>
+                		//调用微信JS api 支付
+                		function jsApiCall(){
+                			WeixinJSBridge.invoke(
+                				'getBrandWCPayRequest',
+                				 ".$jsApiParameters.",
+                				function(res){
+                					WeixinJSBridge.log(res.err_msg);
+                					//alert(res.err_code+res.err_desc+res.err_msg);});}
+                		function callpay(){
+                			if (typeof WeixinJSBridge == 'undefined'){
+                			    if(document.addEventListener){
+                			        document.addEventListener('WeixinJSBridgeReady',jsApiCall, false);
+                			    }else if(document.attachEvent){
+                			        document.attachEvent('WeixinJSBridgeReady',jsApiCall); 
+                			        document.attachEvent('onWeixinJSBridgeReady',jsApiCall);
+                			    }}else{jsApiCall();}}</script></head>";   
+         $html_info .="<body></br></br></br></br><div align='center'>
+                		<button style='width:210px; height:30px; background-color:#FE6714; border:0px #FE6714 solid; cursor: pointer;  color:white;  font-size:16px;' type='button' onclick='callpay()' >贡献一下</button>
+                	  </div></body></html>";
+         
+        return $html_info;
+     }
+     
+
+
+
+
+  public function http($url, $params, $method = 'GET', $header = array(), $multi = false){
+      $opts = array(
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_HTTPHEADER     => $header
+        );
+        switch(strtoupper($method)){
+            case 'GET':
+                $opts[CURLOPT_URL] = $url . '?' . http_build_query($params);
+                break;
+            case 'POST':
+                $params = $multi ? $params : http_build_query($params);
+                $opts[CURLOPT_URL] = $url;
+                $opts[CURLOPT_POST] = 1;
+                $opts[CURLOPT_POSTFIELDS] = $params;
+                break;
+            default:
+                E('不支持的请求方式！');
+        }
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, $opts);
+        $data  = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+        if($error) exit('请求发生错误：' . $error);
+        
+        return  $data;
+    }
+  
+    //订单统计
+    public function shangcheng_order_count($shop_id){
+        $order_total_num = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>array("neq",0)))->count();
+        $order_total_money = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>array(array("eq",1),array("eq",2),'and'),"refund_state"=>0))->sum("order_amount");
+        $todaytime =  strtotime(date('Y-m-d'));
+        $order_today_time = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>array("neq",0),"addtime"=>array("gt",$todaytime)))->count();
+        $monthtime = $strat_time = strtotime(date("Y")."-".date("m")."-1");
+        $order_month_time = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>array("neq",0),"addtime"=>array("gt",$monthtime)))->count();
+        $order_wxf_num = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>1,"refund_state"=>0))->count();
+        $order_yxf_num = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>2,"refund_state"=>0))->count();
+        $order_tksq_num = D("Orders")->where(array("shop_id"=>$shop_id,"order_status"=>1,"refund_state"=>1))->count();
+        
+        $date = array(
+            'order_total_num' => $order_total_num,//订单总数
+            'order_total_money' => $order_total_money,//订单总金额
+            'order_today_time' => $order_today_time,//今日订单量
+            'order_month_tiime' => $order_month_time,//本月订单量
+            'order_wxf_num' => $order_wxf_num,//未消费订单
+            'order_yxf_num' => $order_yxf_num,//已消费订单
+            'order_tksq_num' => $order_tksq_num,//有退款订单
+        );
+        return $date;
+    }
+     
+    /**
+     * 用户订单的统计
+     * $condition 数组 参数为：
+     * @param unknown $userid array
+     * @param $proxy_id渠道id
+     * @param unknown $start_time
+     * @param unknown $end_time
+     * @return Ambigous <\Think\mixed, boolean, unknown, mixed, object>
+     */
+    public function user_order_count($condition){
+        
+        $data=array();
+        if(!empty($condition['user_id'])){
+        $data['buyer_id'] = intval($condition['user_id']);
+        }
+        if(!empty($condition['proxy_id'])){
+            $shopservice = new ShopService();
+            $arr=$shopservice->get_shop_info_by_proxy($condition['proxy_id']);
+            $shop_id = $arr[0]['shop_id'];
+            $data['shop_id'] = $shop_id;
+        }
+       
+        if(!empty($condition['start_time'])&&!empty($condition['end_time'])){
+            $data['add_time'] = array(array("gt",$condition['start_time']),array("lt",$condition['end_time']));
+        }
+        elseif(!empty($condition['start_time'])&&empty($condition['end_time'])){
+            $data['add_time'] = array("gt",$condition['start_time']);
+        }
+        elseif(empty($condition['start_time'])&&!empty($condition['end_time'])){
+            $data['add_time'] = array("lt",$condition['end_time']);
+        }
+        
+        if(!empty($condition['type'])){
+            //type为1订单已经消费 2订单退款
+            if($condition['type']==1){
+              $data['order_status'] = 2;
+            }
+            elseif($condition['type']==2){
+              $data['refund_state'] = 1;
+            }
+            
+        }else{
+            $data['order_status'] = array("neq",0);
+        }
+        //$data_amount = $data;
+        //$data_amount['refund_state'] = 0;//处理退款订单不计算里面
+
+        $order_goods_total = D("Orders")->where($data)->sum("goods_num");//上皮
+        $order_num = D("Orders")->where($data)->count();
+        $order_money = D("Orders")->where($data)->sum("order_amount");
+        
+        $info['order_num'] = empty($order_num)?0:$order_num;
+        $info['order_money']=empty($order_money)?0:$order_money;
+        $info['order_goods_total']=empty($order_goods_total)?0:$order_goods_total;
+        
+        
+        
+        return $info;
+    }
+    /**
+     * 统计总用户的订单数
+     * @param unknown $proxy_id
+     * @param unknown $start_time
+     * @param unknown $end_time
+     * @param unknown $type 1购买一次用户统计，2购买两次用户统计
+     */
+    public function count_user_order($condition){
+        $where="";
+        if(!empty($condition['proxy_id'])){
+            $shopservice = new ShopService();
+            $arr=$shopservice->get_shop_info_by_proxy($condition['proxy_id']);
+            $shop_id = $arr[0]['shop_id'];
+            $where .= "AND shop_id=".$shop_id;
+        }
+         
+        if(!empty($condition['start_time'])&&!empty($condition['end_time'])){
+            $where .= " AND add_time >".$condition['start_time']." AND add_time <".$condition['end_time'];
+        }
+        elseif(!empty($condition['start_time'])&&empty($condition['end_time'])){
+            $where .= " AND add_time >".$condition['start_time'];
+        }
+        elseif(empty($condition['start_time'])&&!empty($condition['end_time'])){
+            $where .= " AND add_time <".$condition['end_time'];
+        }
+        if(!empty($condition['type'])){
+            $where .=" AND COUNT(buyer_id) >=".$condition['type'];
+        }
+        $sql = "SELECT order_id,COUNT(buyer_id) AS total FROM ddt_shop.ddt_orders GROUP BY buyer_id HAVING 1 ".$where;
+        echo $sql;exit();
+        $model = new \Think\Model();
+        $arr = $model->query($sql);
+        
+        echo "<pre>";print_r($arr);exit();
+    }
+    
+    /**
+     * 用户订单列表
+     * @param unknown $userid
+     * $proxy_id渠道id
+     * @return unknown
+     */
+    public function user_order_list($userid,$proxy_id){
+        if(empty($userid)){
+            return false;
+        }
+        
+        $data = array();
+        $data['buyer_id'] = intval($userid);
+        if(!empty($proxy_id)){
+            $shopservice = new ShopService();
+            $arr=$shopservice->get_shop_info_by_proxy($proxy_id);
+            $shop_id = $arr[0]['shop_id'];
+            $data['shop_id'] = $shop_id;
+        }
+        
+        $data['order_status'] = array("neq",0);
+        
+        $arr = D("Home/Orders")->where($data)->order("add_time DESC")->select();
+        for($i=0;$i<count($arr);$i++){
+            $arr[$i]['goods']=D("Home/OrdersGoods")->where(array("order_id"=>$arr[$i]['order_id'],"goods_id"=>$arr[$i]['goods_id']))->field("goods_name,goods_image,goods_price")->find();
+            $arr[$i]['dhm']=D("Home/DhmManage")->where(array("order_id"=>$arr[$i]['order_id'],"goods_id"=>$arr[$i]['goods_id']))->select();
+        }
+        
+        return $arr;
+    }
+   /**
+    * 现金账户流水记录
+    * @param unknown $date
+    * @param unknown $type
+    * @param unknown $admin_name
+    */
+    public function ls_jl($data,$type,$admin_name){
+        if(D("Home/LsPrice")->ls_price_jl($data,$type,$admin_name)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    /**
+     * 通过推广id获取订单列表
+     * @param unknown $extend_id
+     */
+    public function extend_order($extend_id,$goods_id){
+        $map =array();
+        $map['extend_id']=$extend_id;
+        if($goods_id){
+            $map['goods_id']=$goods_id;
+        }
+        
+        $info = D("Orders")->where($map)->select();
+        $order_num_total = count($info);
+        $order_money_total = 0;
+        $order_goods_total = 0;
+        for($i=0;$i<$order_num_total;$i++){
+            $order_money_total = $order_money_total+$info[$i]['order_amount'];
+            $order_goods_total = $order_goods_total+$info[$i]['goods_num'];
+            $info[$i]['goods']=D("OrdersGoods")->where(array("order_id"=>$info[$i]['order_id']))->find();
+            $info[$i]['dhm']=D("DhmManage")->where(array("order_id"=>$info[$i]['order_id'],"type"=>1))->select();
+        }
+        $data = array();
+        $data['list']=$info; 
+        $data['order_num_total'] = $order_num_total;
+        $data['order_money_total'] = $order_money_total;
+        $data['order_goods_total'] = $order_goods_total;
+        return $data;
+    }
+    
+    
+}
+

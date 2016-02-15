@@ -1,0 +1,38 @@
+<include file="Index/header"/>
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('temp/templist')}" onclick="jumpTo(this);" class="active">模板列表</li>
+    </ul>
+</div>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th>ID</th>
+                <th>名称</th>
+                <th>创建时间</th>
+                <th>说明</th>
+                <th>操作</th>
+            </tr>
+     <?php
+	 foreach($data as $val){
+	 ?>
+            <tr class="trbor">
+                <td>{$val['temp_id']}</td>
+
+                <td>{$val['temp_title']}</td>
+                <td><?php echo date("Y:m:d  H:i:s",$val['create_time']);?></td>
+                <td>{$val['content']}</td>
+				<td><a href="{:U('admin/temp/tempedit/temp_id/'.$val['temp_id'])}">修改</a> | <a href="#">删除</a></td>
+            </tr>
+            <?php
+	 }
+	 ?>
+        </table>
+    </div>
+
+</div>
+
+<include file="Index/footer"/>

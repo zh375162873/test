@@ -1,0 +1,28 @@
+<?php
+/**
+ * Created by ddt.
+ * User: 谢林
+ * Date: 2015/9/16 14:59
+ * Description:后台管理控制器基类，所有后台控制器需要继承该控制器
+ */
+
+namespace Core\Controller;
+use Think\Controller;
+
+class BaseController extends Controller {
+    public function jumpIn(){
+        //接收密码串
+        $key=I('get.key','');
+        $act=I('get.act','statistics');
+        if($key==md5('admin'.substr(time(),-4))){
+            //写入状态session,跳转主页
+            session('adminKeyStatus','on');
+            // var_dump($_SESSION['keyStatus']);exit;
+            redirect('./../userscenter/'.$act);
+        }else{
+            //跳转核心平台主页
+            $url='location:'.C('WIFI_URL').'/admin/default/index';
+            header($url);
+        }
+    }
+}

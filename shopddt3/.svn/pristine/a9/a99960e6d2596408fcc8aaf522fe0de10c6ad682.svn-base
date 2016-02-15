@@ -1,0 +1,532 @@
+<?php
+/**
+现金商品信息模型
+*/
+namespace Admin\Model;
+use Think\Model;
+use BizService\Geohash;
+use BizService\MapService;
+class GoodsModel extends Model 
+{ 
+  protected $tableName = 'goods'; 
+  protected $fields = array(
+	  'goods_id', // 商品id
+	  'goods_commonid', //商品公用id
+	  'goods_name', //	varchar(50)	否		商品名称（+规格名称）
+	  'goods_plun', //	varchar(50)	否		商品卖点，宣传语
+	  'shop_id',//	int(10) 	否		商城id
+	  'store_type',//  int(10)   供货商类型（1：代理下商家，2：渠道，3：合同）
+	  'store_id',//  int(30)   供货商id(默认是代理下面的商家id，渠道id，或者合同id)
+	  'store_name',//varchar(50)	否		店铺名称
+	  'gc_id',//varchar(50)	否		主分类
+	  'gc_id_1',//	int(10) 	否		一级分类id
+	  'gc_id_2',//	int(10) 	否		二级分类id
+	  'gc_id_3',// 	int(10) 	否		三级分类id
+	  'brand_id',//	int(10) 	否		品牌id
+	  'goods_price',// 	decimal(10,2)	否		商品价格
+	  'goods_promotion_price',// 	decimal(10,2)	否		商品促销价格
+	  'goods_promotion_type',// 	tinyint(3) 	否	0	促销类型 0无促销，1团购，2限时折扣
+	  'goods_marketprice',// 	decimal(10,2)	否		市场价
+	  'goods_storage_alarm',//	tinyint(3) 	否		库存报警值
+	  'goods_click',//	int(10) 	否	0	商品点击数量
+	  'goods_salenum',//tinyint(3) 	否		出售数量
+	  'goods_collect',//	int(10) 	否	0	收藏数量
+	  'goods_storage',//int(10) 	否	0	商品库存，即上架的库存
+	  'goods_image',//	varchar(100)	否		商品主图
+	  'goods_state',//	tinyint(3) 	否		商品状态 0下架，1正常，10违规（禁售）
+	  'goods_addtime',//int(10) 	否		商品添加时间
+	  'goods_edittime',//	int(10) 	否		商品编辑时间
+	  'areaid_1',//	int(10) 	否		一级地区id（省）
+	  'areaid_2',// 	int(10) 	否		二级地区id（市）
+	  'areaid_3',//	int(10) 	否		三级地区id（区）
+	  'goods_commend',//	tinyint(3) 	否	0	商品推荐 1是，0否 默认0，如果大于0，则为排序
+	  'evaluation_good_star',//	tinyint(3) 	否	5	好评星级
+	  'evaluation_count',// 	int(10) 	否	0	评价数
+	  'is_virtual',//	tinyint(3) 	否	0	是否为虚拟商品 1是，0否
+	  'virtual_indate',//	int(10) 	否		虚拟商品有效期
+	  'virtual_limit',// 	tinyint(3) 	否		虚拟商品购买上限
+	  'virtual_invalid_refund',//	tinyint(3) 	否	1	是否允许过期退款， 1是，0否
+	  'goods_body',//	text	否		商品内容（web端浏览，前期不需要，统一使用商品公用表说明，后期需要给各个渠道销售填写说明时使用）
+	  'mobile_body',//text	否		手机端商品描述（前期不需要，统一使用商品公用表说明，后期需要给各个渠道销售填写说明时使用）
+	  'geohash',//经纬度编码
+	  'latitude',//纬度编码
+	  'longitude',//经纬度编码
+	  'storage_type',//库存展示方式 0:显示实际库存  1：显示虚假库存
+	  'storage_type_max',//最大值
+	  'storage_type_num',//调拨值
+	  'storage_num',//显示的虚假库存
+	  '_pk'=>'goods_id'//主键
+  );
+   
+  //定义自动填充
+ protected $_auto = array ( 
+   array('goods_addtime','time',1,'function'),    
+   array('goods_edittime','time',2,'function'), 
+ );
+ 
+ 
+/**
+ * 获取商品详细信息
+ * @param  milit   $id 分类ID或标识
+ * @param  boolean $field 查询字段
+ * @return array     产品信息
+ * @author zhanghui
+ */
+ public function info($goods_commonid=0,$id=0,$field = true){
+	/* 获取产品信息 */
+	$map = array();
+	if(is_numeric($goods_commonid)){ //通过ID查询
+		$map['goods_commonid'] = $goods_commonid;
+	} 
+	if(is_numeric($id)&&$id>0){ //通过ID查询
+		$map['goods_id'] = $id;
+	} 
+	return $this->field($field)->where($map)->find();
+ }
+
+
+/**
+ * 获取商品详细信息
+ * @param  milit   $id 分类ID或标识
+ * @param  boolean $field 查询字段
+ * @return array     产品信息
+ * @author zhanghui
+ */
+ public function getinfobyid($id=0,$field = true){
+	/* 获取产品信息 */
+	$map = array();
+	if(is_numeric($id)){ //通过ID查询
+		$map['goods_id'] = $id;
+	} 
+	return $this->field($field)->where($map)->find();
+ } 
+
+ 
+/**
+ * 获取商品详细信息
+ * @param  milit   $id 分类ID或标识
+ * @param  boolean $field 查询字段
+ * @return array     产品信息
+ * @author zhanghui
+ */
+ public function getinfobycommonid($goods_commonid=0,$field = true){
+	/* 获取产品信息 */
+	$map = array();
+	if(is_numeric($goods_commonid)){ //通过ID查询
+		$map['goods_commonid'] = $goods_commonid;
+	} 
+	return $this->field($field)->where($map)->find();
+ } 
+ 
+ 
+/**
+ * 新增商品
+ * @param  array   $data 商品信息数组
+ * @return int     商品id
+ * @author zhanghui
+ */ 
+  public function  addGoods($data){
+        $data_goods=array();
+		$data_goods['goods_commonid']=$data['goods_commonid'];
+		$data_goods['goods_name']=$data['goods_name'];
+		$data_goods['shop_id']=$data['shop_id'];
+		$data_goods['store_type']=1;
+		$data_goods['store_id']=$data['store_id'];
+		$data_goods['store_name']=$data['store_name'];
+		$data_goods['areaid_1']=$data['province'];
+		$data_goods['areaid_2']=$data['city'];
+		$data_goods['areaid_3']=$data['district'];
+		$data_goods['goods_price']=$data['goods_price'];
+		$data_goods['goods_marketprice']=$data['goods_marketprice'];
+		$data_goods['goods_image']=$data['goods_image'];
+		$data_goods['goods_state']=0;
+		$data_goods['is_virtual']=1;
+		$data_goods['virtual_indate']=strtotime($data['end_date']);
+		$data_goods['virtual_limit']=$data['goods_limit'];
+		$data_goods['goods_addtime']=time();
+	    $data_goods['goods_edittime']=time();
+		$data_goods['evaluation_good_star']=5;
+		//保存经纬度
+		$merchant_info=get_merchant_info($data['store_id']);
+		$n_latitude = $merchant_info['latitude'];
+        $n_longitude = $merchant_info['longitude'];
+		$geohash = new \BizService\GeohashService();
+		$n_geohash = $geohash->encode($n_latitude, $n_longitude);  
+		$data_goods['geohash']=$n_geohash;
+		$data_goods['latitude']=$n_latitude;
+		$data_goods['longitude']=$n_longitude;
+		$goods_id=$this->add($data_goods);
+		
+		
+		//添加产品
+			$url="http://api.map.baidu.com/geodata/v3/poi/create";
+			$params=array();
+			$params['title']=$data['goods_name'];
+			$params['address']=$merchant_info['address'];
+			$params['longitude']=$merchant_info['longitude'];
+			$params['latitude']=$merchant_info['latitude'];
+			$params['coord_type']=3;
+			$params['geotable_id']=C('MAP_TABLEID');
+		    $params['ak']=C('MAP_KEY');
+			$params['store_id']=$data['store_id'];
+			$params['shop_id']=$data['shop_id'];
+			$params['goods_common_id']=$data['goods_commonid'];
+			$params['price']=$data['goods_price'];
+			$params['goods_id']=$goods_id;
+			$params['tags']=$data['shop_id'].$data['store_id'].$data['goods_commonid'].$goods_id;
+			//循环保存分类
+			foreach($data['gc_id'] as $val){
+			  //获取分类名称
+			  $gc=M("goods_class")->where('gc_id='.$val)->find();
+			  $params['gc1'].=$gc['gc_name'].",";
+			}
+			$f=curl_http($url, $params, $method = 'POST'); 
+		
+		
+		return  $goods_id;
+  }
+  
+  /**
+   *删除商品信息
+   * @param  $id  商品公共id
+   * @return  int   默认1
+   * @author zhanghui
+  */
+  public function  delGoods($id){
+         $data=array();
+	     $data['goods_state']=-1;
+	     $this->where('goods_commonid='.$id)->data($data)->save();
+  }
+  
+  /**
+   *更新现金产品信息
+   * @param  $data  商品公共信息数组
+   * @param  $id  商品公共id
+   * @return  int   默认1
+   * @author zhanghui  
+  */
+  public function  editGoods($data,$id){
+        $data_goods=array();
+		$data_goods['goods_serial']=$data['goods_serial'];
+		$data_goods['goods_name']=$data['goods_name'];
+		$data_goods['goods_plun']=$data['subtitle'];
+		$data_goods['goods_price']=$data['goods_price'];
+		$data_goods['goods_marketprice']=$data['goods_marketprice'];
+		$data_goods['store_type']=1;
+		$data_goods['store_id']=$data['store_id'];
+		$data_goods['store_name']=$data['store_name'];
+		$data_goods['mobile_body']=htmlspecialchars_decode($data['mobile_body']);
+		$data_goods['virtual_limit']=$data['goods_limit'];
+		$data_goods['areaid_1']=$data['province'];
+		$data_goods['areaid_2']=$data['city'];
+		$data_goods['areaid_3']=$data['district'];
+		$data_goods['goods_image']=$data['goods_image'];
+		$data_goods['virtual_indate']=strtotime($data['end_date']); 
+		$data_goods['goods_edittime']=time();
+		//查询数据库商品信息
+		$goods=$this->where("goods_commonid=".$id)->find();
+		if($goods['goods_salenum']==0){
+		   $data_goods['evaluation_good_star']=5;
+		}
+		//保存经纬度
+		$merchant_info=get_merchant_info($data['store_id']);
+		$n_latitude = $merchant_info['latitude'];
+        $n_longitude = $merchant_info['longitude'];
+		$geohash = new \BizService\GeohashService();
+		$n_geohash = $geohash->encode($n_latitude, $n_longitude);  
+		$data_goods['geohash']=$n_geohash;
+		$data_goods['latitude']=$n_latitude;
+		$data_goods['longitude']=$n_longitude;
+		//保存虚假库存
+		//$data_goods['storage_type']=$data['storage_type'];
+		//$data_goods['storage_type_max']=$data['storage_type_max'];
+		//$data_goods['storage_type_num']=$data['storage_type_num'];
+	    $flag=$this->where("goods_commonid=".$id)->data($data_goods)->save();
+		//百度地图lbs信息上传
+		 //查询数据库商品信息
+		//$goods=$this->where("goods_commonid=".$id)->find();
+		//查询产品
+		$url="http://api.map.baidu.com/geodata/v3/poi/list";
+		$params=array();
+		$params['geotable_id']=C('MAP_TABLEID');
+		$params['ak']=C('MAP_KEY');
+		$params['tags']=$goods['shop_id'].$goods['store_id'].$goods['goods_commonid'].$goods['goods_id'];
+		$f=curl_http($url, $params, $method = 'GET');
+		$d=json_decode($f,true);
+		$c=$d['pois'];
+		//修改
+		if($d['status']==0&&$d['pois']){
+		  $url="http://api.map.baidu.com/geodata/v3/poi/update";
+		  $params=array();
+		  $params['geotable_id']=C('MAP_TABLEID');
+		  $params['ak']=C('MAP_KEY');
+		  $params['id']=$c[0][id]; 
+		    $params['title']=$goods['goods_name'];
+			$params['address']=$merchant_info['address'];
+			$params['coord_type']=3;
+			$params['longitude']=$merchant_info['longitude'];
+			$params['latitude']=$merchant_info['latitude'];
+			$params['store_id']=$goods['store_id'];
+			$params['shop_id']=$goods['shop_id'];
+			$params['goods_common_id']=$goods['goods_commonid'];
+			$params['price']=$goods['goods_price'];
+			$params['goods_id']=$goods['goods_id'];
+			$params['evaluation_good_star']=$goods['evaluation_good_star'];
+			$params['evaluation_count']=$goods['evaluation_count'];
+			//循环保存分类
+			foreach($data['gc_id'] as $val){
+			  //获取分类名称
+			  $gc=M("goods_class")->where('gc_id='.$val)->find();
+			  $params['gc1'].=$gc['gc_name'].",";
+			}
+		    $f=curl_http($url, $params, $method = 'POST');
+		}else{
+			//添加产品
+			$url="http://api.map.baidu.com/geodata/v3/poi/create";
+			$params=array();
+			$params['title']=$goods['goods_name'];
+			$params['address']=$merchant_info['address'];
+			$params['longitude']=$merchant_info['longitude'];
+			$params['latitude']=$merchant_info['latitude'];
+			$params['coord_type']=3;
+			$params['geotable_id']=C('MAP_TABLEID');
+		    $params['ak']=C('MAP_KEY');
+			$params['store_id']=$goods['store_id'];
+			$params['shop_id']=$goods['shop_id'];
+			$params['goods_common_id']=$goods['goods_commonid'];
+			$params['price']=$goods['goods_price'];
+			$params['goods_id']=$goods['goods_id'];
+			$params['evaluation_good_star']=$goods['evaluation_good_star'];
+			$params['evaluation_count']=$goods['evaluation_count'];
+			$params['tags']=$goods['shop_id'].$goods['store_id'].$goods['goods_commonid'].$goods['goods_id'];
+			//循环保存分类
+			foreach($data['gc_id'] as $val){
+			  //获取分类名称
+			  $gc=M("goods_class")->where('gc_id='.$val)->find();
+			  $params['gc1'].=$gc['gc_name'].",";
+			}
+			$f=curl_http($url, $params, $method = 'POST');
+	    }
+		
+		
+		
+		
+		return  $flag;
+  }
+  
+
+  
+  
+    //通过商品公用id更新产品信息
+ public function   editGoodsbycommonid($goods_commonid,$data){
+		 $flag=$this->where("goods_commonid=".$goods_commonid)->data($data)->save();
+	     return $flag;
+ }
+
+
+/**
+ *  卖货退货时修改总库存
+ *  @param  $goods_commonid   商品公共id 
+ *  @param  $num      数量  正数为销售  负数为退货
+ *  @author  张辉
+ */
+ public function  changestorage($id,$num){
+     $goods_info=$this->where('goods_id='.$id)->find();
+	 $goods_commonid=$goods_info['goods_commonid'];
+     if($num>0){
+	   //判断是否有此库存量的商品
+	   $goods_storage=$this->where('goods_commonid='.$goods_commonid)->getField('goods_storage');
+	   if($goods_storage>=$num){
+	     $this->where("goods_commonid = $goods_commonid")->setDec('goods_storage',$num); // 减少库存数量
+		 $this->where("goods_commonid = $goods_commonid")->setInc('goods_salenum',$num); // 增加销售数量
+		 D('Admin/goodscommon')->changestorage($goods_commonid,$num); 
+		 //判断是否为虚假库存
+		    $goods=$this->where('goods_id='.$id)->find();
+			if($goods['storage_type']){
+			  //判断买完后的库存值否小于等于最小调拨值，如果小于就重新调配库存
+			  $s_num=$goods['storage_num']-$num;
+			  if($s_num<=$goods['storage_type_num']){
+			    //调取现有的库存是否够最大库存的数量,就将显示的库存显示为最大库存值，如果不是，就显示现有库存
+				if($goods['goods_storage']>=$goods['storage_type_max']){
+			      $goods['storage_num']=$goods['storage_type_max'];
+				}else{
+				  $goods['storage_num']=$goods['goods_storage'];
+				}
+				$this->where('goods_id='.$goods['goods_id'])->data('storage_num='.$goods['storage_num'])->save();
+			  }else{
+			    $this->where('goods_id='.$goods['goods_id'])->data('storage_num='.$s_num)->save();
+			  }
+			}
+	   }else{
+	    return -1;
+	   }
+	 }else{
+	   $goods_salenum=$this->where('goods_commonid='.$goods_commonid)->getField('goods_salenum'); 
+	   if($goods_salenum>=abs($num)){
+	    $this->where("goods_commonid = $goods_commonid")->setDec('goods_salenum',abs($num)); // 减少销售数量
+		$this->where("goods_commonid = $goods_commonid")->setInc('goods_storage',abs($num)); // 减少销售数量
+	    D('Admin/goodsstorehouse')->changestorage($goods_commonid,abs($num)); 
+	    D('Admin/goodscommon')->changestorage($goods_commonid,$num); 
+	   }else{
+	    return -1;
+	   } 
+	 }
+	 
+	 return  1;
+ } 
+ 
+ 
+    //通过产品编号获取商品
+	 /**
+	 *  param  serial   商品编号
+	 *  param  field  获取的字段
+	 *  return  array  商品信息
+	 */
+	function getGoodsBySerial($serial,$field=true){ 
+	    $goodscommon=D("goodscommon")->where("goods_serial = '$serial'")->find(); 
+		$goods_commonid= $goodscommon['goods_commonid'];
+		$goodsinfo=array();
+		if($goodscommon){
+		  $goodsinfo=D("goods")->where("goods_commonid = $goods_commonid")->field($field)->find();  
+		}else{
+		  return 0;
+		}
+		return  $goodsinfo;
+	 }
+
+ 
+ 
+ 
+   /**
+   *获取首页现金产品信息第一页信息
+   * @param  $data  搜索数组
+   * @return  array   
+   * @author zhanghui  
+  */
+   //模板七，产品内容生成
+    public function getindexgoods($data)
+    {
+		$info=$data;
+		//调取代理信息
+        $shop_info = get_shop_proxy();
+        $shop_id=$shop_info['shop_id']?$shop_info['shop_id']:1;
+		$limit="";
+		$gc_id=$info['info_data']['0']['gc_id']?$info['info_data']['0']['gc_id']:1;
+		if($info['info_page']==1&&$info['info_num']>0){
+			$num=$info['info_num'];
+			$limit="  0,$num ";
+		}
+		if($info['info_num']>0){
+			$num=$info['info_num'];
+			$limit="  0,$num ";
+		}
+		
+		 //调取配置信息
+		$setting=M('setting')->where('shop_id='.$shop_id)->select();
+		foreach($setting as $val){
+		  switch($val['code']){
+		    case 'SHOW_EXPIRED':
+			  if($val['value']==1){
+			  
+			  }else{  
+			     $sql_where=" and  c.end_date >  unix_timestamp(now())   "; 
+			  }
+			break;
+			case 'SHOW_SOLD_OUT':
+			  if($val['value']==1){
+			  
+			  }else{  
+			     $sql_where=" and  a.goods_storage > 0   "; 
+			  }
+			break;
+			
+		  }
+		}
+		
+		
+		if($gc_id > 1){
+			$goodslist=   M()->query("select a.* from ddt_goods as a ,ddt_goods_class_relation as b , ddt_goods_common as c  where a.goods_commonid=b.goods_commonid   and a.shop_id= $shop_id  and a.goods_state>=0  and  a.goods_commonid=c.goods_commonid    and b.class_id=".$gc_id.$sql_where."   order by a.goods_commend  desc ,a.goods_commonid desc    limit ".$limit);
+		}else{
+		  $goodslist=   M()->query("select a.* from ddt_goods as a , ddt_goods_common as c   where a.shop_id= $shop_id  and a.goods_state >= 0  and  a.goods_commonid=c.goods_commonid ".$sql_where."  order by a.goods_commend  desc , a.goods_commonid desc  limit ".$limit);  
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		foreach($goodslist as $key=>$val){
+			$goodcommon_info=D('Admin/goodscommon')->where('goods_commonid='.$val['goods_commonid'])->find();
+			$goodslist[$key]['position_tags']=$goodcommon_info['position_tags'];
+			$goodslist[$key]['subtitle']=$goodcommon_info['subtitle'];
+			$goodslist[$key]['end_time']=$goodcommon_info['end_date'];
+			$n_latitude = session('lat')?session('lat'):"34.26567";
+            $n_longitude = session('lng')?session('lng'):"108.953435";
+			$distance = getDistance_admin($n_latitude, $n_longitude, $val['latitude'], $val['longitude']);
+		    $goodslist[$key]['distance'] =  number_format($distance/1000, 2, '.', '');
+		}
+		return $goodslist;
+    }
+    
+	
+	//根据距离排序，通过百度地图lbs检索
+	public function getindexgoods_bylbs($data)
+    {
+		$info=$data;
+		//调取代理信息
+        $shop_info = get_shop_proxy();
+        $shop_id=$shop_info['shop_id']?$shop_info['shop_id']:1;
+		//定义url
+		$url="http://api.map.baidu.com/geosearch/v3/nearby";
+		//定义参数数组
+		$params=array();
+		//获取分类信息
+		$gc_id=$info['info_data']['0']['gc_id']?$info['info_data']['0']['gc_id']:1;
+		//设置分页
+		    $params['page_size']=$info['info_num'];
+			$params['page_index']=0;
+		//设置排序
+		$params['sortby']="distance:1|price:1";
+		//用户信息
+		$params['geotable_id']=C('MAP_TABLEID');
+		$params['ak']=C('MAP_KEY');
+		//位置信息
+		$params['location']=$data['lng'].",".$data['lat'];
+		//半径
+		$params['radius']="500000000";
+		
+		//筛选条件
+		//1、分类筛选
+		if($gc_id > 1){
+		    //获取分类名称
+			$gc=M("goods_class")->where('gc_id='.$gc_id)->find();
+		    $params['q']=$gc['gc_name'];
+		}
+		//2、商城筛选
+		$params['filter']="shop_id:$shop_id";
+		
+		
+		$f=curl_http($url, $params, $method = 'GET');
+		$d=json_decode($f,true);
+		$goodslist=$d['contents'];
+		
+		foreach($goodslist as $key=>$val){
+		    $good_info=D('Admin/goods')->where('goods_commonid='.$val['goods_common_id'])->find();
+			$goodslist[$key]=$good_info;
+			$goodcommon_info=D('Admin/goodscommon')->where('goods_commonid='.$val['goods_common_id'])->find();
+			$goodslist[$key]['position_tags']=$goodcommon_info['position_tags'];
+			$goodslist[$key]['subtitle']=$goodcommon_info['subtitle'];
+			$distance = $val['distance'];
+		    $goodslist[$key]['distance'] =  number_format($distance/1000, 2, '.', '');
+		}
+		return $goodslist;
+    }
+
+
+
+}
+
+?>

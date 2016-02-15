@@ -1,0 +1,40 @@
+<?php
+namespace Home\Controller;
+use BizService\UserService;
+use BizService\GoodsService;
+use BizService\GoodshomeService;
+use Think\Controller;
+header("Content-type:text/html;charset=utf-8");
+class SearchController extends Controller {
+	//产品列表页面默认
+    public function index(){
+        $this->searchgoods();
+    }
+	
+	//搜索产品列表页面
+    public function searchgoods(){
+	    $keywords=I('keywords');
+		$data=array();
+		if(session('lat')&&session('lng')){
+		    $data['lat']=session('lat');
+			$data['lng']=session('lng');
+		}else{
+		    //百度定位
+		    /*$mapService=new \BizService\MapService();
+		    $map=$mapService->locationByIP();
+			$data['lat']=$map['lat'];
+			$data['lng']=$map['lng'];*/
+		}
+		$goodslist=array();
+		$GoodshomeService=new GoodshomeService();
+		if($keywords){
+		 $data['keywords']=$keywords;
+		 $goodslist=$GoodshomeService->mgoods_list($data,0);
+		}
+		$this->assign('goodslist',$goodslist);
+		$this->assign('keywords',$keywords);
+        $this->display('goods_list'); 
+    }
+	
+	
+}

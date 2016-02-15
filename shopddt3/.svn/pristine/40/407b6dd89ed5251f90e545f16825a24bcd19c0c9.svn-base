@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta content="telephone=no" name="format-detection">
+        <title>用户登录-点点通闪购平台</title>
+        <link rel="stylesheet" href="{$uri}__PUBLIC__/home/css/main.css">
+        <script src="__PUBLIC__/home/js/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/jquery.validate.min.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/common.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/general.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/bootstrap-datepicker.js" type="text/javascript"></script>
+        <script src="__PUBLIC__/home/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+    </head>
+    <body>
+    <script type="text/javascript">
+        // function submit(obj){
+        //     obj.submit();
+        // }
+        function checkMobile(sMobile){ 
+            var telReg = !!sMobile.match(/^(0|86|17951)?(13[0-9]|15[012356789]|17[678]|18[0-9]|14[57])[0-9]{8}$/);
+            //如果手机号码不能通过验证
+            if(telReg == false){
+             return false;
+            }        
+        }
+        function check(theForm){
+            if(checkMobile(theForm.username.value) == false){ 
+                alert("请输入正确的手机号码!");theForm.username.focus();return false; 
+            }
+            if(theForm.password.value.length < 6){ 
+                alert("密码不足6位!");theForm.password.focus();return false; 
+            }
+            // theForm.submit();
+            $.post("__APP__/home/index/userActLogin",{
+                username:$("#username").val(),
+                password:$("#password").val()
+                },function(data){
+                    if(data.status==1){
+                        // alert(data.url);
+                        window.location.href=data.info;
+                    }else{
+                        alert(data.info);
+                    }
+                },"json");
+        }
+    </script>
+        <div id="viewport" class="viewport">
+            <div class="logo"><img src="{$uri}__PUBLIC__/home/images/logo_ddsg.png"></div>
+            <div class="login">
+                <form action="__APP__/home/index/userActLogin" method="post" name="formUser" id="formUser">
+                    <div class="item item-username">
+                        <input class="txt-input txt-username" type="text" maxlength="11" placeholder="请输入手机号码" name="username" id="username">
+                    </div>
+                    <div class="item item-password">
+                        <input class="txt-password" type="password" maxlength="12" placeholder="请输入密码" name="password" id="password">
+                    </div>
+                    <div class="item item-btns" onclick="javascript:return check(formUser);">
+                        <a class="btn-login btn-disabled" >登录</a>
+                    </div>
+                </form>    
+                <div class="login_option">
+                    <span class="register-free">
+                        <a href="__APP__/index/register">手机快速注册</a>
+                    </span>
+                    <span class="retrieve-password">
+                        <a href="__APP__/index/findPwd">找回密码</a>
+                    </span>
+                </div>
+            </div>
+        </div>	  
+    </body>
+</html>

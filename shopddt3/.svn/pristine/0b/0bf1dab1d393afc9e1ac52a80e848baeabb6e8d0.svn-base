@@ -1,0 +1,27 @@
+<?php
+
+namespace BizService;
+
+/**
+ * 接口操作
+ *
+ * @author 王春一
+ */
+class OthershareService extends BaseService
+{
+    /**
+     * 兑换码验证
+     * @param unknown $dhm_code 兑换码
+     * @param unknown $store_id 商户id
+     * 返回array(
+     *     error 错误编号 0成功 1 不存在数据  2操作失败
+     *     data  返回数据
+     *  )
+     */
+    public function dhm_yanzheng($dhm_code,$store_id){
+        //处理兑换码数据
+       $arr = D("DhmManage")->yanzheng_dhm($dhm_code,$store_id);
+       
+       return $arr;
+    }
+}

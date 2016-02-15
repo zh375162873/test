@@ -1,0 +1,17 @@
+<?php
+foreach($shoplist as $val){
+?>
+<li class="ui-menu-item" id="ui-id-{$val['merchant_id']}"  onclick="test2('{$val['merchant_name']}',{$val['merchant_id']},'{$val['province']}','{$val['city']}','{$val['district']}')">{$val['merchant_name']}</li>
+<?php
+}
+?>
+
+<select name="channel_id" class="form-control" required data-msg="请输入选择框">
+<?php
+foreach($channelList as $val){
+?>
+<option value="{$val['id']}"  <?php if($val['id']==$id){?>selected="selected"  <?php }?> >{$val['name']}</option>
+<?php
+}
+?>					   
+</select>

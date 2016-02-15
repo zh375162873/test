@@ -1,0 +1,65 @@
+<?php
+namespace Admin\Model;
+use Think\Model;
+class GoodsclassrelationModel extends Model 
+{ 
+  protected $tableName = 'goods_class_relation'; 
+  protected $fields = array(
+    'id', //id
+    'goods_commonid', //	int(11)	否		商品ID
+    'class_id', //	int(11)	否		分类id
+	'shop_id', //	int(11)	否		商城id
+    '_pk'=>'id'//主键
+  );
+
+  /***
+    *更新产品分类关联
+    * @parm  $data  要更新的数据
+    * @parm  goods_id  更新条件
+	* auer   张辉
+  ***/
+  public function  addclass($data,$goods_commonid,$shop_id){
+     //先删除原有的关联
+     $this->where(array('goods_commonid'=>$goods_commonid))->delete();
+	 foreach ($data as $c) {
+	   $this->data(array('goods_commonid'=>$goods_commonid,'shop_id'=>$shop_id, 'class_id'=>$c))->add();
+	 }
+	 //再关联分类
+	 $reation=$this->where(array('userid'=>$this->userid))->select(); 
+  }
+  
+  /**
+ * 获取产品下的所有分类
+ * @param  milit   $id 分类ID或标识
+ * @param  boolean $field 查询字段
+ * @return array     分类信息
+ * @author zhanghui
+ */
+ public function getclass($id){
+	/* 获取分类信息 */
+	$map = array();
+	if(is_numeric($id)){ //通过ID查询
+		$map['goods_commonid'] = $id;
+	} 
+	return $this->where($map)->select();
+ }
+ 
+ /**
+ * 获取产品是否属于该分类
+ * @param  milit   $id 分类ID或标识
+ * @param  boolean $field 查询字段
+ * @return array     分类信息
+ * @author zhanghui
+ */
+ public function isbelongclass($id,$class){
+  /* 获取分类信息 */
+  $map = array();
+  if(is_numeric($id)){ //通过ID查询
+    $map['goods_commonid'] = $id;
+    $map['class_id'] = $class;
+  } 
+  return $this->where($map)->count();
+ }
+ 
+}
+?>

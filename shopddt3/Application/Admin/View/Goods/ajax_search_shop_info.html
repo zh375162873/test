@@ -1,0 +1,4 @@
+
+<foreach name="shoplist" item="val">
+<li class="ui-menu-item" id="ui-id-{$val['merchant_id']}"  onclick="test2('{$val['merchant_name']}',{$val['merchant_id']},'{$val['province']}','{$val['city']}','{$val['district']}')">{$val['merchant_name']}</li>
+</foreach>

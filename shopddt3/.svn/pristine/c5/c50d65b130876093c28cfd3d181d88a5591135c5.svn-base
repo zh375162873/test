@@ -1,0 +1,9 @@
+@charset "utf-8";
+/* CSS Document */
+      /**--------轮播图和分类区域-------------------*/
+        .focus1{max-width:100%;height:auto;margin:0 auto;position:relative;overflow:hidden;}
+        .focus1 .bd,.focus1 .nav_bd{position:relative;z-index:0;text-align:center;}
+        .focus1 .bd li img{width:100%;background:url(/Public/home/images/loading.gif) center center no-repeat;}
+        .focus1 .bd li a,.focus1 .nav_bd li a{
+		  -webkit-tap-highlight-color : rgba(0, 0, 0, 0); 
+		 }

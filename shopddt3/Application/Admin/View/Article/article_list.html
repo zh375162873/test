@@ -1,0 +1,40 @@
+<include file="Index/header"/>
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('article/article_list')}" onclick="jumpTo(this);" class="active">文章列表</li>
+        <li data-url="{:U('article/index')}" onclick="jumpTo(this);">添加文章</li>
+    </ul>
+</div>
+
+<div class="row-fluid">
+    <div class="biaoge">
+        <table class="table" style="padding-bottom:0px; margin-bottom:0px;">
+            <tr class="biaoti border_d6e1ee">
+                <th>ID</th>
+                <th>文章标题</th>
+                <th>发布人</th>
+                <th>发布时间</th>
+                <th>修改时间</th>
+                <th>操作</th>
+            </tr>
+
+            <volist name="news_list" id="val" empty="$empty">
+                <tr class="trbor">
+                    <td>{$val['id']}</td>
+                    <td>{$val['subject']}</td>
+                    <td>{$val['author']}</td>
+                    <td>{$val['createtime']}</td>
+                    <td>{$val['lastmodifytime']}</td>
+                    <td>
+                        <a href="{:U('admin/article/edit?id='.$val['id'])}" data-toggle="modal" title="修改">修改</a>
+                        <a href="{:U('admin/article/delete?id='.$val['id'])}" data-toggle="modal" title="删除">删除</a>
+                    </td>
+                </tr>
+
+            </volist>
+        </table>
+    </div>
+{$page}
+</div>
+
+<include file="Index/footer"/>

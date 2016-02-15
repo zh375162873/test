@@ -1,0 +1,305 @@
+<layout name="Extend/layout"/>
+
+
+<div class="container">
+
+    <div class="secondaryMenu" style="border-bottom:1px solid #d6e1ee;">
+    	<ul class="nav nav-tabs">
+		   	<li class="active"><a href="__APP__/admin/extend/index" style="color:red">所有渠道</a></li>
+		   	<li><a href="__APP__/admin/extend/memberList" style="color:black">所有人员</a></li>
+			<li>
+		    	<!-- 按钮触发增加渠道模态框 -->
+				<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addchannel">增加渠道</button>
+				<!-- 增加渠道模态框（Modal） -->
+				<div class="modal fade" id="addchannel" tabindex="-1" role="dialog" 
+				   aria-labelledby="myModalLabel" aria-hidden="true">
+				   	<div class="modal-dialog">
+				      	<div class="modal-content">
+				         	<div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					            <h4 class="modal-title" id="myModalLabel">增加渠道</h4>
+				         	</div>
+
+				         	<div class="modal-body">
+			         	      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">渠道名称：</span>
+						         	<input name="channelname" type="text" class="form-control" placeholder="请输入渠道名称">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">负责人用户名：</span>
+						         	<input name="c_username" type="text" class="form-control" placeholder="请输入负责人用户名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">负责人姓名：</span>
+						         	<input name="c_membername" type="text" class="form-control" placeholder="请输入负责人姓名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">佣金分成比例：</span>
+						         	<input name="c_distribute" type="text" class="form-control" style="width:60px"><span class="input-group-addon" style="width:20px">%|(默认为10%)</span>
+						      	</div>
+				         	</div>
+				         	<div class="modal-footer">
+					            <button type="button" onclick="addChannel()" class="btn btn-primary">增加渠道</button>
+					            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				         	</div>
+				      	</div><!-- /.modal-content -->
+					</div><!-- /.modal -->
+				</div>
+
+
+				<!-- 按钮触发增加推广人员模态框 -->
+				<button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addmember" >增加推广人员</button>
+				<!-- 增加推广人员模态框（Modal） -->
+				<div class="modal fade" id="addmember" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				   	<div class="modal-dialog">
+				      	<div class="modal-content">
+				         	<div class="modal-header">
+					            <button type="button" class="close" 
+					               data-dismiss="modal" aria-hidden="true">&times;</button>
+					            <h4 class="modal-title" id="myModalLabel">增加推广人员</h4>
+				         	</div>
+
+				         	<div class="modal-body">
+			         	      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">人员姓名：</span>
+						         	<input name="m_membername" type="text" class="form-control" placeholder="请输入人员姓名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">关联账号：</span>
+						         	<input name="m_username" type="text" class="form-control" placeholder="请输入用户名">
+						      	</div>
+						      	<div class="input-group">
+						         	<span class="input-group-addon" style="width:125px">推广标签：</span>
+						         	<input name="m_goodscode" type="text" class="form-control" placeholder="请输入推广标签">
+						      	</div>
+						      	<div class="input-group">
+		      						<span class="input-group-addon" style="width:125px">渠道列表：</span>
+						         	<select name="channeldrop" class="form-control">
+										<foreach name="channel_list" item="channel" >
+											<option value="{$channel.id}">{$channel.name}</option>
+										</foreach>
+									</select>
+						      	</div>
+				         	</div>
+				         	<div class="modal-footer">
+					            <button name="channelinput" type="button" onclick="addExtendMember()" class="btn btn-primary">增加推广人员</button>
+					            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				         	</div>
+				      	</div><!-- /.modal-content -->
+					</div><!-- /.modal -->
+				</div>
+			</li>
+			<li style="float:right"><span>共{$count}个渠道,{$member_count}个推广人员</span></li>
+				
+		</ul>
+    </div>
+
+	<form class="input-group" name="searchForm" style="width:300px" method="get" action="__APP__/admin/extend/index">
+   		<input class="form-control" type="text"  maxlength="11" value="{$search_form['username']}" placeholder="输入渠道名称或者负责人姓名查询" name="username"/>
+       		<input name="ordername" type="hidden" value="{$search_form['ordername']}" />
+       		<input name="ordertype" type="hidden" value="{$search_form['ordertype']}" />
+		<span class="input-group-btn ">
+			<button class="btn btn-info btn-sm" onclick="submit()">查询</button>
+       	</span>
+	</form>
+    <div class="biaoge">
+        <table class="table table-hover">
+            <thead class="biaoti orderHoverCss">
+                <th name="name" onclick="changeOrder(this)">渠道名称</th>
+                <th name="user_name" onclick="changeOrder(this)">负责人</th>
+                <th name="membercount" onclick="changeOrder(this)">人员（数量）</th>
+                <th name="distribute" onclick="changeOrder(this)">佣金分成比例</th>
+                <th name="goodscount" onclick="changeOrder(this)">商品数</th>
+                <th name="extendcount" onclick="changeOrder(this)">推广注册总数</th>
+                <th name="orderscount" onclick="changeOrder(this)">订单总数</th>
+                <th name="dealcount" onclick="changeOrder(this)">总交易额</th>
+                <th name="ave_extendcount" onclick="changeOrder(this)">平均推广用户数</th>
+                <th name="ave_orderscount" onclick="changeOrder(this)">平均订单数</th>
+                <th name="ave_dealcount" onclick="changeOrder(this)">平均交易额</th>
+                <th name="add_time" onclick="changeOrder(this)">创建时间</th>
+                <th>操作</th>
+            </thead>
+            <tbody>
+            	<foreach name="channel_list" item="channel" >
+		            <tr class="trbor" style="background: rgb(237, 244, 253);">
+		                <td><a href="__APP__/admin/extend/memberList?channelid={$channel.id}"><u>{$channel.name}</u></a></td>
+		                <td>{$channel.username}<br />{$channel.user_name}</td>
+		                <td>{$channel.membercount}</td>
+		                <td>{$channel.distribute}</td>
+		                <td>{$channel.goodscount}</td>
+		                <td>{$channel.extendcount}</td>
+		                <td>{$channel.orderscount}</td>
+		                <td>{$channel.dealcount}</td>
+		                <td>{$channel.ave_extendcount}</td>
+		                <td>{$channel.ave_orderscount}</td>
+		                <td>{$channel.ave_dealcount}</td>
+		                <td>{$channel.add_time|date="Y-m-d H:i:s",###}</td>
+		                <td><if condition="$channel.id neq 0">
+						    <a  href="{:U('admin/Commission/ChannelList',array('channel_id'=>$channel['id']))}"><u>佣金结算</u></a>&nbsp;
+		                	<a  data-toggle="modal" data-target="#editChannel{$channel.id}"><u>编辑</u></a>&nbsp;
+		                	<a href="javascript:void(0)" onclick="deleteChannel({$channel.id},'{$channel.name}')"><u>删除</u></a>
+		                	<else />
+		                		不可删除
+		                	</if>
+	                	</td>
+	                	<div class="modal fade" id="editChannel{$channel.id}" tabindex="-1" role="dialog" 
+						   	aria-labelledby="myModalLabel" aria-hidden="true">
+						   	<div class="modal-dialog">
+						      	<div class="modal-content">
+						         	<div class="modal-header">
+							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							            <h4 class="modal-title" id="myModalLabel">修改渠道</h4>
+						         	</div>
+
+						         	<div class="modal-body">
+					         	      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">渠道名称：</span>
+								         	<input name="channelname{$channel.id}" type="text" class="form-control" value="{$channel.name}">
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">用户名：</span>
+								         	<input name="c_username{$channel.id}" type="text" class="form-control" value="{$channel.username}">
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">负责人姓名：</span>
+								         	<input name="c_membername{$channel.id}" type="text" class="form-control" value="{$channel.user_name}">
+								      	</div>
+								      	<div class="input-group">
+								         	<span class="input-group-addon" style="width:125px">佣金分成比例：</span>
+								         	<input name="c_distribute{$channel.id}" type="text" class="form-control" value="{$channel.distribute}" style="width:60px"><span class="input-group-addon" style="width:20px">%|(默认为10%)</span>
+								      	</div>
+						         	</div>
+						         	<div class="modal-footer">
+							            <button type="button" onclick="editChannel({$channel.id})" class="btn btn-primary">修改渠道</button>
+							            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+						         	</div>
+						      	</div><!-- /.modal-content -->
+							</div><!-- /.modal -->
+						</div>
+		            </tr>
+	            </foreach>
+	         
+            </tbody>
+        </table>
+    </div>
+    <div style="float:right">
+    	{$page}
+    </div>
+</div>
+
+<script type="text/javascript">
+    // $(function(){
+    //     /*初始化时间控件*/
+    //     $('#begin_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    //     $('#end_time').datepicker({
+    //         format: "yyyy-mm-dd",
+    //         todayBtn: "linked",
+    //         language: "zh-CN",
+    //         orientation: "top auto",
+    //         daysOfWeekDisabled: "0",
+    //         todayHighlight: true
+    //     });
+    // });
+
+    function addChannel(){
+    	var _url='__APP__/admin/extend/addChannel';
+    	var _channelname = $("input[name='channelname']").val();
+    	var _username = $("input[name='c_username']").val();
+    	var _membername = $("input[name='c_membername']").val();
+    	var _distribute = $("input[name='c_distribute']").val();
+    	if(_distribute<0||_distribute>100){
+    		alert('佣金分成比例必须为数字0-100之间的整数!');
+    		return false;
+    	}
+	    var confirm_alert = window.confirm('确认增加渠道吗？');
+	    if(confirm_alert){
+	        $.post(_url,{channelname:_channelname,username:_username,membername:_membername,distribute:_distribute},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+
+	function addExtendMember(){
+    	var _url='__APP__/admin/extend/addExtendMember';
+    	var _channelid = $("select[name='channeldrop']").val();
+    	var _username = $("input[name='m_username']").val();
+    	var _goodscode = $("input[name='m_goodscode']").val();
+    	var _membername = $("input[name='m_membername']").val();
+	    var confirm_alert = window.confirm('确认增加推广人员吗？');
+	    if(confirm_alert){
+	        $.post(_url,{channelid:_channelid,username:_username,goodscode:_goodscode,membername:_membername},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+
+    function editChannel(_id){
+    	var _url='__APP__/admin/extend/editChannel';
+    	var _data = new Array();
+    	var	_channelname = $('input[name="channelname'+_id+'"]').val();
+    	var	_username = $('input[name="c_username'+_id+'"]').val();
+    	var	_membername = $('input[name="c_membername'+_id+'"]').val();
+    	var	_distribute = $('input[name="c_distribute'+_id+'"]').val();
+    	if(_distribute<0||_distribute>100){
+    		alert('佣金分成比例必须为数字0-100之间的整数!');
+    		return false;
+    	}
+    	var confirm_alert = window.confirm('确认修改渠道吗？');
+	    if(confirm_alert){
+	        $.post(_url,{channelid:_id,channelname:_channelname,username:_username,membername:_membername,distribute:_distribute},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+
+	function deleteChannel(_id,_name){
+    	var _url='__APP__/admin/extend/deleteChannel';
+	    var confirm_alert = window.confirm('删除该渠道,将所有渠道下人员均更改为未分组，确认删除渠道'+_name+'吗？');
+	    if(confirm_alert){
+	        $.post(_url,{id:_id},
+	        function(data){
+	            alert(data);
+	            location.reload();
+	        });
+	    }
+	}
+
+	function changeOrder(obj){
+		var data = $(obj).attr('name');
+		var ordername = $('input[name="ordername"]').val();
+		var ordertype = $('input[name="ordertype"]').val();
+		if(data==ordername){
+			if(ordertype!='DESC')
+			$('input[name="ordertype"]').val('DESC');
+			else
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}else{
+			$('input[name="ordername"]').val(data);
+			$('input[name="ordertype"]').val('ASC');
+			$('form[name="searchForm"]').submit();
+		}
+		// alert(data);
+	}
+	
+	/*确认当前排序状态css*/
+	var curordername = $('input[name="ordername"]').val();
+	if(curordername){
+		$('th[name="'+curordername+'"]').addClass("active");
+	}
+</script>
+	
+	

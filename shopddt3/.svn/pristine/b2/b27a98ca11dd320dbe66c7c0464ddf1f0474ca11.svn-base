@@ -1,0 +1,548 @@
+<include file="Index/header" />
+<!--日期选择-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/datepicker.css">
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.js" type="text/javascript"></script>
+<script src="{$uri}__PUBLIC__/admin/js/bootstrap-datepicker.zh-CN.js" type="text/javascript"></script>
+
+<!--文件上传-->
+<link rel="stylesheet" href="{$uri}__PUBLIC__/static/uploadify/uploadify.css">
+<script src="{$uri}__PUBLIC__/static/uploadify/jquery.uploadify.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="{$uri}__PUBLIC__/admin/css/normalize.css">
+
+<div class="row headerNav" id="headerNav">
+    <ul>
+        <li data-url="{:U('goods/goods_common_list')}" onclick="jumpTo(this);">所有商品</li>
+        <li data-url="{:U('goods/goods_list')}" onclick="jumpTo(this);">现金商品</a></li>
+        <li data-url="{:U('goods/goods_integral_list')}" onclick="jumpTo(this);">积分商品</li>
+        <li data-url="{:U('goods/goods_prize_list')}" onclick="jumpTo(this);">活动商品</li>
+        <li data-url="{:U('goods/goods_common_add')}" onclick="jumpTo(this);" class="active">添加商品</li>
+    </ul>
+</div>
+
+<!--子菜单-->
+<div class="row-fluid" style=" margin-top:10px;">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="javascript:void(0);">基本信息</a></li>
+
+    </ul>
+</div>
+         
+<div class="row" style="padding-top:10px;">
+    <form id="form1" action="" method="post" enctype="multipart/form-data" class="form-horizontal" role="form">
+        <div class="form-group" style="clear:both">
+                <label for="goods_serial" class="col-md-2 control-label">商品编号<span class="span_required">*</span></label>
+                <div class="col-xs-7">
+				<input class="form-control required"  style="width:280px;" name="goods_serial"  type="text"  value=""   data-msg="请输入商品编号"    onchange="goods_serial_info()"  id="goods_serial"  />
+				<span id="goods_serial_text" style="color:#FF0000"></span>
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+			<script>
+			function goods_serial_info(){ 
+   goods_serial=$("#goods_serial").val();
+   $.get("<?php echo U('goods/ajax_check_serial') ;?>", { goods_serial:goods_serial}, function(result){
+			   $("#goods_serial_text").html(result);
+   });
+}
+			</script>
+        <div class="form-group">
+<label for="store_name" class="col-md-2 control-label">所属商家<span class="span_required">*</span></label>				
+<style>
+.ui-widget-content {
+    border: 1px solid #aaaaaa;
+    background: #ffffff url("images/ui-bg_flat_75_ffffff_40x100.png") 50% 50% repeat-x;
+    color: #222222;
+	z-index:100
+}
+.ui-menu-item{
+line-height:25px;
+padding-left:10px;
+cursor:pointer;
+}
+.ui-menu-item:active{
+border:1px solid #CCCCCC}
+</style>
+<div class="col-xs-7" style="position:relative">				
+  <input type="text" id="store_name" name="store_name"   value=""  required  data-msg="请输入所属商家" class="form-control"   style="width:200px; display:inline"  placeholder="输入商家名称进行搜索"  >
+  <input type="hidden"  name="store_id" id="store_id"  value="">
+  <input type="hidden"  name="province" id="province"  value="">
+  <input type="hidden"  name="city" id="city"  value="">
+  <input type="hidden"  name="district" id="district"  value="">
+  <input type="button" onClick="test()" value="查询"  class="btn btn-primary">
+<ul class="ui-widget-content" id="shoplist" tabindex="0" style=" display:none; top: 40px; left:15px;  width: 227px; position:absolute">
+
+</ul>
+</div>
+<script>
+
+
+ function test(){
+   search_shop_info();
+ }
+ function test2(names,num,province,city,district){
+   $("#store_id").val(num);
+   $("#store_name").val(names);
+   $("#province").val(province);
+   $("#city").val(city);
+   $("#district").val(district);
+   $("#shoplist").hide();
+ }
+function search_shop_info(){ 
+   keywords=$("#store_name").val();
+   $.get("<?php echo U('goods/ajax_search_shop_info') ;?>", { proxy_id: "{$shop_info['shop_id']}", str: keywords }, function(result){
+   $("#shoplist").html(result);
+   $("#shoplist").show();
+  // $("div").html(result);
+  });
+}
+ 
+ 
+</script>
+
+            </div>
+
+       <div class="form-group" style="clear:both">
+                <label for="position_tags" class="col-md-2 control-label">商品名称<span class="span_required">*</span></label>
+                <div class="col-xs-3">
+			      <input class="form-control"   name="position_tags"  type="text"  value="" placeholder="地理位置标签（2-6个汉字，选填）"/>	
+                </div>
+				<div class="col-xs-3">
+			      <input class="form-control required"  name="goods_name"  type="text"  value="" data-msg="请输主标题" placeholder="主标题（3-15个汉字，必填）	" />
+                </div>
+				<div class="col-md-3">
+			      <input class="form-control" name="subtitle"  type="text"  value="" placeholder="副标题（1-30个汉字，选填）"/>
+			      
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+
+        <div class="form-group">
+            <label for="select11" class="col-md-2 control-label">分类</label>
+
+            <div class="col-md-7">
+                    <?php
+					 $i=0;
+					 foreach($classdata as $val){
+					?>
+					   <?php
+					    if($val['gc_name']=='随便看看'){
+					   ?>
+                        <input type="checkbox" name="gc_id[]" value="{$val['gc_id']}" checked="checked" style="display:none">
+						<?php
+						}else{
+						?>
+						<input type="checkbox" name="gc_id[]" value="{$val['gc_id']}"> {$val['gc_name']}
+						<?php
+						}
+						?>
+                    <?php
+					}
+					?>
+					
+					
+            </div>
+            <div class="help-block with-errors"></div>
+        </div>
+
+        <div class="form-group" style="clear:both">
+                <label for="goods_storage" class="col-md-2 control-label">商品库存<span class="span_required">*</span></label>
+                <div class="col-xs-7">
+				<input class="form-control required"  style="width:280px;" name="goods_storage"  type="text"  value=""  max="99999" min="1" data-msg="请输入数字"   />
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+			
+			<div class="form-group" style="clear:both">
+                <label for="inputName" class="col-md-2 control-label">限购数量<span></span></label>
+                <div class="col-xs-7">
+				<input class="form-control"  style="width:280px;" name="goods_limit"  type="text"  value=""  />
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+			
+			<div class="form-group" style="clear:both">
+                <label for="goods_marketprice" class="col-md-2 control-label">市场价格<span class="span_required">*</span></label>
+                <div class="col-xs-7">
+		<input class="form-control required" style="width:280px;" name="goods_marketprice" type="text"   value=""  data-msg="请输入市场价"   />
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+
+        <div class="form-group" style="clear:both">
+                <label for="goods_price" class="col-md-2 control-label">销售价<span class="span_required">*</span></label>
+                <div class="col-xs-7">
+				<input class="form-control required"   style="width:280px;" name="goods_price"  type="text"   value=""    data-msg="请输入销售价"  />
+                </div>
+                <span class="help-block with-errors"></span>
+            </div>
+       
+
+
+        <div class="form-group">
+            <label for="select11" class="col-md-2 control-label">渠道来源<span class="span_required">*</span></label>
+
+            <div class="col-md-3">
+                <select id="select11" class="form-control" name="channel_type" required data-msg="请输入选择框" onchange="setchannel()">
+				      <option>请选择渠道</option>
+					  <?php  
+					  foreach($channelList as $val){
+					  ?>
+                       <option value="{$val['id']}" <?php if($goods_data['channel_type']==$val['id']){?>selected="selected"  <?php }?> >{$val['name']}</option>
+					  <?php
+					  }
+					  ?>
+                    </select>
+            </div>
+            <div class="col-xs-3" id="channel">	
+					<select id="channel_id" name="channel_id" class="form-control" required data-msg="请输入选择框">
+					 <option>请选择人员</option>
+					  <?php  
+					  foreach($memberList as $val){
+					  ?>
+                       <option value="{$val['id']}" <?php if($goods_data['channel_id']==$val['id']){?>selected="selected"  <?php }?> >{$val['user_name']}</option>
+					  <?php
+					  }
+					  ?>
+					 </select>
+                </div>
+				<script>
+				  function  setchannel(){
+				   pid=$("#select11").val(); 
+				   $.get("<?php echo U('goods/ajax_get_channel') ;?>", { pid:pid }, function(result){
+				   $("#channel").html(result);
+				    });
+				  }
+				</script>
+            <div class="help-block with-errors"></div>
+        </div>
+        <hr>
+        <div class="form-group" style="clear:both">
+            <label for="inputName" class="col-md-2 control-label">商品主图<span class="span_required">*</span></label>
+
+            <div class="col-md-7">
+                <input id="goods_image_file" name="goods_image_file" type="file" multiple="true">
+                <input type="hidden" id="goods_image"  name="goods_image" value="" class="required"  data-msg="请上传商品主图">
+                <img style="width:200px; height:150px;" id="goods_img" src="{$uri}__PUBLIC__/admin/img/goods/onimg.png"
+                     class="img-thumbnail">
+            </div>
+            <span class="help-block with-errors"></span>
+        </div>
+
+        <div class="form-group" style="clear:both">
+            <label for="inputName" class="col-md-2 control-label">轮播图<span class="span_required">*</span></label>
+
+            <div class="col-md-7">
+                <input id="goods_lunbo_file" name="goods_lunbo_file" type="file" multiple="true">
+
+                <div class="preview">
+                    <ul id="previewImgs">
+                        <?php
+					 foreach($goods_lunbo as $val){
+					 ?>
+                        <li>
+                            <input type=hidden name=goods_lunbo[] value='{$val[' goods_image']}'>
+                            <img src="__ROOT__{$val['goods_image']}" alt="预览图片" width="80" height="70"
+                                 class="img-thumbnail">
+                            <a href="javascript:void(0);" onclick=goDel(this,"{$val['goods_image']}")>删除</a>
+                        </li>
+                        <?php
+					  }
+					  ?>
+                    </ul>
+                </div>
+
+            </div>
+            <span class="help-block with-errors"></span>
+        </div>
+
+
+        <hr>
+        <div class="form-group">
+            <label for="select11" class="col-md-2 control-label">商品说明<span class="span_required">*</span></label>
+
+            <div class="col-md-7">
+                <textarea id="mobile_body" class="required" name="mobile_body" style="width:100%;height:280px;visibility:hidden;" data-msg="请输入"   placeholder="商品相关内容介绍，如套餐（菜品/服务）内容，服务流程等详情。"  ></textarea>
+			<script src="{$uri}__PUBLIC__/static/kindeditor/kindeditor-min.js" charset="utf-8"></script>
+			<script src="{$uri}__PUBLIC__/static/kindeditor/lang/zh_CN.js" charset="utf-8"></script>
+			<script>
+			  var KE;
+			  KindEditor.ready(function(K) {
+					KE = K.create("textarea[name='mobile_body']", {
+									items : ['source', '|', 'fullscreen', 'undo', 'redo', 'print', 'cut', 'copy', 'paste',
+						'plainpaste', 'wordpaste', '|', 'justifyleft', 'justifycenter', 'justifyright',
+						'justifyfull', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'subscript',
+						'superscript', '|', 'selectall', 'clearhtml','quickformat','|',
+						'formatblock', 'fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold',
+						'italic', 'underline', 'strikethrough', 'lineheight', 'removeformat', '|', 'image', 'flash', 'media', 'table', 'hr', 'emoticons', 'link', 'unlink', '|', 'about'],
+									cssPath : "{$uri}__PUBLIC__/static/kindeditor/themes/default/default.css",
+									allowImageUpload : false,
+									allowFlashUpload : false,
+									allowMediaUpload : false,
+									allowFileManager : false,
+									syncType:"form",
+									afterCreate : function() {
+										var self = this;
+										self.sync();
+									},
+									afterChange : function() {
+										var self = this;
+										self.sync();
+									},
+									afterBlur : function() {
+										var self = this;
+										self.sync();
+									}
+					});
+						KE.appendHtml = function(id,val) {
+							this.html(this.html() + val);
+							if (this.isCreated) {
+								var cmd = this.cmd;
+								cmd.range.selectNodeContents(cmd.doc.body).collapse(false);
+								cmd.select();
+							}
+							return this;
+						}
+				});
+			</script>
+            </div>
+        </div>
+        <hr>
+       <div class="form-group" style="clear:both">
+                <label for="start_date" class="col-xs-2 control-label">有效期<span class="span_required">*</span></label>
+				<div class="col-xs-8  form-inline">
+					<input id="start_date" class="form-control "   name="start_date"  type="text"  value=""  placeholder="开始时间"  />
+				
+					-
+					
+					<input id="end_date" class="form-control required"   name="end_date"  type="text"  value=""  data-msg="请输入有效期" placeholder="结束时间" />
+				</div>
+                <span class="help-block with-errors"></span>
+            </div>
+
+
+        <div class="form-group" style="clear:both">
+            <label for="inputName" class="col-md-2 control-label">使用时间<span class="span_required">*</span></label>
+
+            <div class="col-md-8 form-inline">
+                    <select name="usetime[]" class="form-control">
+                        <?php
+					  for($i=0;$i<24;$i++){
+					    $num=$i;
+					    if($num<10){
+						  $num="0".$num;
+						}
+					  ?>
+                        <option value="{$num}">{$num}</option>
+                        <?php
+					   }
+					  ?>
+                    </select>
+                    ：
+                
+                
+                    <select name="usetime[]" class="form-control">
+                        <?php
+					  for($i=0;$i<60;$i++){
+					    $num=$i;
+					    if($num<10){
+						  $num="0".$num;
+						}
+					  ?>
+                        <option value="{$num}">{$num}</option>
+                        <?php
+					   }
+					  ?>
+                    </select>
+                   -
+              
+                    <select name="usetime[]" class="form-control">
+                        <?php
+					  for($i=0;$i<24;$i++){
+					    $num=$i;
+					    if($num<10){
+						  $num="0".$num;
+						}
+					  ?>
+                        <option value="{$num}">{$num}</option>
+                        <?php
+					   }
+					  ?>
+                    </select>
+                    ：
+                
+                    <select name="usetime[]" class="form-control">
+                        <?php
+					  for($i=0;$i<60;$i++){
+					    $num=$i;
+					    if($num<10){
+						  $num="0".$num;
+						}
+					  ?>
+                        <option value="{$num}">{$num}</option>
+                        <?php
+					   }
+					  ?>
+                    </select>
+                
+                    <input type="checkbox" name="usetimes"> 24小时正常营业
+            </div>
+
+
+            <span class="help-block with-errors"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="select11" class="col-md-2 control-label">使用规则</label>
+
+            <div class="col-md-7" style="text-align:left;">
+                <div id="rules"  style="text-align:left;padding-left:0px;">
+                    <div class="col-md-12" style="padding-bottom:10px;text-align:left; padding-left:0px;">
+					 <div class="col-md-9" style="padding-left:0px;" >
+					  <input class="form-control"  name="rules[]"     type="text"   placeholder="每条1-60个汉字"  />
+					 </div>
+					 <button type="button"  name="sub" class="btn btn-primary" onclick="del_content(this)" >删除</button>
+		            </div>  
+                </div>
+                <div class="col-md-7" style="text-align:right">
+                    <button type="button" name="sub" class="btn btn-primary" onclick="add_rules()">添加</button>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" name="shop_id" value="1">
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-7">
+                <button type="submit" value="1" name="sub" class="btn btn-primary">下一步（上架）</button>
+                <button type="submit" value="2" name="sub" class="btn btn-primary">入库</button>
+            </div>
+        </div>
+
+
+    </form>
+    <include file="Index/footer"/>
+	
+	
+    <script>
+         $(function () {
+        /*初始化时间控件*/
+        $('#start_date').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+			startDate:new Date(),
+            todayHighlight: true
+        });
+        $('#end_date').datepicker({
+            format: "yyyy-mm-dd",
+            todayBtn: "linked",
+            language: "zh-CN",
+            orientation: "top auto",
+			startDate:new Date(),
+            todayHighlight: true
+        });
+		$('#start_date').datepicker().on('changeDate', function(ev){
+            var end = $("#end_date").val();
+            if (end && ev.date.valueOf() > (new Date(end).valueOf())){
+                alert("开始日期不可大于结束日期");
+				$('#start_date').val('');
+            }
+        });
+		$('#end_date').datepicker().on('changeDate', function(ev){
+            var start = $("#start_date").val();
+            if (start && ev.date.valueOf() < (new Date(start).valueOf())){
+                alert("结束日期不得小于开始日期");
+				$('#end_date').val('');
+            }
+        });
+    });
+	
+
+        function add_rules() {
+            $.get("<?php echo U('goods/ajax_add_rules') ;?>", function (result) {
+                $("#rules").append(result);
+                // $("div").html(result);
+            });
+        }
+
+function del_content(objdom){
+		$(objdom).parent().remove();
+	} 
+    </script>
+
+
+    <script type="text/javascript">
+        //上传图片
+        /* 初始化上传插件 */
+        $("#goods_image_file").uploadify({
+            "height": 30,
+            "swf": "{$uri}__PUBLIC__/static/uploadify/uploadify.swf",
+            "fileObjName": "download",
+            "buttonText": "上传图片",
+            "uploader": "{:U('File/upload',array('session_id'=>session_id()))}",
+            "width": 120,
+            'removeTimeout': 1,
+            'fileTypeExts': '*.jpg; *.png; *.gif;',
+            "onUploadSuccess": uploadPicture,
+            'onFallback': function () {
+                alert('未检测到兼容版本的Flash.');
+            }
+        });
+        function uploadPicture(file, data) {
+            var data = $.parseJSON(data);
+            if (data.status) {
+                //$("#upload_validate").val(data.id);
+                $("#goods_image").val(data.path);
+                $("#goods_img").attr("src", "__ROOT__" + data.path);
+            } else {
+                //alert(data.info);
+                setTimeout(function () {
+                    $('#top-alert').find('button').click();
+                    $(that).removeClass('disabled').prop('disabled', false);
+                }, 1500);
+            }
+        }
+
+
+        //上传图片
+        /* 初始化上传插件 */
+        $("#goods_lunbo_file").uploadify({
+            "height": 30,
+            "swf": "{$uri}__PUBLIC__/static/uploadify/uploadify.swf",
+            "fileObjName": "download",
+            "buttonText": "添加图片",
+            "uploader": "{:U('File/upload',array('session_id'=>session_id()))}",
+            "width": 120,
+            'removeTimeout': 1,
+            'fileTypeExts': '*.jpg; *.png; *.gif;',
+            "onUploadSuccess": uploadPicture2,
+            'onFallback': function () {
+                alert('未检测到兼容版本的Flash.');
+            }
+        });
+        function uploadPicture2(file, data) {
+
+            var obj = jQuery.parseJSON(data);
+            var imgstr = '<li><input type=hidden name=goods_lunbo[] value=' + obj.path + '><img src= "__ROOT__' + obj.path + '" alt="预览图片" width="80" height="70" class="img-thumbnail"><a  href="javascript:void(0);" onclick=goDel(this,"' + obj.savepath + '")>删除</a></li>';
+            $("#previewImgs").append(imgstr);
+            $("#saveurl").append(obj.savepath + '|');
+
+        }
+
+        // ajax 删除预览列表中的一张图片
+        function goDel(objdom, src) {
+            //先执行ajax删除图片，删除成功之后 删除预览图片
+            //alert(src);
+            $(objdom).parent().remove();
+            //删除预览图片之后还要 修改 id="saveurl" 隐藏域的值，这个是写入到数据库的图片路径（我这里只是写一个测试就没有完善见谅了）
+
+            return false;
+        }
+    </script>
+	
+	
+	<script>
+    ddt_validate($('#form1'));
+</script>
+	

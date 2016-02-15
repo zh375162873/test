@@ -1,0 +1,127 @@
+<?php
+/**
+ * 通用通知接口demo
+ * ====================================================
+ * 支付完成后，微信会把相关支付和用户信息发送到商户设定的通知URL，
+ * 商户接收回调信息后，根据需要设定相应的处理流程。
+ * 
+ * 这里举例使用log文件形式记录回调信息。
+*/
+include_once("./log_.php");
+include_once("../ThinkPHP/Library/Vendor/WxPayPubHelper/WxPayPubHelper.php");
+
+    //使用通用通知接口
+	$notify = new Notify_pub();
+
+	//存储微信的回调
+	$xml = $GLOBALS['HTTP_RAW_POST_DATA'];	
+	$notify->saveData($xml);
+	$log_ = new Log_();
+	$log_name="./notify_url.log";//log文件路径
+	
+	//验证签名，并回应微信。
+	//对后台通知交互时，如果微信收到商户的应答不是成功或超时，微信认为通知失败，
+	//微信会通过一定的策略（如30分钟共8次）定期重新发起通知，
+	//尽可能提高通知的成功率，但微信不保证通知最终能成功。
+	if($notify->checkSign() == FALSE){
+	    $log_->log_result($log_name,"【false】");
+		$notify->setReturnParameter("return_code","FAIL");//返回状态码
+		$notify->setReturnParameter("return_msg","签名失败");//返回信息
+	}else{
+		$notify->setReturnParameter("return_code","SUCCESS");//设置返回码
+		
+		
+		//==商户根据实际情况设置相应的处理流程，此处仅作举例=======
+		$arr = json_encode($notify);
+		$log_->log_result($log_name,"【接收到的ture通知】:\n".$arr."\n");
+		$log_->log_result($log_name,"【接收到的ture通知】:\n".$xml."\n");
+
+		if ($notify->data["return_code"] == "FAIL") {
+		    //此处应该更新一下订单状态，商户自行增删操作
+		    //$log_->log_result("【通信出错】:\n".$xml."\n");
+		    echo "error";
+		}
+		elseif($notify->data["result_code"] == "FAIL"){
+		    //此处应该更新一下订单状态，商户自行增删操作
+		    //$log_->log_result("【业务出错】:\n".$xml."\n");
+		    echo "error";
+		}
+		else{
+		    //此处应该更新一下订单状态，商户自行增删操作
+		
+		    $parameter = array(
+		        "trade_no" => $notify->data['transaction_id'],
+		        "buyer_email"=>$notify->data['appid'],
+		        "out_trade_no"=>$notify->data['out_trade_no'],
+		    );
+		    $string=json_encode($parameter);
+		    $log_->log_result($log_name,"【接收到的ture通知】:\n".$string."\n");
+		    $url = "http://".$_SERVER['HTTP_HOST']."index.php?m=Home&c=Wxpay&a=wx_notiy_do&trade_no=".$notify->data['transaction_id']."&buyer_email=".$notify->data['appid']."&out_trade_no=".$notify->data['out_trade_no'];
+
+		    $ch = curl_init ();
+		    curl_setopt ( $ch, CURLOPT_URL, $url );
+		    curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		    curl_setopt ( $ch, CURLOPT_CONNECTTIMEOUT, 10 );
+		    curl_setopt ( $ch, CURLOPT_POST, 1 ); //启用POST提交
+		    $exec = curl_exec ( $ch );
+		    curl_close ( $ch );
+		    $log_->log_result($log_name,"【接收到的ture通知】:\n".$exec."\n");
+		    
+		    if($exec=="success"){
+		        echo "success";
+		    }else{
+		        echo "error";
+		    }
+		
+		}
+		
+		
+		
+	}
+	$returnXml = $notify->returnXml();
+	//echo $returnXml;
+	
+	//==商户根据实际情况设置相应的处理流程，此处仅作举例=======
+	
+	//以log文件形式记录回调信息
+
+/* 	$log_->log_result($log_name,"【接收到的notify通知】:\n".$xml."\n");
+   
+	$string1 .= json_encode($notify->data);
+	$log_->log_result($log_name, "【".$string1."】");
+	if($notify->checkSign())
+	{} */
+        
+function http($url, $params, $method = 'GET', $header = array(), $multi = false){
+      $opts = array(
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_HTTPHEADER     => $header
+        );
+        switch(strtoupper($method)){
+            case 'GET':
+                $opts[CURLOPT_URL] = $url . '?' . http_build_query($params);
+                break;
+            case 'POST':
+                $params = $multi ? $params : http_build_query($params);
+                $opts[CURLOPT_URL] = $url;
+                $opts[CURLOPT_POST] = 1;
+                $opts[CURLOPT_POSTFIELDS] = $params;
+                break;
+            default:
+                E('不支持的请求方式！');
+        }
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, $opts);
+        $data  = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+        if($error) exit('请求发生错误：' . $error);
+        
+        return  $data;
+    }        
+        
+?>

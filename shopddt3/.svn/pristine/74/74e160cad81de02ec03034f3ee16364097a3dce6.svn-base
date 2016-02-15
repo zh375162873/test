@@ -1,0 +1,215 @@
+<?php
+
+namespace Core\Controller;
+use BizService\UserService;
+use BizService\ShopService;
+use BizService\OrderService;
+class UserscenterController extends BaseController {
+
+    //初始化加载是否登录的验证权限
+    public function _initialize(){
+        $user = new UserService;
+        if('ture'!=I('get.houtai',''))
+            $user->checkUsercenter();
+    }
+    
+    //wifi后台同步登出
+    public function jumpOut(){
+        //销毁session
+        session_destroy();
+        //跳转核心平台主页
+        $url='location:'.C('WIFI_URL').'/admin/default/index';
+        header($url);
+    }
+            //Yii框架中登出
+          //    public function actionLogout() {
+             //     Yii::app()->admin->logout(false);
+             //     // $this->redirect(Yii::app()->admin->loginUrl);
+             //     $url='location:http://localhost:8084/home/userscenter/jumpout';
+             //     header($url);
+                // }
+            //Yii框架中跳转，传密令
+                // public function actionJumptp(){
+                //     $key=md5('admin'.substr(time(),-4));
+                //     $url='location:http://localhost:8084/home/userscenter/jumpin?key='.$key;
+                //     header($url);
+                // }
+    //用户中心管理
+    public function index(){
+        $user = new UserService;
+        $shop = new ShopService;
+        $Order = new OrderService;
+        $searchForm['username'] = trim(I('get.username','','strval'));
+        $searchForm['region'] = trim(I('get.region','','strval'));
+        $searchForm['come_from'] = trim(I('get.come_from','','strval'));
+        $searchForm['status'] = trim(I('get.status','','strval'));
+        $searchForm['bought'] = trim(I('get.bought','','strval'));
+        $searchForm['begin_time'] = trim(I('get.begin_time','','strval'));
+        $searchForm['end_time'] = trim(I('get.end_time','','strval'));
+        $searchForm['ordername'] = trim(I('get.ordername','','strval'));
+        $searchForm['ordertype'] = trim(I('get.ordertype','','strval'));
+        // $userName = I('post.username','');
+        // $porxy = I('post.proxy','');
+        // $startTime = I('post.startime','');
+        // $endTime = I('post.endtime','');
+        // $status = I('post.status','');
+        // $orderTag = I('post.ordertag','');
+        // $orderDesc = I('post.orderdesc',0);
+        // $condition = array();
+        // $condition['userName'] = $userName;
+        // $condition['porxy'] = $porxy;
+        // $condition['startTime'] =  $startTime;
+        // $condition['endTime'] = $endTime;
+        // $condition['status'] = $status;
+        // $condition['orderTag'] = $orderTag;
+        // $condition['orderDesc'] = $orderDesc;
+        $condition = array();
+        $users_list = $user->userList($searchForm);
+        //将代理Id替换为商城名称
+        foreach ($users_list as $key => $value) {
+            $shopData = $shop->get_shop_info_by_proxy(intval($users_list[$key]['reg_from']));
+            $condition['user_id'] = $value['user_id'];
+            $OrderInfo[$key]= $Order->user_order_count($condition);
+            $users_list[$key]['order_num'] = $OrderInfo[$key]['order_num'];
+            $users_list[$key]['order_money'] = $OrderInfo[$key]['order_money'];
+            // $Orderlist[$key]= $Order->user_order_list($users_list[$key]['user_id']);
+            if($shopData)
+                $users_list[$key]['reg_from'] = $shopData[0]['shop_name'];
+            else 
+                $users_list[$key]['reg_from'] = '直接注册';
+        }
+        //订单数量和交易金额排序
+        if($searchForm['ordername'] == 'order_num'||$searchForm['ordername'] == 'order_money'){
+            $users_list = $user->array_sort($users_list,$searchForm['ordername'],$searchForm['ordertype']);
+        }
+
+        // var_dump($users_list);exit;
+        $this->assign('search_form',$searchForm);
+        $pageList = array_page($users_list);
+        // var_dump($pageList);exit;
+        $this->assign('userslist',$pageList['list']);
+        $this->assign('page',$pageList['page']);
+        $this->assign('count',$pageList['count']);
+        $this->display();
+    }
+
+    public function userOrderList(){
+        $Order = new OrderService;
+        $userId = I('get.user_id',0);
+        if($userId){
+            $orderList= $Order->user_order_list($userId);
+
+            var_dump($orderList);exit;
+        }
+    }
+    public function statistics(){
+        $user = new UserService;
+        $shop = new ShopService;
+        $Order = new OrderService;
+
+        //当日信息
+        $condition = array();
+        $condition['type'] = 1;
+        $condition['start_time'] = strtotime(date('Y-m-d',strtotime('+0 day')));
+        // exit;
+        $today = $Order->user_order_count($condition);
+        $today['user_count'] = $user->userCount($condition);
+        //当月信息
+        $condition = array();
+        $condition['type'] = 1;
+        $condition['start_time'] = strtotime(date('Y-m',strtotime('+0 month')));
+        // echo time().'<br />';
+        // echo $condition['start_time'];
+        // exit;
+        $month = $Order->user_order_count($condition);
+        $month['user_count'] = $user->userCount($condition);
+        //总量信息
+        // echo time().'<br />';
+        // echo $condition['start_time'];
+        // exit;
+        $condition = array();
+        $condition['type'] = 1;
+        $total = $Order->user_order_count($condition);
+        $total['user_count'] = $user->userCount($condition);
+
+
+        $this->assign('today',$today);
+        $this->assign('month',$month);
+        $this->assign('total',$total);
+
+
+        // var_dump($today);
+        // var_dump($month);
+        // var_dump($total);
+
+        // exit;
+        $this->display();
+    }
+
+    //修改会员账号状态
+    public function changeState(){
+        $user = new UserService;
+        $userId = I('post.id',0);
+        $status = I('post.status',-1);
+        if($status==0||$status==1){
+            $change = $status?0:1;
+            $res=$user->changeUserData($userId,'is_validated',$change);
+            echo $change?($res?'禁用成功':'禁用失败'):($res?'启用成功':'启用失败');
+        }else{
+            echo '修改失败';
+            exit;
+        }
+    }
+    //重置会员密码
+    public function resetPasswd(){
+        $user = new UserService;
+        $userId = I('post.id',0);
+        $rePassword = I('post.passwd','');
+        if($rePassword!=''){
+            $res=$user->resetPasswd($userId,$rePassword);
+            echo $res?'修改密码成功':'修改密码失败';
+        }else{
+            echo '输入密码无效';
+            exit;
+        }
+    }
+    //修改会员账户资金
+    public function changeUserMoney(){
+        $user = new UserService;
+        $Order = new OrderService;
+        $userId = I('post.id',0,'intval');
+        $change = I('post.changemoneynum',0,'floatval');    
+        $content = I('post.content','','strval');    
+        // echo $change;exit;
+        if($change!=0){
+            $data =array();
+            $data['shop_id'] = 0;
+            $data['userid'] = $userId;
+            $data['money'] = abs($change);
+            $data['content'] = $content;
+            $type = $change>0?3:4;
+            $admin_name = "admin";
+            $res1=$user->changeUserMoney($userId,$change);
+            if($res1){
+                $res2=$Order->ls_jl($data,$type,$admin_name);
+                echo $res2;
+            }else{
+                echo $res1;
+            }
+            
+
+        }else{
+            echo '修改数值无效';
+            exit;
+        }
+    }
+    //删除会员账号
+    public function deleteUser(){
+        $user = new UserService;
+        $userId = I('post.id',0);
+        $res = 0;
+        if($userId)
+            $res=$user->deleteUser($userId);
+        echo $res?'删除用户成功':'删除用户失败';
+    }
+}

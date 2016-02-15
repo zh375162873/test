@@ -1,0 +1,195 @@
+<?php
+namespace Admin\Model;
+use Think\Model;
+class GoodsclassModel extends Model 
+{ 
+  protected $tableName = 'goods_class'; 
+  protected $fields = array(
+  'gc_id', //   int(10) 	否		索引ID
+  'gc_name', //	varchar(30)	否		分类名称
+  'shop_id', //	int(10)	否		商城id
+  'type_id', //int(10) 	否		类型id
+  'type_name',//	varchar(100)	否		类型名称
+  'gc_images',// varchar(255)  否   分类图片
+  'gc_parent_id',//	int(10) 	否	0	父ID
+  'gc_sort',//tinyint(1) 	否	0	排序
+  'gc_title',//varchar(200)	否		名称
+  'gc_keywords',//varchar(255)	否		关键词
+  'gc_description',//varchar(255)	否		描述
+  '_pk'=>'gc_id'//主键
+  );
+  protected $_map = array(  
+                       'id'  =>'gc_id', // 把表单中的id映射到数据表的gc_id字段      
+					   'name' =>'gc_name', // 把表单中name映射到数据表的gc_name字段    
+					   'sort'  =>'gc_sort', // 把表单中的order映射到数据表的gc_order字段
+					   'img'  =>'gc_images' // 把表单中的img映射到数据表的gc_images字段
+				    );
+
+/**
+ * 获取分类详细信息
+ * @param  milit   $id 分类ID或标识
+ * @param  boolean $field 查询字段
+ * @return array     分类信息
+ * @author zhanghui
+ */
+ public function info($id, $field = true){
+	/* 获取分类信息 */
+	$map = array();
+	if(is_numeric($id)){ //通过ID查询
+		$map['gc_id'] = $id;
+	} else { //通过标识查询
+		$map['name'] = $id;
+	}
+	return $this->field($field)->where($map)->find();
+ }
+
+/**
+ * 获取分类树，指定分类则返回指定分类极其子分类，不指定则返回所有分类树
+ * @param  integer $id    分类ID
+ * @param  boolean $field 查询字段
+ * @return array          分类树
+ * @author zhanghui
+ */
+public function getTree($id = 0, $field = true,$shop_id=0){
+	/* 获取当前分类信息 */
+	if($id){
+		$info = $this->info($id);
+		$id   = $info['gc_id'];
+	}
+	if($shop_id){
+		$where['shop_id'] = $shop_id;
+	}
+	/* 获取所有分类 */
+	$list = $this->field($field)->where($where)->order('gc_sort')->select();
+	//整理数据
+	foreach($list as $key=>$val){
+	  //添加商品数量
+	  if($val['gc_name']='随便看看'){
+	    $list[$key]['goods_num']=count(D('goodscommon')->where('goods_state>=0')->select());
+	  }else{
+	    $list[$key]['goods_num']=count(D('goodsclassrelation')->where('class_id='.$val['gc_id'])->select());
+	  }	
+	}
+	
+	$list = $this->list_to_tree($list, $pk = 'gc_id', $pid = 'gc_parent_id', $child = 'child', $root = $id);
+
+	/* 获取返回数据 */
+	if(isset($info)){ //指定分类则返回当前分类极其子分类
+		$info['child'] = $list;
+	} else { //否则返回所有分类
+		$info = $list;
+	}
+	return $info;
+}
+
+	
+	
+	/**
+ * 把返回的数据集转换成Tree
+ *
+ * @param array $list
+ *        	要转换的数据集
+ * @param string $pid
+ *        	parent标记字段
+ * @param string $level
+ *        	level标记字段
+ * @return array
+ * @author 张辉
+ */
+function list_to_tree($list, $pk = 'gc_id', $pid = 'gc_parent_id', $child = '_child', $root = 0) {
+	// 创建Tree
+	$tree = array ();
+	if (is_array ( $list )) {
+		// 创建基于主键的数组引用
+		$refer = array ();
+		foreach ( $list as $key => $data ) {
+			$refer [$data [$pk]] = & $list [$key];
+		}
+		foreach ( $list as $key => $data ) {
+			// 判断是否存在parent
+			$parentId = $data [$pid];
+			if ($root == $parentId) {
+				$tree [] = & $list [$key];
+			} else {
+				if (isset ( $refer [$parentId] )) {
+					$parent = & $refer [$parentId];
+					$parent [$child] [] = & $list [$key];
+				}
+			}
+		}
+	}
+	return $tree;
+}
+	
+
+/**
+ * 将list_to_tree的树还原成列表
+ *
+ * @param array $tree
+ *        	原来的树
+ * @param string $child
+ *        	孩子节点的键
+ * @param string $order
+ *        	排序显示的键，一般是主键 升序排列
+ * @param array $list
+ *        	过渡用的中间数组，
+ * @return array 返回排过序的列表数组
+ * @author 张辉
+ */
+function tree_to_list($tree, $child = '_child', $order = 'gc_id', &$list = array()) {
+	if (is_array ( $tree )) {
+		$refer = array ();
+		foreach ( $tree as $key => $value ) {
+			$reffer = $value;
+			if (isset ( $reffer [$child] )) {
+				unset ( $reffer [$child] );
+				tree_to_list ( $value [$child], $child, $order, $list );
+			}
+			$list [] = $reffer;
+		}
+		$list = list_sort_by ( $list, $order, $sortby = 'asc' );
+	}
+	return $list;
+}	
+	
+	
+
+    /**
+     * 获取指定分类的同级分类
+     * @param  integer $id    分类ID
+     * @param  boolean $field 查询字段
+     * @return array
+     * @author zhanghui
+     */
+    public function getSameLevel($gc_id, $field = true){
+        $info = $this->info($id, 'gc_parent_id');
+        $map = array('gc_parent_id' => $info['gc_parent_id']);
+        return $this->field($field)->where($map)->order('gc_sort')->select();
+    }
+
+
+/**
+ * 记录行为日志，并执行该行为的规则
+ *
+ * @param string $action
+ *        	行为标识
+ * @param string $model
+ *        	触发行为的模型名
+ * @param int $record_id
+ *        	触发行为的记录id
+ * @param int $user_id
+ *        	执行行为的用户id
+ * @return boolean
+ * @author zhanghui
+ */
+function action_log($action = null, $model = null, $record_id = null, $user_id = null) {
+	
+	
+}
+
+ 
+
+  
+
+}
+?>

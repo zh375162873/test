@@ -1,0 +1,190 @@
+<?php
+/*
+ * 订单支付模型
+ */
+namespace Home\model;
+use Think\Model;
+use Org\Util\Date;
+class CommissionOrderModel extends Model {
+
+    /**
+     * 未确认的订单收益金额为灰色
+     * @param unknown $userid
+     * @param number $type
+     */
+    public function get_order_list($userid,$pages,$pagesNum=10,$type=1){
+        if($type==1){
+            $num=$pagesNum;
+            $page_start=($pages-1)*$num;
+            $limit = $page_start.",".$num;
+            
+            $arr = $this->where(array("referee_id"=>$userid))->order("create_time DESC")->limit($limit)->select();
+            if(!empty($arr)){
+                for($i=0;$i<count($arr);$i++){
+                   $arr[$i]['username'] = D("Home/Users")->findUserNameById($arr[$i]['referee_id']);
+                   $arr[$i]['username'] = substr_replace($arr[$i]['username'],"****",3,4);
+                }
+            }
+            return $arr;
+        }else{
+            $num=$pagesNum;
+            $page_start=$pages*$num;
+            $start_time = strtotime(Date('Y-m-d'))-($page_start-1)*86400;
+            $end_time = $start_time+86400*$num;
+            $map=array();
+            $map['channel_id'] = $userid;
+            $map['create_time'] = array(array("gt",$start_time),array("lt",$end_time),"and");
+            
+            $arr = $this->where($map)->order("create_time DESC")->select();
+            $data = array();
+            for($i=0;$i<count($arr);$i++){
+                $rq = Date("Y/m/d",$arr[$i]['create_time']);
+                $data[$rq]['date'] = $rq;
+                $data[$rq]['num']= $data[$rq]['num']+1;
+                $data[$rq]['shouyi_total'] = $data[$rq]['shouyi_total']+$arr[$i]['channel_money'];
+            }
+            return $data;
+        }
+    }
+    
+    /**
+     * 获取今日、7日、30日订单数据
+     * @param unknown $days 统计的天数,以今天往后推几天
+     * @param unknown $userid 推广人id或渠道id
+     * @param number $type 判断统计人员角色1为推广人2渠道
+     */
+    public function get_order_total($days,$userid,$type=1){
+        //获取时间区间
+        $start_time = strtotime(Date('Y-m-d'))-(($days-1)*86400);
+        $end_time = strtotime(Date('Y-m-d'))+86400;
+        $map = array();
+        $map['create_time'] = array(array("gt",$start_time),array("lt",$end_time),"and");
+
+        if($type==1){
+            $map['referee_id'] = $userid;
+            $info['order_count'] = $this->where($map)->count();
+            $info['shouyi_total'] = $this->where($map)->sum("referee_money");
+            $info['shouyi_total'] = empty($info['shouyi_total'])?0:trim($info['shouyi_total']);
+        }else{
+            $map['channel_id'] = $userid;
+            $info['order_count'] = $this->where($map)->count();
+            $info['shouyi_total'] = $this->where($map)->sum("channel_money");
+            $info['shouyi_total'] = empty($info['shouyi_total'])?0:trim($info['shouyi_total']);
+        }
+        
+        return $info;
+    }
+    
+    /**
+     * 获取已经可以提取的收益金额列表(统计每日的收益)
+     * @param unknown $userid 推广人id或渠道id
+     * @param number $type 判断统计人员角色1为推广人2渠道
+     */
+    public function get_shouyi_list($userid,$pages,$pageNum=15,$type=1){
+        $num=$pageNum;
+        $page_start=$pages*$num;
+        $start_time = strtotime(Date('Y-m-d'))-($page_start-1)*86400;
+        $end_time = $start_time+86400*$num;
+
+        $map=array();
+        $map['create_time'] = array(array("gt",$start_time),array("lt",$end_time),"and");
+        if($type==1){
+           $map['referee_id']=$userid;
+           $arr = $this->where($map)->field("order_fee,commission_fee,channel_money,channel_money,referee_money,user_status,qd_status,create_time")->order("create_time DESC")->select();
+        }else{
+           $map['channel_id']=$userid;
+           $arr = $this->where($map)->field("order_fee,commission_fee,channel_money,channel_money,referee_money,user_status,qd_status,create_time")->order("create_time DESC")->select();
+        }
+        $data = array();
+        for($i=0;$i<count($arr);$i++){
+           $rq = Date("Y/m/d",$arr[$i]['create_time']);
+           $data[$rq]['date'] = $rq; 
+           if($type==1){
+           $data[$rq]['shouyi'] = $data[$rq]['shouyi']+$arr[$i]['referee_money'];
+           }else{
+           $data[$rq]['shouyi'] = $data[$rq]['shouyi']+$arr[$i]['channel_money'];
+           }
+        }
+
+        return $data;
+    }
+    
+    /**
+     * 获取今日、7日、30日收益分成接口
+     * @param unknown $days 统计的天数,以今天往后推几天
+     * @param unknown $userid 推广人id或渠道id
+     * @param number $type 判断统计人员角色1为推广人2渠道
+     */
+    public function get_shouyi_total($days,$userid,$type=1){
+
+        //获取时间区间
+        $start_time = strtotime(Date('Y-m-d'))-(($days-1)*86400);
+        $end_time = strtotime(Date('Y-m-d'))+86400;
+        $map = array();
+        $map['create_time'] =  array(array("gt",$start_time),array("lt",$end_time),"and");
+        if($type==1){
+            $map['referee_id'] = $userid;
+            $shouyi_total = $this->where($map)->sum("referee_money");
+        }else{
+            $map['channel_id'] = $userid;
+            $shouyi_total = $this->where($map)->sum("channel_money");
+        }
+        $shouyi_total = empty($shouyi_total)?0:trim($shouyi_total);
+        return $shouyi_total;
+    }
+    
+    /**
+     * 待支付
+     * @param unknown $userid 推广人id或渠道id
+     * @param unknown $type 判断统计人员角色1为推广人2渠道
+     * @param unknown $status 0待确认，1待结算，2已结算，3已支付
+     */
+    public function daipay_total($userid,$type=1,$status){
+        $map = array();
+        if($type == 1){
+            $map['referee_id'] = $userid;
+            if($status=="dzf"){
+                $map['user_status'] = array("neq",3);
+            }
+            elseif($status=="yzf"){
+                $map['user_status'] =3;
+            }
+            $shouyi_total = $this->where($map)->sum("referee_money");
+        }else{
+            $map['channel_id'] = $userid;
+            if($status=="dzf"){
+                $map['qd_status'] = array("neq",3);
+            }
+            elseif($status=="yzf"){
+                $map['qd_status'] =3;
+            }
+            $shouyi_total = $this->where($map)->sum("channel_money");
+        }
+           $shouyi_total = empty($shouyi_total)?0:trim($shouyi_total);
+           return $shouyi_total;
+    }
+    
+    /**
+     * 待支付详情页
+     * @param unknown $userid 推广人id或渠道id
+     * @param unknown $type 判断统计人员角色1为推广人2渠道
+     * @param unknown $status 0待确认，1待结算，2已结算，3已支付
+     */
+    public function daipay_info($userid,$type=1,$status){
+         $map = array();
+         if($type==1){
+             $map['referee_id'] = $userid;
+             $map['user_status'] =$status;
+             $shouyi_total = $this->where($map)->sum("referee_money");
+         }else{
+             $map['channel_id'] = $userid;
+             $map['qd_status'] = $status;
+             $shouyi_total = $this->where($map)->sum("channel_money");
+         }
+             $shouyi_total = empty($shouyi_total)?0:trim($shouyi_total);
+             return $shouyi_total;
+    }
+    
+    
+    
+}

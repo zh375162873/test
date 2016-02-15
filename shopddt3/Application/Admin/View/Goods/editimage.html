@@ -1,0 +1,191 @@
+<include file="Index/header" />
+
+<style>
+.container{
+padding-top:10px;
+color:#000000}
+.container a, .container a:link, .container a:visited{
+color:#000000}
+
+ .img_l{
+ width:66%;
+ border:1px solid #CCCCCC;
+ float:left;
+ padding:5px;
+ margin-top:10px;}
+ .img_r{
+ width:30%;
+ border:1px solid #CCCCCC;
+ float:left;
+ margin-left:20px;
+ margin-top:10px;}
+ .img_r ul{
+ list-style:none;
+ padding:10px;
+ }
+ .img_r ul li{
+ display:block;
+ clear:both;
+ width:100%;
+ padding-bottom:10px;
+ padding-top:10px;}
+ .img_r h4{
+ padding-left:10px;}
+ 
+ .ncsc-goodspic-upload{
+ width:245px;
+ float:left}
+ </style>
+ 
+ 
+ 
+ <div class="container">
+  <!--面包屑导航-->
+
+<ul class="breadcrumb">
+  <li>
+    <a href="<?php echo U('goods/goods_common_list') ;?>">商品管理</a> 
+  </li>
+  <li class="active">商品修改</li>
+</ul>
+  
+  <!--子菜单-->
+  <div class="row-fluid" style=" margin-top:10px;">
+	<ul class="nav nav-tabs">
+	    <li  ><a href="<?php echo U('goods/goods_common_edit_base?goods_id='.$goods_id) ;?>">基本信息</a></li>
+        <li  class="active" ><a href="javascript:void(0);">图片管理</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state1?goods_id='.$goods_id) ;?>">现金购买商品上架</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state2?goods_id='.$goods_id) ;?>">积分商品上架</a></li>
+        <li><a href="<?php echo U('goods/goods_common_state3?goods_id='.$goods_id) ;?>">活动商品上架</a></li>
+	</ul>
+  </div>
+  
+  <div class="row"  style="padding-top:10px;">
+  <div class="img_l">
+	<form id="biz-repassword-form" action="/biz/biz/repassword" method="post">	
+          <ul nctype="ul0">
+            <li class="ncsc-goodspic-upload">
+              <div class="upload-thumb"><img src="http://localhost/shopncjd/data/upload/shop/common/default_goods_image_240.gif" nctype="file_03">
+                <input type="hidden" name="img[0][3][name]" value="" nctype="file_03">
+              </div>
+              <div class="show-default" nctype="file_03">
+                <p><i class="icon-ok-circle"></i>默认主图
+                  <input type="hidden" name="img[0][3][default]" value="0">
+                </p>
+                <a href="javascript:void(0)" nctype="del" class="del" title="移除">X</a> </div>
+              <div class="show-sort">排序：
+                <input name="img[0][3][sort]" type="text" class="text" value="0" size="1" maxlength="1">
+              </div>
+              <div class="ncsc-upload-btn"><a href="javascript:void(0);"><span>
+                <input type="file" hidefocus="true" size="1" class="input-file" name="file_03" id="file_03">
+                </span>
+                <p><i class="icon-upload-alt"></i>上传</p>
+                </a></div>
+            </li>
+            <li class="ncsc-goodspic-upload">
+              <div class="upload-thumb"><img src="http://localhost/shopncjd/data/upload/shop/common/default_goods_image_240.gif" nctype="file_01">
+                <input type="hidden" name="img[0][1][name]" value="" nctype="file_01">
+              </div>
+              <div class="show-default" nctype="file_01">
+                <p><i class="icon-ok-circle"></i>默认主图
+                  <input type="hidden" name="img[0][1][default]" value="0">
+                </p>
+                <a href="javascript:void(0)" nctype="del" class="del" title="移除">X</a> </div>
+              <div class="show-sort">排序：
+                <input name="img[0][1][sort]" type="text" class="text" value="0" size="1" maxlength="1">
+              </div>
+              <div class="ncsc-upload-btn"><a href="javascript:void(0);"><span>
+                <input type="file" hidefocus="true" size="1" class="input-file" name="file_01" id="file_01">
+                </span>
+                <p><i class="icon-upload-alt"></i>上传</p>
+                </a></div>
+            </li>
+            <li class="ncsc-goodspic-upload">
+              <div class="upload-thumb"><img src="http://localhost/shopncjd/data/upload/shop/common/default_goods_image_240.gif" nctype="file_02">
+                <input type="hidden" name="img[0][2][name]" value="" nctype="file_02">
+              </div>
+              <div class="show-default" nctype="file_02">
+                <p><i class="icon-ok-circle"></i>默认主图
+                  <input type="hidden" name="img[0][2][default]" value="0">
+                </p>
+                <a href="javascript:void(0)" nctype="del" class="del" title="移除">X</a> </div>
+              <div class="show-sort">排序：
+                <input name="img[0][2][sort]" type="text" class="text" value="0" size="1" maxlength="1">
+              </div>
+              <div class="ncsc-upload-btn"><a href="javascript:void(0);"><span>
+                <input type="file" hidefocus="true" size="1" class="input-file" name="file_02" id="file_02">
+                </span>
+                <p><i class="icon-upload-alt"></i>上传</p>
+                </a></div>
+            </li>
+            <li class="ncsc-goodspic-upload">
+              <div class="upload-thumb"><img src="http://localhost/shopncjd/data/upload/shop/common/default_goods_image_240.gif" nctype="file_03">
+                <input type="hidden" name="img[0][3][name]" value="" nctype="file_03">
+              </div>
+              <div class="show-default" nctype="file_03">
+                <p><i class="icon-ok-circle"></i>默认主图
+                  <input type="hidden" name="img[0][3][default]" value="0">
+                </p>
+                <a href="javascript:void(0)" nctype="del" class="del" title="移除">X</a> </div>
+              <div class="show-sort">排序：
+                <input name="img[0][3][sort]" type="text" class="text" value="0" size="1" maxlength="1">
+              </div>
+              <div class="ncsc-upload-btn"><a href="javascript:void(0);"><span>
+                <input type="file" hidefocus="true" size="1" class="input-file" name="file_03" id="file_03">
+                </span>
+                <p><i class="icon-upload-alt"></i>上传</p>
+                </a></div>
+            </li>
+            <li class="ncsc-goodspic-upload">
+              <div class="upload-thumb"><img src="http://localhost/shopncjd/data/upload/shop/common/default_goods_image_240.gif" nctype="file_04">
+                <input type="hidden" name="img[0][4][name]" value="" nctype="file_04">
+              </div>
+              <div class="show-default" nctype="file_04">
+                <p><i class="icon-ok-circle"></i>默认主图
+                  <input type="hidden" name="img[0][4][default]" value="0">
+                </p>
+                <a href="javascript:void(0)" nctype="del" class="del" title="移除">X</a> </div>
+              <div class="show-sort">排序：
+                <input name="img[0][4][sort]" type="text" class="text" value="0" size="1" maxlength="1">
+              </div>
+              <div class="ncsc-upload-btn"><a href="javascript:void(0);"><span>
+                <input type="file" hidefocus="true" size="1" class="input-file" name="file_04" id="file_04">
+                </span>
+                <p><i class="icon-upload-alt"></i>上传</p>
+                </a></div>
+            </li>
+          </ul>
+		
+  </form>
+		  
+		  
+        </div>
+		
+		
+		
+  <div class="img_r">
+          <h4>上传要求：</h4>
+          <ul>
+            <li>1. 请使用jpg\jpeg\png等格式、单张大小不超过4M的正方形图片。</li>
+            <li>2. 上传图片最大尺寸将被保留为1280像素。</li>
+            <li>3. 每种颜色最多可上传5张图片或从图片空间中选择已有的图片，上传后的图片也将被保存在店铺图片空间中以便其它使用。</li>
+            <li>4. 通过更改排序数字修改商品图片的排列显示顺序。</li>
+            <li>5. 图片质量要清晰，不能虚化，要保证亮度充足。</li>
+            <li>6. 操作完成后请点下一步，否则无法在网站生效。</li>
+          </ul>
+          <h4>建议:</h4>
+          <ul>
+            <li>1. 主图为白色背景正面图。</li>
+            <li>2. 排序依次为正面图-&gt;背面图-&gt;侧面图-&gt;细节图。</li>
+          </ul>
+        </div>
+  
+ </div> 
+  
+</div>
+<include file="Index/footer" />
+ 
+ 
+ 
+ 
+ 
